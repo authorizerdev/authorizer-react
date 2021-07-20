@@ -1,5 +1,16 @@
-import styled from 'styled-components';
-import { ButtonAppearance } from '../constants';
+import styled, { css } from 'styled-components';
+import { ButtonAppearance, MessageType } from '../constants';
+import { media } from './media';
+
+type FlexProps = {
+  wrap?: string;
+  alignItems?: string;
+  flexDirection?: string;
+  isResponsive?: boolean;
+  justifyContent?: string;
+  height?: string;
+  width?: string;
+};
 
 export const Wrapper = styled.div`
   font-family: ${(props) => props.theme.fonts.fontStack};
@@ -126,4 +137,44 @@ export const Footer = styled.div`
   justify-content: center;
   align-items: center;
   margin-top: 15px;
+`;
+
+export const MessageWrapper = styled.div<{ type: MessageType }>`
+  padding: 10px;
+  color: white;
+  border-radius: ${(props) => props.theme.radius.card};
+  margin: 10px 0px;
+  font-size: ${(props) => props.theme.fonts.smallText};
+  ${(props) =>
+    props.type === MessageType.Error &&
+    `
+    background-color: ${props.theme.colors.danger};
+  `}
+  ${(props) =>
+    props.type === MessageType.Success &&
+    `
+    background-color: ${props.theme.colors.success};
+  `};
+`;
+
+export const Flex = styled.div`
+  display: flex;
+  flex-direction: ${({ flexDirection, isResponsive }: FlexProps) =>
+    isResponsive && flexDirection !== 'column'
+      ? 'column'
+      : flexDirection || 'row'};
+  flex-wrap: ${({ wrap }: FlexProps) => wrap || 'wrap'};
+  ${({ alignItems }) =>
+    alignItems &&
+    css`
+      align-items: ${alignItems};
+    `};
+  ${({ justifyContent }: FlexProps) =>
+    justifyContent &&
+    css`
+      justify-content: ${justifyContent};
+    `};
+  ${media.lg`
+    flex-direction: ${({ flexDirection }: FlexProps) => flexDirection || 'row'}
+  `}
 `;

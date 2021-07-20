@@ -1,3 +1,5 @@
+import { Client } from '@urql/core';
+
 export type UserType = {
   id: string | number;
   email: string;
@@ -21,4 +23,5 @@ export type YAuthContextPropsType = {
   setLoading: (data: boolean) => void;
   setUser: (data: null | UserType) => void;
   setToken: (data: null | string) => void;
+  graphQlRef: Client;
 };

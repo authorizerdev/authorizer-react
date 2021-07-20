@@ -4,9 +4,10 @@ export const theme = {
   colors: {
     primary: '#3B82F6',
     primaryDisabled: '#60A5FA',
-    danger: '#DC2626',
-    textColor: '#374151',
     gray: '#D1D5DB',
+    danger: '#DC2626',
+    success: '#10B981',
+    textColor: '#374151',
   },
   fonts: {
     // typography

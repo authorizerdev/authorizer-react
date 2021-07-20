@@ -1,18 +1,66 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
-import { ButtonAppearance } from '../constants';
+import { gql } from '@urql/core';
 
+import { ButtonAppearance, MessageType } from '../constants';
+import { useYAuth } from '../contexts/YAuthContext';
 import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
 import { isValidEmail } from '../utils/validations';
 import { SocialLogin } from './SocialLogin';
+import { formatErrorMessage } from '../utils/format';
+import { Message } from './Message';
 
 export const YAuthLogin: FC = () => {
-  const onSubmit = (values: Record<string, string>) => {
-    console.log(values);
+  const [error, setError] = useState(``);
+  const [loading, setLoading] = useState(false);
+  const { graphQlRef, setToken, setUser } = useYAuth();
+  const onSubmit = async (values: Record<string, string>) => {
+    console.log({ values });
+    setLoading(true);
+    const res = await graphQlRef
+      .mutation(
+        gql`
+          mutation login($params: LoginInput!) {
+            login(params: $params) {
+              accessToken
+              user {
+                id
+                firstName
+                lastName
+                email
+                image
+              }
+            }
+          }
+        `,
+        {
+          params: values,
+        }
+      )
+      .toPromise();
+    setLoading(false);
+    if (res?.error?.message) {
+      setError(formatErrorMessage(res.error.message));
+    }
+
+    if (res.data) {
+      setError(``);
+      setUser(res.data.user);
+      setToken(res.data.accessToken);
+    }
+
+    console.log({ res });
+  };
+
+  const onErrorClose = () => {
+    setError(``);
   };
 
   return (
     <>
+      {error && (
+        <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
+      )}
       <SocialLogin />
       <Form
         onSubmit={onSubmit}
@@ -78,10 +126,10 @@ export const YAuthLogin: FC = () => {
             <br />
             <Button
               type="submit"
-              disabled={pristine}
+              disabled={pristine || loading}
               appearance={ButtonAppearance.Primary}
             >
-              Log In
+              {loading ? `Processing ...` : `Log In`}
             </Button>
           </form>
         )}
