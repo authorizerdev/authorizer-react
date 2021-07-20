@@ -32,4 +32,4 @@ export const YAuthProvider: FC<{ config: YAuthConfigType }> = ({
   );
 };
 
-export const useYAuthContext = useContext(YAuthContext);
+export const useYAuth = () => useContext(YAuthContext);

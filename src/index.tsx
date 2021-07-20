@@ -1,15 +1,39 @@
-import React, { FC, HTMLAttributes, ReactChild } from 'react';
+import React, { FC, useState } from 'react';
+import { ThemeProvider } from 'styled-components';
+import { YAuthLogin } from './components/YAuthLogin';
+import { YAuthProvider, useYAuth } from './contexts/YAuthContext';
+import { Card, Wrapper, Link, Footer } from './styles';
+import { theme } from './styles/theme';
+import { Views } from './constants';
 
-export interface Props extends HTMLAttributes<HTMLDivElement> {
-  /** custom content, defaults to 'the snozzberries taste like snozzberries' */
-  children?: ReactChild;
-}
+export const YAuth: FC = () => {
+  const [view, setView] = useState(Views.Login);
 
-// Please do not use types off of a default export module or else Storybook Docs will suffer.
-// see: https://github.com/storybookjs/storybook/issues/9556
-/**
- * A custom Thing component. Neat!
- */
-export const Thing: FC<Props> = ({ children }) => {
-  return <div>{children || `the snozzberries taste like snozzberries`}</div>;
+  return (
+    <ThemeProvider theme={theme}>
+      <Wrapper>
+        <Card>
+          {view === Views.Login && <YAuthLogin />}
+
+          {view === Views.Login && (
+            <Footer>
+              <Link
+                onClick={() => setView(Views.ForgotPassword)}
+                style={{ marginBottom: 10 }}
+              >
+                Forgot Password?
+              </Link>
+
+              <div>
+                Don't have an account?{' '}
+                <Link onClick={() => setView(Views.Signup)}>Sign Up</Link>
+              </div>
+            </Footer>
+          )}
+        </Card>
+      </Wrapper>
+    </ThemeProvider>
+  );
 };
+
+export { YAuthProvider, useYAuth };
