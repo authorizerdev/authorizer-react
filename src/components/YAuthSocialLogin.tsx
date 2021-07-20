@@ -5,7 +5,7 @@ import { Button, Separator } from '../styles';
 import { useYAuth } from '../contexts/YAuthContext';
 import { ButtonAppearance } from '../constants';
 
-export const SocialLogin = () => {
+export const YAuthSocialLogin = () => {
   const { config } = useYAuth();
   const hasSocialLogin =
     config.isGoogleLoginEnabled || config.isGithubLoginEnabled;

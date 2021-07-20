@@ -33,14 +33,7 @@ export const Required = styled.span`
   padding-right: 3px;
 `;
 
-export const Card = styled.div`
-  width: 400px;
-  margin: 10px auto;
-  border: 1px solid ${(props) => props.theme.colors.gray};
-  padding: 25px 20px;
-  border-radius: ${(props) => props.theme.radius.card};
-  backgrounud: white;
-`;
+export const Card = styled.div``;
 
 export const Error = styled.div`
   color: ${(props) => props.theme.colors.danger};

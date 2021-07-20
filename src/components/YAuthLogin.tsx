@@ -6,7 +6,7 @@ import { ButtonAppearance, MessageType } from '../constants';
 import { useYAuth } from '../contexts/YAuthContext';
 import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
 import { isValidEmail } from '../utils/validations';
-import { SocialLogin } from './SocialLogin';
+import { YAuthSocialLogin } from './YAuthSocialLogin';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
@@ -14,8 +14,8 @@ export const YAuthLogin: FC = () => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const { graphQlRef, setToken, setUser } = useYAuth();
+
   const onSubmit = async (values: Record<string, string>) => {
-    console.log({ values });
     setLoading(true);
     const res = await graphQlRef
       .mutation(
@@ -45,8 +45,8 @@ export const YAuthLogin: FC = () => {
 
     if (res.data) {
       setError(``);
-      setUser(res.data.user);
-      setToken(res.data.accessToken);
+      setUser(res.data.login.user);
+      setToken(res.data.login.accessToken);
     }
 
     console.log({ res });
@@ -61,7 +61,7 @@ export const YAuthLogin: FC = () => {
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
-      <SocialLogin />
+      <YAuthSocialLogin />
       <Form
         onSubmit={onSubmit}
         validate={(values) => {
@@ -85,7 +85,7 @@ export const YAuthLogin: FC = () => {
         }}
       >
         {({ handleSubmit, pristine }) => (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} name="yauth-login-form">
             <FieldWrapper>
               <Field name="email">
                 {({ input, meta }) => (
