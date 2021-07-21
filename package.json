@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.0-beta.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -35,7 +35,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "yauth-react",
+  "name": "@yauth/yauth-react",
   "author": "Lakhan Samani",
   "module": "dist/yauth-react.esm.js",
   "size-limit": [
