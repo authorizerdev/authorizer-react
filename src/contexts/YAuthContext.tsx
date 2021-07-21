@@ -33,6 +33,7 @@ export const YAuthProvider: FC<{ config: YAuthConfigType }> = ({
   const [user, setUser] = useState<UserType | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  let intervalRef: any = null;
 
   const graphQlClientRef = useRef(
     createClient({
@@ -72,6 +73,19 @@ export const YAuthProvider: FC<{ config: YAuthConfigType }> = ({
         if (isMounted) {
           setToken(res.data.token.accessToken);
           setUser(res.data.token.user);
+
+          const expiresAt = res.data.token.accessTokenExpiresAt * 1000 - 300000;
+          const currentDate = new Date();
+
+          const milisecondDiff =
+            new Date(expiresAt).getTime() - currentDate.getTime();
+
+          if (milisecondDiff > 0) {
+            if (intervalRef) clearInterval(intervalRef);
+            intervalRef = setInterval(() => {
+              getToken();
+            }, milisecondDiff);
+          }
         }
       }
       if (isMounted) {
@@ -82,6 +96,9 @@ export const YAuthProvider: FC<{ config: YAuthConfigType }> = ({
     getToken();
     return () => {
       isMounted = false;
+      if (intervalRef) {
+        clearInterval(intervalRef);
+      }
     };
   }, []);
 

@@ -17,7 +17,6 @@ export const YAuthSignup: FC = () => {
   const { graphQlRef } = useYAuth();
 
   const onSubmit = async (values: Record<string, string>) => {
-    console.log({ values });
     setLoading(true);
     const res = await graphQlRef
       .mutation(
@@ -42,8 +41,6 @@ export const YAuthSignup: FC = () => {
       setError(``);
       setSuccessMessage(res.data.signup.message);
     }
-
-    console.log({ res });
   };
 
   const onErrorClose = () => {

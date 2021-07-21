@@ -48,8 +48,6 @@ export const YAuthLogin: FC = () => {
       setUser(res.data.login.user);
       setToken(res.data.login.accessToken);
     }
-
-    console.log({ res });
   };
 
   const onErrorClose = () => {

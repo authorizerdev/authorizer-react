@@ -30,7 +30,6 @@ export const YAuthResetPassword: FC<Props> = ({ onReset }) => {
   const { graphQlRef } = useYAuth();
 
   const onSubmit = async (values: Record<string, string>) => {
-    console.log({ values });
     setLoading(true);
     const res = await graphQlRef
       .mutation(
@@ -50,7 +49,6 @@ export const YAuthResetPassword: FC<Props> = ({ onReset }) => {
       )
       .toPromise();
     setLoading(false);
-    console.log({ res });
     if (res?.error?.message) {
       setError(formatErrorMessage(res.error.message));
     }

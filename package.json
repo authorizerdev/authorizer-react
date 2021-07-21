@@ -41,11 +41,11 @@
   "size-limit": [
     {
       "path": "dist/yauth-react.cjs.production.min.js",
-      "limit": "10 KB"
+      "limit": "100 KB"
     },
     {
       "path": "dist/yauth-react.esm.js",
-      "limit": "10 KB"
+      "limit": "100 KB"
     }
   ],
   "devDependencies": {

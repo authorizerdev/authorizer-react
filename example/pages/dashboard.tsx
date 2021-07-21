@@ -17,7 +17,6 @@ const Dashboard: React.FC = () => {
         `
       )
       .toPromise();
-    console.log(res);
     setToken(null);
     setLoading(false);
   };
