@@ -1,0 +1,11 @@
+body {
+  font-family: -apple-system, system-ui, sans-serif;
+  color: #374151;
+  font-size: 14px;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}

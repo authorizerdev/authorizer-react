@@ -11,7 +11,7 @@ export const theme = {
   },
   fonts: {
     // typography
-    fontStack: 'SF UI Display, -apple-system, system-ui, sans-serif',
+    fontStack: '-apple-system, system-ui, sans-serif',
 
     // font sizes
     largeText: '18px',

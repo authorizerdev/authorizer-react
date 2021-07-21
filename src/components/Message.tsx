@@ -11,7 +11,6 @@ type Props = {
 };
 
 export const Message: FC<Props> = ({ type, text, onClose }) => {
-  console.log(`here..`, text);
   if (text.trim()) {
     return (
       <MessageWrapper type={type}>

@@ -16,10 +16,7 @@ export const Wrapper = styled.div`
   font-family: ${(props) => props.theme.fonts.fontStack};
   color: ${(props) => props.theme.colors.textColor};
   font-size: ${(props) => props.theme.fonts.mediumText};
-
-  div {
-    box-sizing: border-box;
-  }
+  box-sizing: border-box;
 
   *,
   *:before,
@@ -32,8 +29,6 @@ export const Required = styled.span`
   color: ${(props) => props.theme.colors.danger};
   padding-right: 3px;
 `;
-
-export const Card = styled.div``;
 
 export const Error = styled.div`
   color: ${(props) => props.theme.colors.danger};

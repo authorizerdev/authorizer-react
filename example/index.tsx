@@ -1,7 +1,10 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { YAuth, YAuthProvider } from '../.';
+import { BrowserRouter } from 'react-router-dom';
+import { YAuthProvider } from '../.';
+import Root from './root';
+import './index.css';
 
 const App = () => {
   return (
@@ -15,16 +18,18 @@ const App = () => {
           borderRadius: 5,
         }}
       >
-        <YAuthProvider
-          config={{
-            domain: 'http://localhost:8080',
-            isGoogleLoginEnabled: true,
-            isGithubLoginEnabled: true,
-            redirectURL: window.location.origin,
-          }}
-        >
-          <YAuth />
-        </YAuthProvider>
+        <BrowserRouter>
+          <YAuthProvider
+            config={{
+              domain: 'http://localhost:8080',
+              isGoogleLoginEnabled: true,
+              isGithubLoginEnabled: true,
+              redirectURL: window.location.origin,
+            }}
+          >
+            <Root />
+          </YAuthProvider>
+        </BrowserRouter>
       </div>
     </div>
   );
