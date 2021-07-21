@@ -1,7 +1,53 @@
 import * as React from 'react';
+import { useYAuth } from '../../.';
 
 const Dashboard: React.FC = () => {
-  return <h1>Dashboard</h1>;
+  const [loading, setLoading] = React.useState(false);
+  const { user, setToken, graphQlRef } = useYAuth();
+  const onLogout = async () => {
+    setLoading(true);
+    const res = await graphQlRef
+      .mutation(
+        `
+          mutation {
+            logout {
+              message
+            }
+          }
+        `
+      )
+      .toPromise();
+    console.log(res);
+    setToken(null);
+    setLoading(false);
+  };
+  return (
+    <div>
+      <h1>Hey 👋,</h1>
+      <p>Thank you for joining yAuth demo app.</p>
+      <p>
+        Your email address is{' '}
+        <a href={`mailto:${user?.email}`} style={{ color: '#3B82F6' }}>
+          {user?.email}
+        </a>
+      </p>
+
+      <br />
+      {loading ? (
+        <h3>Processing....</h3>
+      ) : (
+        <h3
+          style={{
+            color: '#3B82F6',
+            cursor: 'pointer',
+          }}
+          onClick={onLogout}
+        >
+          Logout
+        </h3>
+      )}
+    </div>
+  );
 };
 
 export default Dashboard;
