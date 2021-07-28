@@ -2,11 +2,11 @@ import React from 'react';
 import { Github } from '../icons/github';
 import { Google } from '../icons/google';
 import { Button, Separator } from '../styles';
-import { useYAuth } from '../contexts/YAuthContext';
+import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { ButtonAppearance } from '../constants';
 
-export const YAuthSocialLogin = () => {
-  const { config } = useYAuth();
+export const AuthorizerSocialLogin = () => {
+  const { config } = useAuthorizer();
   const hasSocialLogin =
     config.isGoogleLoginEnabled || config.isGithubLoginEnabled;
   return (

@@ -35,16 +35,16 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "@yauth/yauth-react",
+  "name": "@authorizer/authorizer-react",
   "author": "Lakhan Samani",
-  "module": "dist/yauth-react.esm.js",
+  "module": "dist/authorizer-react.esm.js",
   "size-limit": [
     {
-      "path": "dist/yauth-react.cjs.production.min.js",
+      "path": "dist/authorizer-react.cjs.production.min.js",
       "limit": "100 KB"
     },
     {
-      "path": "dist/yauth-react.esm.js",
+      "path": "dist/authorizer-react.esm.js",
       "limit": "100 KB"
     }
   ],

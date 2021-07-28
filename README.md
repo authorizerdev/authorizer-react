@@ -1,4 +1,4 @@
-# yauth-react 
+# authorizer-react 
 
 
 
@@ -6,7 +6,7 @@
 
 ### Local Development
 
-The recommended workflow is to run yauth in one terminal:
+The recommended workflow is to run authorizer in one terminal:
 
 ```bash
 npm start # or yarn start

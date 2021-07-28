@@ -3,7 +3,7 @@ import { Form, Field } from 'react-final-form';
 import { gql } from '@urql/core';
 
 import { ButtonAppearance, MessageType } from '../constants';
-import { useYAuth } from '../contexts/YAuthContext';
+import { useAuthorizer } from '../contexts/AuthorizerContext';
 import {
   Input,
   Label,
@@ -23,11 +23,11 @@ type Props = {
   onReset?: () => void;
 };
 
-export const YAuthResetPassword: FC<Props> = ({ onReset }) => {
+export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
   const { token } = getSearchParams();
   const [error, setError] = useState(!token ? `Invalid token` : ``);
   const [loading, setLoading] = useState(false);
-  const { graphQlRef } = useYAuth();
+  const { graphQlRef } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
@@ -102,7 +102,7 @@ export const YAuthResetPassword: FC<Props> = ({ onReset }) => {
           }}
         >
           {({ handleSubmit, pristine }) => (
-            <form onSubmit={handleSubmit} name="yauth-reset-password-form">
+            <form onSubmit={handleSubmit} name="authorizer-reset-password-form">
               <FieldWrapper>
                 <Field name="password">
                   {({ input, meta }) => (

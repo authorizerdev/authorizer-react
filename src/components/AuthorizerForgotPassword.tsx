@@ -3,33 +3,26 @@ import { Form, Field } from 'react-final-form';
 import { gql } from '@urql/core';
 
 import { ButtonAppearance, MessageType } from '../constants';
-import { useYAuth } from '../contexts/YAuthContext';
+import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
 import { isValidEmail } from '../utils/validations';
-import { YAuthSocialLogin } from './YAuthSocialLogin';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
-export const YAuthLogin: FC = () => {
+export const AuthorizerForgotPassword: FC = () => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
-  const { graphQlRef, setToken, setUser } = useYAuth();
+  const [successMessage, setSuccessMessage] = useState(``);
+  const { graphQlRef } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
     const res = await graphQlRef
       .mutation(
         gql`
-          mutation login($params: LoginInput!) {
-            login(params: $params) {
-              accessToken
-              user {
-                id
-                firstName
-                lastName
-                email
-                image
-              }
+          mutation forgotPassword($params: ForgotPasswordInput!) {
+            forgotPassword(params: $params) {
+              message
             }
           }
         `,
@@ -45,8 +38,7 @@ export const YAuthLogin: FC = () => {
 
     if (res.data) {
       setError(``);
-      setUser(res.data.login.user);
-      setToken(res.data.login.accessToken);
+      setSuccessMessage(res.data.forgotPassword.message);
     }
   };
 
@@ -54,12 +46,20 @@ export const YAuthLogin: FC = () => {
     setError(``);
   };
 
+  if (successMessage) {
+    return <Message type={MessageType.Success} text={successMessage} />;
+  }
+
   return (
     <>
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
-      <YAuthSocialLogin />
+      <p style={{ textAlign: 'center', margin: '10px 0px' }}>
+        Please enter your email address.
+        <br /> We will send you an email to reset your password.
+      </p>
+      <br />
       <Form
         onSubmit={onSubmit}
         validate={(values) => {
@@ -76,14 +76,11 @@ export const YAuthLogin: FC = () => {
             errors.email = `Please enter valid email`;
           }
 
-          if (!values.password) {
-            errors.password = 'Password is required';
-          }
           return errors;
         }}
       >
         {({ handleSubmit, pristine }) => (
-          <form onSubmit={handleSubmit} name="yauth-login-form">
+          <form onSubmit={handleSubmit} name="authorizer-forgot-password-form">
             <FieldWrapper>
               <Field name="email">
                 {({ input, meta }) => (
@@ -102,32 +99,13 @@ export const YAuthLogin: FC = () => {
                 )}
               </Field>
             </FieldWrapper>
-            <FieldWrapper>
-              <Field name="password">
-                {({ input, meta }) => (
-                  <div>
-                    <Label>
-                      <Required>*</Required>
-                      Password
-                    </Label>
-                    <Input
-                      {...input}
-                      type="password"
-                      placeholder="*********"
-                      hasError={Boolean(meta.error && meta.touched)}
-                    />
-                    {meta.error && meta.touched && <Error>{meta.error}</Error>}
-                  </div>
-                )}
-              </Field>
-            </FieldWrapper>
             <br />
             <Button
               type="submit"
               disabled={pristine || loading}
               appearance={ButtonAppearance.Primary}
             >
-              {loading ? `Processing ...` : `Log In`}
+              {loading ? `Processing ...` : `Send Email`}
             </Button>
           </form>
         )}

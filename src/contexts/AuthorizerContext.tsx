@@ -8,9 +8,13 @@ import React, {
 } from 'react';
 import { createClient, gql } from '@urql/core';
 
-import { UserType, YAuthConfigType, YAuthContextPropsType } from '../types';
+import {
+  UserType,
+  AuthorizerConfigType,
+  AuthorizerContextPropsType,
+} from '../types';
 
-const YAuthContext = createContext<YAuthContextPropsType>({
+const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   config: {
     domain: '',
     isGithubLoginEnabled: false,
@@ -26,7 +30,7 @@ const YAuthContext = createContext<YAuthContextPropsType>({
   graphQlRef: createClient({ url: 'http://localhost:8080' }),
 });
 
-export const YAuthProvider: FC<{ config: YAuthConfigType }> = ({
+export const AuthorizerProvider: FC<{ config: AuthorizerConfigType }> = ({
   config,
   children,
 }) => {
@@ -103,7 +107,7 @@ export const YAuthProvider: FC<{ config: YAuthConfigType }> = ({
   }, []);
 
   return (
-    <YAuthContext.Provider
+    <AuthorizerContext.Provider
       value={{
         config,
         user,
@@ -116,8 +120,8 @@ export const YAuthProvider: FC<{ config: YAuthConfigType }> = ({
       }}
     >
       {children}
-    </YAuthContext.Provider>
+    </AuthorizerContext.Provider>
   );
 };
 
-export const useYAuth = () => useContext(YAuthContext);
+export const useAuthorizer = () => useContext(AuthorizerContext);

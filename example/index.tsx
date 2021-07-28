@@ -2,7 +2,7 @@ import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
-import { YAuthProvider } from '../.';
+import { AuthorizerProvider } from '../.';
 import Root from './root';
 import './index.css';
 
@@ -19,7 +19,7 @@ const App = () => {
         }}
       >
         <BrowserRouter>
-          <YAuthProvider
+          <AuthorizerProvider
             config={{
               domain: 'http://localhost:8080',
               isGoogleLoginEnabled: true,
@@ -28,7 +28,7 @@ const App = () => {
             }}
           >
             <Root />
-          </YAuthProvider>
+          </AuthorizerProvider>
         </BrowserRouter>
       </div>
     </div>

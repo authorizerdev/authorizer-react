@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { YAuthResetPassword } from '../../.';
+import { AuthorizerResetPassword } from '../../.';
 
 const ResetPassword: React.FC = () => {
   return (
     <>
       <h1 style={{ textAlign: 'center' }}>Reset Password</h1>
       <br />
-      <YAuthResetPassword />
+      <AuthorizerResetPassword />
     </>
   );
 };

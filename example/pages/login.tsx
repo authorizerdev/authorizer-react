@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { YAuth } from '../../.';
+import { Authorizer } from '../../.';
 
 const Login: React.FC = () => {
   return (
     <>
-      <h1 style={{ textAlign: 'center' }}>Welcome to YAuth</h1>
+      <h1 style={{ textAlign: 'center' }}>Welcome to Authorizer</h1>
       <br />
-      <YAuth />
+      <Authorizer />
     </>
   );
 };

@@ -8,15 +8,15 @@ export type UserType = {
   image?: string;
 };
 
-export type YAuthConfigType = {
+export type AuthorizerConfigType = {
   domain: string;
   isGoogleLoginEnabled: boolean;
   isGithubLoginEnabled: boolean;
   redirectURL: string;
 };
 
-export type YAuthContextPropsType = {
-  config: YAuthConfigType;
+export type AuthorizerContextPropsType = {
+  config: AuthorizerConfigType;
   user: null | UserType;
   token: null | string;
   loading: boolean;

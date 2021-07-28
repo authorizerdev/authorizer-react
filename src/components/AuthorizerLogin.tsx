@@ -3,26 +3,33 @@ import { Form, Field } from 'react-final-form';
 import { gql } from '@urql/core';
 
 import { ButtonAppearance, MessageType } from '../constants';
-import { useYAuth } from '../contexts/YAuthContext';
+import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
 import { isValidEmail } from '../utils/validations';
+import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
-export const YAuthForgotPassword: FC = () => {
+export const AuthorizerLogin: FC = () => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(``);
-  const { graphQlRef } = useYAuth();
+  const { graphQlRef, setToken, setUser } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
     const res = await graphQlRef
       .mutation(
         gql`
-          mutation forgotPassword($params: ForgotPasswordInput!) {
-            forgotPassword(params: $params) {
-              message
+          mutation login($params: LoginInput!) {
+            login(params: $params) {
+              accessToken
+              user {
+                id
+                firstName
+                lastName
+                email
+                image
+              }
             }
           }
         `,
@@ -38,7 +45,8 @@ export const YAuthForgotPassword: FC = () => {
 
     if (res.data) {
       setError(``);
-      setSuccessMessage(res.data.forgotPassword.message);
+      setUser(res.data.login.user);
+      setToken(res.data.login.accessToken);
     }
   };
 
@@ -46,20 +54,12 @@ export const YAuthForgotPassword: FC = () => {
     setError(``);
   };
 
-  if (successMessage) {
-    return <Message type={MessageType.Success} text={successMessage} />;
-  }
-
   return (
     <>
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
-      <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-        Please enter your email address.
-        <br /> We will send you an email to reset your password.
-      </p>
-      <br />
+      <AuthorizerSocialLogin />
       <Form
         onSubmit={onSubmit}
         validate={(values) => {
@@ -76,11 +76,14 @@ export const YAuthForgotPassword: FC = () => {
             errors.email = `Please enter valid email`;
           }
 
+          if (!values.password) {
+            errors.password = 'Password is required';
+          }
           return errors;
         }}
       >
         {({ handleSubmit, pristine }) => (
-          <form onSubmit={handleSubmit} name="yauth-forgot-password-form">
+          <form onSubmit={handleSubmit} name="authorizer-login-form">
             <FieldWrapper>
               <Field name="email">
                 {({ input, meta }) => (
@@ -99,13 +102,32 @@ export const YAuthForgotPassword: FC = () => {
                 )}
               </Field>
             </FieldWrapper>
+            <FieldWrapper>
+              <Field name="password">
+                {({ input, meta }) => (
+                  <div>
+                    <Label>
+                      <Required>*</Required>
+                      Password
+                    </Label>
+                    <Input
+                      {...input}
+                      type="password"
+                      placeholder="*********"
+                      hasError={Boolean(meta.error && meta.touched)}
+                    />
+                    {meta.error && meta.touched && <Error>{meta.error}</Error>}
+                  </div>
+                )}
+              </Field>
+            </FieldWrapper>
             <br />
             <Button
               type="submit"
               disabled={pristine || loading}
               appearance={ButtonAppearance.Primary}
             >
-              {loading ? `Processing ...` : `Send Email`}
+              {loading ? `Processing ...` : `Log In`}
             </Button>
           </form>
         )}

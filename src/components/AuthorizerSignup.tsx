@@ -3,18 +3,18 @@ import { Form, Field } from 'react-final-form';
 import { gql } from '@urql/core';
 
 import { ButtonAppearance, MessageType } from '../constants';
-import { useYAuth } from '../contexts/YAuthContext';
+import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
 import { isValidEmail } from '../utils/validations';
-import { YAuthSocialLogin } from './YAuthSocialLogin';
+import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
-export const YAuthSignup: FC = () => {
+export const AuthorizerSignup: FC = () => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
-  const { graphQlRef } = useYAuth();
+  const { graphQlRef } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
@@ -56,7 +56,7 @@ export const YAuthSignup: FC = () => {
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
-      <YAuthSocialLogin />
+      <AuthorizerSocialLogin />
       <Form
         onSubmit={onSubmit}
         validate={(values) => {
@@ -93,7 +93,7 @@ export const YAuthSignup: FC = () => {
         }}
       >
         {({ handleSubmit, pristine }) => (
-          <form onSubmit={handleSubmit} name="yauth-signup-form">
+          <form onSubmit={handleSubmit} name="authorizer-signup-form">
             <FieldWrapper>
               <Field name="email">
                 {({ input, meta }) => (

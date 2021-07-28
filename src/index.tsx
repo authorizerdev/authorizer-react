@@ -1,21 +1,24 @@
 import React, { FC, useState } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { YAuthLogin } from './components/YAuthLogin';
-import { YAuthProvider, useYAuth } from './contexts/YAuthContext';
+import { AuthorizerLogin } from './components/AuthorizerLogin';
+import {
+  AuthorizerProvider,
+  useAuthorizer,
+} from './contexts/AuthorizerContext';
 import { Wrapper, Link, Footer } from './styles';
 import { theme } from './styles/theme';
 import { Views } from './constants';
-import { YAuthSignup } from './components/YAuthSignup';
-import { YAuthForgotPassword } from './components/YAuthForgotPassword';
-import { YAuthResetPassword } from './components/YAuthResetPassword';
+import { AuthorizerSignup } from './components/AuthorizerSignup';
+import { AuthorizerForgotPassword } from './components/AuthorizerForgotPassword';
+import { AuthorizerResetPassword } from './components/AuthorizerResetPassword';
 
-export const YAuth: FC = () => {
+export const Authorizer: FC = () => {
   const [view, setView] = useState(Views.Login);
 
   return (
     <ThemeProvider theme={theme}>
       <Wrapper>
-        {view === Views.Login && <YAuthLogin />}
+        {view === Views.Login && <AuthorizerLogin />}
 
         {view === Views.Login && (
           <Footer>
@@ -33,7 +36,7 @@ export const YAuth: FC = () => {
           </Footer>
         )}
 
-        {view === Views.Signup && <YAuthSignup />}
+        {view === Views.Signup && <AuthorizerSignup />}
 
         {view === Views.Signup && (
           <Footer>
@@ -44,7 +47,7 @@ export const YAuth: FC = () => {
           </Footer>
         )}
 
-        {view == Views.ForgotPassword && <YAuthForgotPassword />}
+        {view == Views.ForgotPassword && <AuthorizerForgotPassword />}
         {view === Views.ForgotPassword && (
           <Footer>
             <div>
@@ -58,4 +61,4 @@ export const YAuth: FC = () => {
   );
 };
 
-export { YAuthProvider, useYAuth, YAuthResetPassword };
+export { AuthorizerProvider, useAuthorizer, AuthorizerResetPassword };
