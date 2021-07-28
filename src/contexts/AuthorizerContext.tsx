@@ -12,7 +12,17 @@ import {
   UserType,
   AuthorizerConfigType,
   AuthorizerContextPropsType,
+  TokenType,
 } from '../types';
+
+const getIntervalDiff = (accessTokenExpiresAt: number): number => {
+  const expiresAt = accessTokenExpiresAt * 1000 - 300000;
+
+  const currentDate = new Date();
+
+  const milisecondDiff = new Date(expiresAt).getTime() - currentDate.getTime();
+  return milisecondDiff;
+};
 
 const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   config: {
@@ -35,7 +45,7 @@ export const AuthorizerProvider: FC<{
   config: AuthorizerConfigType;
 }> = ({ config: defaultConfig, children }) => {
   const [user, setUser] = useState<UserType | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<TokenType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [config, setConfig] = useState({
     ...defaultConfig,
@@ -56,83 +66,88 @@ export const AuthorizerProvider: FC<{
     })
   );
 
-  useEffect(() => {
-    let isMounted = true;
-    const getToken = async () => {
-      const res = await graphQlClientRef.current
+  const getToken = async () => {
+    const res = await graphQlClientRef.current
+      .query(
+        gql`
+          query {
+            token {
+              accessToken
+              accessTokenExpiresAt
+              user {
+                id
+                email
+                firstName
+                lastName
+                image
+              }
+            }
+          }
+        `
+      )
+      .toPromise();
+
+    if (res.data.token) {
+      setToken({
+        accessToken: res.data.token.accessToken,
+        accessTokenExpiresAt: res.data.token.accessTokenExpiresAt,
+      });
+      setUser(res.data.token.user);
+      const milisecondDiff = getIntervalDiff(
+        res.data.token.accessTokenExpiresAt
+      );
+      if (milisecondDiff > 0) {
+        if (intervalRef) clearInterval(intervalRef);
+        intervalRef = setInterval(() => {
+          getToken();
+        }, milisecondDiff);
+      }
+    } else {
+      const metaRes = await graphQlClientRef.current
         .query(
           gql`
             query {
-              token {
-                accessToken
-                accessTokenExpiresAt
-                user {
-                  id
-                  email
-                  firstName
-                  lastName
-                  image
-                }
+              meta {
+                isGoogleLoginEnabled
+                isGithubLoginEnabled
+                isBasicAuthenticationEnabled
+                isEmailVerificationEnabled
               }
             }
           `
         )
         .toPromise();
 
-      if (res.data.token) {
-        if (isMounted) {
-          setToken(res.data.token.accessToken);
-          setUser(res.data.token.user);
+      setConfig({
+        ...config,
+        ...metaRes.data.meta,
+      });
+    }
 
-          const expiresAt = res.data.token.accessTokenExpiresAt * 1000 - 300000;
-          const currentDate = new Date();
+    setLoading(false);
+  };
 
-          const milisecondDiff =
-            new Date(expiresAt).getTime() - currentDate.getTime();
-
-          if (milisecondDiff > 0) {
-            if (intervalRef) clearInterval(intervalRef);
-            intervalRef = setInterval(() => {
-              getToken();
-            }, milisecondDiff);
-          }
-        }
-      } else {
-        const metaRes = await graphQlClientRef.current
-          .query(
-            gql`
-              query {
-                meta {
-                  isGoogleLoginEnabled
-                  isGithubLoginEnabled
-                  isBasicAuthenticationEnabled
-                  isEmailVerificationEnabled
-                }
-              }
-            `
-          )
-          .toPromise();
-
-        if (isMounted) {
-          setConfig({
-            ...config,
-            ...metaRes.data.meta,
-          });
-        }
-      }
-      if (isMounted) {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     getToken();
     return () => {
-      isMounted = false;
       if (intervalRef) {
         clearInterval(intervalRef);
       }
     };
   }, []);
+
+  const handleTokenChange = (data: null | TokenType) => {
+    setToken(data);
+    if (data?.accessToken) {
+      const milisecondDiff = getIntervalDiff(data.accessTokenExpiresAt);
+      if (milisecondDiff > 0) {
+        if (intervalRef) clearInterval(intervalRef);
+        intervalRef = setInterval(() => {
+          getToken();
+        }, milisecondDiff);
+      }
+    }
+  };
 
   return (
     <AuthorizerContext.Provider
@@ -142,7 +157,7 @@ export const AuthorizerProvider: FC<{
         token,
         loading,
         setUser,
-        setToken,
+        setToken: handleTokenChange,
         setLoading,
         graphQlRef: graphQlClientRef.current,
       }}

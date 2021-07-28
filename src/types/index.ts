@@ -13,6 +13,11 @@ export type AuthorizerConfigType = {
   redirectURL: string;
 };
 
+export type TokenType = {
+  accessToken: string;
+  accessTokenExpiresAt: number;
+};
+
 export type AuthorizerContextPropsType = {
   config: {
     domain: string;
@@ -22,10 +27,10 @@ export type AuthorizerContextPropsType = {
     isBasicAuthenticationEnabled: boolean;
   };
   user: null | UserType;
-  token: null | string;
+  token: null | TokenType;
   loading: boolean;
   setLoading: (data: boolean) => void;
   setUser: (data: null | UserType) => void;
-  setToken: (data: null | string) => void;
+  setToken: (data: null | TokenType) => void;
   graphQlRef: Client;
 };

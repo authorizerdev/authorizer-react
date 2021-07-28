@@ -34,6 +34,7 @@ export const AuthorizerLogin: FC<{
           mutation login($params: LoginInput!) {
             login(params: $params) {
               accessToken
+              accessTokenExpiresAt
               user {
                 id
                 firstName
@@ -57,7 +58,10 @@ export const AuthorizerLogin: FC<{
     if (res.data) {
       setError(``);
       setUser(res.data.login.user);
-      setToken(res.data.login.accessToken);
+      setToken({
+        accessToken: res.data.login.accessToken,
+        accessTokenExpiresAt: res.data.login.accessTokenExpiresAt,
+      });
     }
   };
 

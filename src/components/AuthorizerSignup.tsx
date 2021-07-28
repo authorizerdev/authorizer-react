@@ -25,7 +25,7 @@ export const AuthorizerSignup: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
-  const { graphQlRef, config } = useAuthorizer();
+  const { graphQlRef, config, setToken, setUser } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
@@ -35,6 +35,15 @@ export const AuthorizerSignup: FC<{
           mutation signup($params: SignUpInput!) {
             signup(params: $params) {
               message
+              accessToken
+              accessTokenExpiresAt
+              user {
+                id
+                firstName
+                lastName
+                email
+                image
+              }
             }
           }
         `,
@@ -50,7 +59,16 @@ export const AuthorizerSignup: FC<{
 
     if (res.data) {
       setError(``);
-      setSuccessMessage(res.data.signup.message);
+      if (res.data.signup.accessToken) {
+        setError(``);
+        setUser(res.data.signup.user);
+        setToken({
+          accessToken: res.data.signup.accessToken,
+          accessTokenExpiresAt: res.data.signup.accessTokenExpiresAt,
+        });
+      } else {
+        setSuccessMessage(res.data.signup.message);
+      }
     }
   };
 
