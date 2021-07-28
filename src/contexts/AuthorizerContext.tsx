@@ -17,9 +17,10 @@ import {
 const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   config: {
     domain: '',
-    isGithubLoginEnabled: false,
-    isGoogleLoginEnabled: false,
     redirectURL: window.location.origin,
+    isGoogleLoginEnabled: false,
+    isGithubLoginEnabled: false,
+    isBasicAuthenticationEnabled: false,
   },
   user: null,
   token: null,
@@ -30,13 +31,18 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   graphQlRef: createClient({ url: 'http://localhost:8080' }),
 });
 
-export const AuthorizerProvider: FC<{ config: AuthorizerConfigType }> = ({
-  config,
-  children,
-}) => {
+export const AuthorizerProvider: FC<{
+  config: AuthorizerConfigType;
+}> = ({ config: defaultConfig, children }) => {
   const [user, setUser] = useState<UserType | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [config, setConfig] = useState({
+    ...defaultConfig,
+    isGoogleLoginEnabled: false,
+    isGithubLoginEnabled: false,
+    isBasicAuthenticationEnabled: false,
+  });
   let intervalRef: any = null;
 
   const graphQlClientRef = useRef(
@@ -90,6 +96,28 @@ export const AuthorizerProvider: FC<{ config: AuthorizerConfigType }> = ({
               getToken();
             }, milisecondDiff);
           }
+        }
+      } else {
+        const metaRes = await graphQlClientRef.current
+          .query(
+            gql`
+              query {
+                meta {
+                  isGoogleLoginEnabled
+                  isGithubLoginEnabled
+                  isBasicAuthenticationEnabled
+                  isEmailVerificationEnabled
+                }
+              }
+            `
+          )
+          .toPromise();
+
+        if (isMounted) {
+          setConfig({
+            ...config,
+            ...metaRes.data.meta,
+          });
         }
       }
       if (isMounted) {

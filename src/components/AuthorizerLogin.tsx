@@ -2,18 +2,29 @@ import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
 import { gql } from '@urql/core';
 
-import { ButtonAppearance, MessageType } from '../constants';
+import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
+import {
+  Input,
+  Label,
+  FieldWrapper,
+  Required,
+  Button,
+  Error,
+  Footer,
+  Link,
+} from '../styles';
 import { isValidEmail } from '../utils/validations';
 import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
-export const AuthorizerLogin: FC = () => {
+export const AuthorizerLogin: FC<{
+  setView: (v: Views) => void;
+}> = ({ setView }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
-  const { graphQlRef, setToken, setUser } = useAuthorizer();
+  const { graphQlRef, setToken, setUser, config } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
@@ -60,78 +71,100 @@ export const AuthorizerLogin: FC = () => {
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
       <AuthorizerSocialLogin />
-      <Form
-        onSubmit={onSubmit}
-        validate={(values) => {
-          const errors: Record<string, string> = {};
-          if (!values.email) {
-            errors.email = 'Email is required';
-          }
+      {config.isBasicAuthenticationEnabled && (
+        <>
+          <Form
+            onSubmit={onSubmit}
+            validate={(values) => {
+              const errors: Record<string, string> = {};
+              if (!values.email) {
+                errors.email = 'Email is required';
+              }
 
-          if (
-            values.email &&
-            values.email.trim() &&
-            !isValidEmail(values.email)
-          ) {
-            errors.email = `Please enter valid email`;
-          }
+              if (
+                values.email &&
+                values.email.trim() &&
+                !isValidEmail(values.email)
+              ) {
+                errors.email = `Please enter valid email`;
+              }
 
-          if (!values.password) {
-            errors.password = 'Password is required';
-          }
-          return errors;
-        }}
-      >
-        {({ handleSubmit, pristine }) => (
-          <form onSubmit={handleSubmit} name="authorizer-login-form">
-            <FieldWrapper>
-              <Field name="email">
-                {({ input, meta }) => (
-                  <div>
-                    <Label>
-                      <Required>*</Required>Email
-                    </Label>
-                    <Input
-                      {...input}
-                      type="email"
-                      placeholder="eg. foo@bar.com"
-                      hasError={Boolean(meta.error && meta.touched)}
-                    />
-                    {meta.error && meta.touched && <Error>{meta.error}</Error>}
-                  </div>
-                )}
-              </Field>
-            </FieldWrapper>
-            <FieldWrapper>
-              <Field name="password">
-                {({ input, meta }) => (
-                  <div>
-                    <Label>
-                      <Required>*</Required>
-                      Password
-                    </Label>
-                    <Input
-                      {...input}
-                      type="password"
-                      placeholder="*********"
-                      hasError={Boolean(meta.error && meta.touched)}
-                    />
-                    {meta.error && meta.touched && <Error>{meta.error}</Error>}
-                  </div>
-                )}
-              </Field>
-            </FieldWrapper>
-            <br />
-            <Button
-              type="submit"
-              disabled={pristine || loading}
-              appearance={ButtonAppearance.Primary}
+              if (!values.password) {
+                errors.password = 'Password is required';
+              }
+              return errors;
+            }}
+          >
+            {({ handleSubmit, pristine }) => (
+              <form onSubmit={handleSubmit} name="authorizer-login-form">
+                <FieldWrapper>
+                  <Field name="email">
+                    {({ input, meta }) => (
+                      <div>
+                        <Label>
+                          <Required>*</Required>Email
+                        </Label>
+                        <Input
+                          {...input}
+                          type="email"
+                          placeholder="eg. foo@bar.com"
+                          hasError={Boolean(meta.error && meta.touched)}
+                        />
+                        {meta.error && meta.touched && (
+                          <Error>{meta.error}</Error>
+                        )}
+                      </div>
+                    )}
+                  </Field>
+                </FieldWrapper>
+                <FieldWrapper>
+                  <Field name="password">
+                    {({ input, meta }) => (
+                      <div>
+                        <Label>
+                          <Required>*</Required>
+                          Password
+                        </Label>
+                        <Input
+                          {...input}
+                          type="password"
+                          placeholder="*********"
+                          hasError={Boolean(meta.error && meta.touched)}
+                        />
+                        {meta.error && meta.touched && (
+                          <Error>{meta.error}</Error>
+                        )}
+                      </div>
+                    )}
+                  </Field>
+                </FieldWrapper>
+                <br />
+                <Button
+                  type="submit"
+                  disabled={pristine || loading}
+                  appearance={ButtonAppearance.Primary}
+                >
+                  {loading ? `Processing ...` : `Log In`}
+                </Button>
+              </form>
+            )}
+          </Form>
+
+          <Footer>
+            <Link
+              onClick={() => setView(Views.ForgotPassword)}
+              style={{ marginBottom: 10 }}
             >
-              {loading ? `Processing ...` : `Log In`}
-            </Button>
-          </form>
-        )}
-      </Form>
+              Forgot Password?
+            </Link>
+
+            <div>
+              Don't have an account?{' '}
+              <Link onClick={() => setView(Views.Signup)}>Sign Up</Link>
+            </div>
+          </Footer>
+        </>
+      )}
     </>
   );
 };

@@ -10,13 +10,17 @@ export type UserType = {
 
 export type AuthorizerConfigType = {
   domain: string;
-  isGoogleLoginEnabled: boolean;
-  isGithubLoginEnabled: boolean;
   redirectURL: string;
 };
 
 export type AuthorizerContextPropsType = {
-  config: AuthorizerConfigType;
+  config: {
+    domain: string;
+    redirectURL: string;
+    isGoogleLoginEnabled: boolean;
+    isGithubLoginEnabled: boolean;
+    isBasicAuthenticationEnabled: boolean;
+  };
   user: null | UserType;
   token: null | string;
   loading: boolean;

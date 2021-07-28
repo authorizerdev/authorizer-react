@@ -2,14 +2,25 @@ import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
 import { gql } from '@urql/core';
 
-import { ButtonAppearance, MessageType } from '../constants';
+import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
+import {
+  Input,
+  Label,
+  FieldWrapper,
+  Required,
+  Button,
+  Error,
+  Footer,
+  Link,
+} from '../styles';
 import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
-export const AuthorizerForgotPassword: FC = () => {
+export const AuthorizerForgotPassword: FC<{
+  setView: (v: Views) => void;
+}> = ({ setView }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -110,6 +121,12 @@ export const AuthorizerForgotPassword: FC = () => {
           </form>
         )}
       </Form>
+      <Footer>
+        <div>
+          Remember your password?{' '}
+          <Link onClick={() => setView(Views.Login)}>Log In</Link>
+        </div>
+      </Footer>
     </>
   );
 };

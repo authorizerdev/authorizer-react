@@ -5,7 +5,7 @@ import {
   AuthorizerProvider,
   useAuthorizer,
 } from './contexts/AuthorizerContext';
-import { Wrapper, Link, Footer } from './styles';
+import { Wrapper } from './styles';
 import { theme } from './styles/theme';
 import { Views } from './constants';
 import { AuthorizerSignup } from './components/AuthorizerSignup';
@@ -18,43 +18,12 @@ export const Authorizer: FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <Wrapper>
-        {view === Views.Login && <AuthorizerLogin />}
+        {view === Views.Login && <AuthorizerLogin setView={setView} />}
 
-        {view === Views.Login && (
-          <Footer>
-            <Link
-              onClick={() => setView(Views.ForgotPassword)}
-              style={{ marginBottom: 10 }}
-            >
-              Forgot Password?
-            </Link>
+        {view === Views.Signup && <AuthorizerSignup setView={setView} />}
 
-            <div>
-              Don't have an account?{' '}
-              <Link onClick={() => setView(Views.Signup)}>Sign Up</Link>
-            </div>
-          </Footer>
-        )}
-
-        {view === Views.Signup && <AuthorizerSignup />}
-
-        {view === Views.Signup && (
-          <Footer>
-            <div>
-              Already have an account?{' '}
-              <Link onClick={() => setView(Views.Login)}>Log In</Link>
-            </div>
-          </Footer>
-        )}
-
-        {view == Views.ForgotPassword && <AuthorizerForgotPassword />}
-        {view === Views.ForgotPassword && (
-          <Footer>
-            <div>
-              Remember your password?{' '}
-              <Link onClick={() => setView(Views.Login)}>Log In</Link>
-            </div>
-          </Footer>
+        {view == Views.ForgotPassword && (
+          <AuthorizerForgotPassword setView={setView} />
         )}
       </Wrapper>
     </ThemeProvider>

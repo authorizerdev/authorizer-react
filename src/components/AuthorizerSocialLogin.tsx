@@ -39,7 +39,9 @@ export const AuthorizerSocialLogin = () => {
           <br />
         </>
       )}
-      {hasSocialLogin && <Separator>OR</Separator>}
+      {hasSocialLogin && config.isBasicAuthenticationEnabled && (
+        <Separator>OR</Separator>
+      )}
     </>
   );
 };
