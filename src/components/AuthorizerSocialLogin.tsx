@@ -16,7 +16,7 @@ export const AuthorizerSocialLogin = () => {
           <Button
             appearance={ButtonAppearance.Default}
             onClick={() => {
-              window.location.href = `${config.domain}/login/google`;
+              window.location.href = `${config.domain}/login/google?redirect_url=${config.redirectURL}`;
             }}
           >
             <Google />
@@ -30,7 +30,7 @@ export const AuthorizerSocialLogin = () => {
           <Button
             appearance={ButtonAppearance.Default}
             onClick={() => {
-              window.location.href = `${config.domain}/login/github`;
+              window.location.href = `${config.domain}/login/github?redirect_url=${config.redirectURL}`;
             }}
           >
             <Github />
