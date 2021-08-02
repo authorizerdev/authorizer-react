@@ -26,7 +26,7 @@ const getIntervalDiff = (accessTokenExpiresAt: number): number => {
 
 const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   config: {
-    domain: '',
+    authorizerURL: '',
     redirectURL: window.location.origin,
     isGoogleLoginEnabled: false,
     isGithubLoginEnabled: false,
@@ -57,7 +57,7 @@ export const AuthorizerProvider: FC<{
 
   const graphQlClientRef = useRef(
     createClient({
-      url: `${config.domain}/graphql`,
+      url: `${config.authorizerURL}/graphql`,
       fetchOptions: () => {
         return {
           credentials: 'include',

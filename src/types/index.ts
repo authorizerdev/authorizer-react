@@ -9,7 +9,7 @@ export type UserType = {
 };
 
 export type AuthorizerConfigType = {
-  domain: string;
+  authorizerURL: string;
   redirectURL: string;
 };
 
@@ -20,7 +20,7 @@ export type TokenType = {
 
 export type AuthorizerContextPropsType = {
   config: {
-    domain: string;
+    authorizerURL: string;
     redirectURL: string;
     isGoogleLoginEnabled: boolean;
     isGithubLoginEnabled: boolean;
