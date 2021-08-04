@@ -102,27 +102,27 @@ export const AuthorizerProvider: FC<{
           getToken();
         }, milisecondDiff);
       }
-    } else {
-      const metaRes = await graphQlClientRef.current
-        .query(
-          gql`
-            query {
-              meta {
-                isGoogleLoginEnabled
-                isGithubLoginEnabled
-                isBasicAuthenticationEnabled
-                isEmailVerificationEnabled
-              }
-            }
-          `
-        )
-        .toPromise();
-
-      setConfig({
-        ...config,
-        ...metaRes.data.meta,
-      });
     }
+
+    const metaRes = await graphQlClientRef.current
+      .query(
+        gql`
+          query {
+            meta {
+              isGoogleLoginEnabled
+              isGithubLoginEnabled
+              isBasicAuthenticationEnabled
+              isEmailVerificationEnabled
+            }
+          }
+        `
+      )
+      .toPromise();
+
+    setConfig({
+      ...config,
+      ...metaRes.data.meta,
+    });
 
     setLoading(false);
   };

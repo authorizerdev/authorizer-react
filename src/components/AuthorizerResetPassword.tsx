@@ -27,7 +27,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
   const { token } = getSearchParams();
   const [error, setError] = useState(!token ? `Invalid token` : ``);
   const [loading, setLoading] = useState(false);
-  const { graphQlRef } = useAuthorizer();
+  const { graphQlRef, config } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
@@ -58,7 +58,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
       if (onReset) {
         onReset();
       } else {
-        window.location.href = '/';
+        window.location.href = config.redirectURL;
       }
     }
   };
