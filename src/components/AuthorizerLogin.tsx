@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
-import { gql } from '@urql/core';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -16,7 +15,6 @@ import {
 } from '../styles';
 import { isValidEmail } from '../utils/validations';
 import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
-import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
 export const AuthorizerLogin: FC<{
@@ -24,44 +22,26 @@ export const AuthorizerLogin: FC<{
 }> = ({ setView }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
-  const { graphQlRef, setToken, setUser, config } = useAuthorizer();
+  const { setToken, setUser, config, authorizerRef } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
-    const res = await graphQlRef
-      .mutation(
-        gql`
-          mutation login($params: LoginInput!) {
-            login(params: $params) {
-              accessToken
-              accessTokenExpiresAt
-              user {
-                id
-                firstName
-                lastName
-                email
-                image
-              }
-            }
-          }
-        `,
-        {
-          params: values,
-        }
-      )
-      .toPromise();
-    setLoading(false);
-    if (res?.error?.message) {
-      setError(formatErrorMessage(res.error.message));
-    }
-
-    if (res.data) {
-      setError(``);
-      setUser(res.data.login.user);
-      setToken({
-        accessToken: res.data.login.accessToken,
-        accessTokenExpiresAt: res.data.login.accessTokenExpiresAt,
+    try {
+      const res = await authorizerRef.login({
+        email: values.email,
+        password: values.password,
       });
+      setLoading(false);
+
+      setError(``);
+      setUser(res.user);
+      setToken({
+        accessToken: res.accessToken,
+        accessTokenExpiresAt: res.accessTokenExpiresAt,
+      });
+    } catch (err) {
+      setLoading(false);
+      setError(err.message);
     }
   };
 

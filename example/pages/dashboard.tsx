@@ -3,20 +3,10 @@ import { useAuthorizer } from '../../.';
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
-  const { user, setToken, graphQlRef } = useAuthorizer();
+  const { user, setToken, authorizerRef } = useAuthorizer();
   const onLogout = async () => {
     setLoading(true);
-    const res = await graphQlRef
-      .mutation(
-        `
-          mutation {
-            logout {
-              message
-            }
-          }
-        `
-      )
-      .toPromise();
+    await authorizerRef.logout();
     setToken(null);
     setLoading(false);
   };

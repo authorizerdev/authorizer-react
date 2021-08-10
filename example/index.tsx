@@ -22,8 +22,6 @@ const App = () => {
           <AuthorizerProvider
             config={{
               authorizerURL: 'http://localhost:8080',
-              isGoogleLoginEnabled: true,
-              isGithubLoginEnabled: true,
               redirectURL: window.location.origin,
             }}
           >

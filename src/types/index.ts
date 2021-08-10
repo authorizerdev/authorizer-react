@@ -1,36 +1,18 @@
-import { Client } from '@urql/core';
-
-export type UserType = {
-  id: string | number;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  image?: string;
-};
-
-export type AuthorizerConfigType = {
-  authorizerURL: string;
-  redirectURL: string;
-};
-
-export type TokenType = {
-  accessToken: string;
-  accessTokenExpiresAt: number;
-};
+import { AuthToken, User } from '@authorizerdev/authorizer-js';
 
 export type AuthorizerContextPropsType = {
   config: {
     authorizerURL: string;
-    redirectURL: string;
+    redirectURL?: string;
     isGoogleLoginEnabled: boolean;
     isGithubLoginEnabled: boolean;
     isBasicAuthenticationEnabled: boolean;
   };
-  user: null | UserType;
-  token: null | TokenType;
+  user: null | User;
+  token: null | AuthToken;
   loading: boolean;
   setLoading: (data: boolean) => void;
-  setUser: (data: null | UserType) => void;
-  setToken: (data: null | TokenType) => void;
-  graphQlRef: Client;
+  setUser: (data: null | User) => void;
+  setToken: (data: null | AuthToken) => void;
+  authorizerRef: any;
 };

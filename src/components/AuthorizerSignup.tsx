@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
-import { gql } from '@urql/core';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -25,50 +24,29 @@ export const AuthorizerSignup: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
-  const { graphQlRef, config, setToken, setUser } = useAuthorizer();
+  const { authorizerRef, config, setToken, setUser } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
-    setLoading(true);
-    const res = await graphQlRef
-      .mutation(
-        gql`
-          mutation signup($params: SignUpInput!) {
-            signup(params: $params) {
-              message
-              accessToken
-              accessTokenExpiresAt
-              user {
-                id
-                firstName
-                lastName
-                email
-                image
-              }
-            }
-          }
-        `,
-        {
-          params: values,
-        }
-      )
-      .toPromise();
-    setLoading(false);
-    if (res?.error?.message) {
-      setError(formatErrorMessage(res.error.message));
-    }
+    try {
+      setLoading(true);
+      const res = await authorizerRef.signup(values);
 
-    if (res.data) {
+      setLoading(false);
+
       setError(``);
-      if (res.data.signup.accessToken) {
+      if (res.accessToken) {
         setError(``);
-        setUser(res.data.signup.user);
+        setUser(res.user);
         setToken({
-          accessToken: res.data.signup.accessToken,
-          accessTokenExpiresAt: res.data.signup.accessTokenExpiresAt,
+          accessToken: res.accessToken,
+          accessTokenExpiresAt: res.accessTokenExpiresAt,
         });
       } else {
-        setSuccessMessage(res.data.signup.message);
+        setSuccessMessage(res.message);
       }
+    } catch (err) {
+      setLoading(false);
+      setError(formatErrorMessage(err.message));
     }
   };
 

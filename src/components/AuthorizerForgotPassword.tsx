@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
-import { gql } from '@urql/core';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -24,32 +23,24 @@ export const AuthorizerForgotPassword: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
-  const { graphQlRef } = useAuthorizer();
+  const { authorizerRef } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
-    setLoading(true);
-    const res = await graphQlRef
-      .mutation(
-        gql`
-          mutation forgotPassword($params: ForgotPasswordInput!) {
-            forgotPassword(params: $params) {
-              message
-            }
-          }
-        `,
-        {
-          params: values,
-        }
-      )
-      .toPromise();
-    setLoading(false);
-    if (res?.error?.message) {
-      setError(formatErrorMessage(res.error.message));
-    }
+    try {
+      setLoading(true);
 
-    if (res.data) {
-      setError(``);
-      setSuccessMessage(res.data.forgotPassword.message);
+      const res = await authorizerRef.forgotPassword({ email: values.email });
+      setLoading(false);
+
+      if (res.message) {
+        setError(``);
+        setSuccessMessage(res.message);
+      }
+    } catch (err) {
+      setLoading(false);
+      if (err.message) {
+        setError(formatErrorMessage(err.message));
+      }
     }
   };
 

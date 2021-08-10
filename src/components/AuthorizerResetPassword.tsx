@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
-import { gql } from '@urql/core';
 
 import { ButtonAppearance, MessageType } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -27,39 +26,26 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
   const { token } = getSearchParams();
   const [error, setError] = useState(!token ? `Invalid token` : ``);
   const [loading, setLoading] = useState(false);
-  const { graphQlRef, config } = useAuthorizer();
+  const { authorizerRef, config } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
-    const res = await graphQlRef
-      .mutation(
-        gql`
-          mutation resetPassword($params: ResetPassowrdInput!) {
-            resetPassword(params: $params) {
-              message
-            }
-          }
-        `,
-        {
-          params: {
-            ...values,
-            token: token || '',
-          },
-        }
-      )
-      .toPromise();
-    setLoading(false);
-    if (res?.error?.message) {
-      setError(formatErrorMessage(res.error.message));
-    }
-
-    if (res.data) {
+    try {
+      await authorizerRef.resetPassword({
+        token,
+        ...values,
+      });
+      setLoading(false);
       setError(``);
       if (onReset) {
         onReset();
       } else {
-        window.location.href = config.redirectURL;
+        console.log({ config, o: window.location.origin });
+        window.location.href = config.redirectURL || window.location.origin;
       }
+    } catch (err) {
+      setLoading(false);
+      setError(formatErrorMessage(err.message));
     }
   };
 
