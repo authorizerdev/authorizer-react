@@ -7,8 +7,8 @@ const Dashboard: React.FC = () => {
   const onLogout = async () => {
     setLoading(true);
     await authorizerRef.logout();
-    setToken(null);
     setLoading(false);
+    setToken(null);
   };
   return (
     <div>
