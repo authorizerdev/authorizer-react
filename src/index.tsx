@@ -12,19 +12,25 @@ import { AuthorizerSignup } from './components/AuthorizerSignup';
 import { AuthorizerForgotPassword } from './components/AuthorizerForgotPassword';
 import { AuthorizerResetPassword } from './components/AuthorizerResetPassword';
 
+type ComponentMap = {
+  [key: string]: React.FC<any>;
+};
+
+const componentMap: ComponentMap = {
+  [Views.Login]: AuthorizerLogin,
+  [Views.Signup]: AuthorizerSignup,
+  [Views.ForgotPassword]: AuthorizerForgotPassword,
+};
+
 export const Authorizer: FC = () => {
   const [view, setView] = useState(Views.Login);
+
+  const AuthorizerComponent = componentMap[view];
 
   return (
     <ThemeProvider theme={theme}>
       <Wrapper>
-        {view === Views.Login && <AuthorizerLogin setView={setView} />}
-
-        {view === Views.Signup && <AuthorizerSignup setView={setView} />}
-
-        {view == Views.ForgotPassword && (
-          <AuthorizerForgotPassword setView={setView} />
-        )}
+        <AuthorizerComponent setView={setView} />
       </Wrapper>
     </ThemeProvider>
   );
