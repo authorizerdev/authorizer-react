@@ -20,8 +20,8 @@ const getIntervalDiff = (accessTokenExpiresAt: number): number => {
 
   const currentDate = new Date();
 
-  const milisecondDiff = new Date(expiresAt).getTime() - currentDate.getTime();
-  return milisecondDiff;
+  const millisecond = new Date(expiresAt).getTime() - currentDate.getTime();
+  return millisecond;
 };
 
 const AuthorizerContext = createContext<AuthorizerContextPropsType>({
@@ -77,12 +77,12 @@ export const AuthorizerProvider: FC<{
           accessTokenExpiresAt: res.accessTokenExpiresAt,
         });
         setUser(res?.user);
-        const milisecondDiff = getIntervalDiff(res.accessTokenExpiresAt);
-        if (milisecondDiff > 0) {
+        const millisecond = getIntervalDiff(res.accessTokenExpiresAt);
+        if (millisecond > 0) {
           if (intervalRef) clearInterval(intervalRef);
           intervalRef = setInterval(() => {
             getToken();
-          }, milisecondDiff);
+          }, millisecond);
         }
       }
     } catch (err) {}
@@ -109,12 +109,12 @@ export const AuthorizerProvider: FC<{
   const handleTokenChange = (data: null | AuthToken) => {
     setToken(data);
     if (data?.accessToken) {
-      const milisecondDiff = getIntervalDiff(data.accessTokenExpiresAt);
-      if (milisecondDiff > 0) {
+      const millisecond = getIntervalDiff(data.accessTokenExpiresAt);
+      if (millisecond > 0) {
         if (intervalRef) clearInterval(intervalRef);
         intervalRef = setInterval(() => {
           getToken();
-        }, milisecondDiff);
+        }, millisecond);
       }
     }
   };
