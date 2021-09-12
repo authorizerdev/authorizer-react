@@ -30,6 +30,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     redirectURL: window.location.origin,
     isGoogleLoginEnabled: false,
     isGithubLoginEnabled: false,
+    isFacebookLoginEnabled: false,
     isBasicAuthenticationEnabled: false,
   },
   user: null,
@@ -54,6 +55,7 @@ export const AuthorizerProvider: FC<{
     ...defaultConfig,
     isGoogleLoginEnabled: false,
     isGithubLoginEnabled: false,
+    isFacebookLoginEnabled: false,
     isBasicAuthenticationEnabled: false,
   });
   let intervalRef: any = null;

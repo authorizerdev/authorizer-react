@@ -6,6 +6,7 @@ export type AuthorizerContextPropsType = {
     redirectURL?: string;
     isGoogleLoginEnabled: boolean;
     isGithubLoginEnabled: boolean;
+    isFacebookLoginEnabled: boolean;
     isBasicAuthenticationEnabled: boolean;
   };
   user: null | User;

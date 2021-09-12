@@ -1,6 +1,7 @@
 import React from 'react';
 import { Github } from '../icons/github';
 import { Google } from '../icons/google';
+import { Facebook } from '../icons/facebook';
 import { Button, Separator } from '../styles';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { ButtonAppearance } from '../constants';
@@ -35,6 +36,20 @@ export const AuthorizerSocialLogin = () => {
           >
             <Github />
             Sign in with Github
+          </Button>
+          <br />
+        </>
+      )}
+      {config.isFacebookLoginEnabled && (
+        <>
+          <Button
+            appearance={ButtonAppearance.Default}
+            onClick={() => {
+              window.location.href = `${config.authorizerURL}/oauth_login/facebook?redirectURL=${config.redirectURL}`;
+            }}
+          >
+            <Facebook />
+            Sign in with Facebook
           </Button>
           <br />
         </>
