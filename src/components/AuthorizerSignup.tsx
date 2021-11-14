@@ -15,6 +15,7 @@ import {
 } from '../styles';
 import { isValidEmail } from '../utils/validations';
 import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
+import { AuthorizerMagicLogin } from './AuthorizerMagicLogin';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
@@ -46,7 +47,7 @@ export const AuthorizerSignup: FC<{
       }
     } catch (err) {
       setLoading(false);
-      setError(formatErrorMessage(err.message));
+      setError(formatErrorMessage((err as Error).message));
     }
   };
 
@@ -64,7 +65,7 @@ export const AuthorizerSignup: FC<{
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
       <AuthorizerSocialLogin />
-      {config.isBasicAuthenticationEnabled && (
+      {config.isBasicAuthenticationEnabled && !config.isMagicLoginEnabled && (
         <>
           <Form
             onSubmit={onSubmit}
@@ -184,6 +185,8 @@ export const AuthorizerSignup: FC<{
           </Footer>
         </>
       )}
+
+      {config.isMagicLoginEnabled && <AuthorizerMagicLogin />}
     </>
   );
 };

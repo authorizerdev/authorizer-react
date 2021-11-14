@@ -8,6 +8,7 @@ export type AuthorizerContextPropsType = {
     isGithubLoginEnabled: boolean;
     isFacebookLoginEnabled: boolean;
     isBasicAuthenticationEnabled: boolean;
+    isMagicLoginEnabled: boolean;
   };
   user: null | User;
   token: null | AuthToken;

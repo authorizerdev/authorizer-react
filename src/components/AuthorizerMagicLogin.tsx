@@ -1,25 +1,14 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
 
-import { ButtonAppearance, MessageType, Views } from '../constants';
+import { ButtonAppearance, MessageType } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import {
-  Input,
-  Label,
-  FieldWrapper,
-  Required,
-  Button,
-  Error,
-  Footer,
-  Link,
-} from '../styles';
+import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
 import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
-export const AuthorizerForgotPassword: FC<{
-  setView: (v: Views) => void;
-}> = ({ setView }) => {
+export const AuthorizerMagicLogin: FC<{}> = () => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -29,7 +18,7 @@ export const AuthorizerForgotPassword: FC<{
     try {
       setLoading(true);
 
-      const res = await authorizerRef.forgotPassword({ email: values.email });
+      const res = await authorizerRef.magicLogin({ email: values.email });
       setLoading(false);
 
       if (res.message) {
@@ -55,11 +44,6 @@ export const AuthorizerForgotPassword: FC<{
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
-      <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-        Please enter your email address.
-        <br /> We will send you an email to reset your password.
-      </p>
-      <br />
       <Form
         onSubmit={onSubmit}
         validate={(values) => {
@@ -80,7 +64,7 @@ export const AuthorizerForgotPassword: FC<{
         }}
       >
         {({ handleSubmit, pristine }) => (
-          <form onSubmit={handleSubmit} name="authorizer-forgot-password-form">
+          <form onSubmit={handleSubmit} name="authorizer-magic-login-form">
             <FieldWrapper>
               <Field name="email">
                 {({ input, meta }) => (
@@ -110,12 +94,6 @@ export const AuthorizerForgotPassword: FC<{
           </form>
         )}
       </Form>
-      <Footer>
-        <div>
-          Remember your password?{' '}
-          <Link onClick={() => setView(Views.Login)}>Log In</Link>
-        </div>
-      </Footer>
     </>
   );
 };

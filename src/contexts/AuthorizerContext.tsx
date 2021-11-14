@@ -32,6 +32,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     isGithubLoginEnabled: false,
     isFacebookLoginEnabled: false,
     isBasicAuthenticationEnabled: false,
+    isMagicLoginEnabled: false,
   },
   user: null,
   token: null,
@@ -57,6 +58,7 @@ export const AuthorizerProvider: FC<{
     isGithubLoginEnabled: false,
     isFacebookLoginEnabled: false,
     isBasicAuthenticationEnabled: false,
+    isMagicLoginEnabled: false,
   });
   let intervalRef: any = null;
 

@@ -40,12 +40,11 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
       if (onReset) {
         onReset();
       } else {
-        console.log({ config, o: window.location.origin });
         window.location.href = config.redirectURL || window.location.origin;
       }
     } catch (err) {
       setLoading(false);
-      setError(formatErrorMessage(err.message));
+      setError(formatErrorMessage((err as Error).message));
     }
   };
 
