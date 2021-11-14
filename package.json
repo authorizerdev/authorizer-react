@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0-beta.19",
+  "version": "0.1.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -10,6 +10,7 @@
   "engines": {
     "node": ">=10"
   },
+  "repository": "https://github.com/authorizerdev/authorizer-react",
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
@@ -70,7 +71,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
-    "@authorizerdev/authorizer-js": "^0.1.0-beta.23",
+    "@authorizerdev/authorizer-js": "^0.1.0",
     "final-form": "^4.20.2",
     "react-final-form": "^6.5.3",
     "styled-components": "^5.3.0"
