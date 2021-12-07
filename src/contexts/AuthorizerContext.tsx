@@ -14,6 +14,7 @@ import {
 } from '@authorizerdev/authorizer-js';
 
 import { AuthorizerContextPropsType } from '../types';
+import { hasWindow } from '../utils/window';
 
 const getIntervalDiff = (accessTokenExpiresAt: number): number => {
   const expiresAt = accessTokenExpiresAt * 1000 - 300000;
@@ -27,7 +28,7 @@ const getIntervalDiff = (accessTokenExpiresAt: number): number => {
 const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   config: {
     authorizerURL: '',
-    redirectURL: window.location.origin,
+    redirectURL: '/',
     isGoogleLoginEnabled: false,
     isGithubLoginEnabled: false,
     isFacebookLoginEnabled: false,
@@ -42,7 +43,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   setUser: () => {},
   authorizerRef: new Authorizer({
     authorizerURL: `http://localhost:8080`,
-    redirectURL: window.location.origin,
+    redirectURL: hasWindow() ? window.location.origin : '/',
   }),
 });
 
@@ -65,7 +66,7 @@ export const AuthorizerProvider: FC<{
   const authorizerRef = useRef(
     new Authorizer({
       authorizerURL: config.authorizerURL,
-      redirectURL: window.location.origin,
+      redirectURL: hasWindow() ? window.location.origin : '/',
     })
   );
 

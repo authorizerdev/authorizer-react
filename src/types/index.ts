@@ -3,7 +3,7 @@ import { AuthToken, User } from '@authorizerdev/authorizer-js';
 export type AuthorizerContextPropsType = {
   config: {
     authorizerURL: string;
-    redirectURL?: string;
+    redirectURL: string;
     isGoogleLoginEnabled: boolean;
     isGithubLoginEnabled: boolean;
     isFacebookLoginEnabled: boolean;
