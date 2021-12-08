@@ -49,7 +49,14 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
 
 export const AuthorizerProvider: FC<{
   config: ConfigType;
-}> = ({ config: defaultConfig, children }) => {
+  onTokenCallback?: ({
+    token,
+    user,
+  }: {
+    token: AuthToken;
+    user: User;
+  }) => Promise<void>;
+}> = ({ config: defaultConfig, onTokenCallback, children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<AuthToken | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -75,11 +82,18 @@ export const AuthorizerProvider: FC<{
       const res = await authorizerRef.current.getSession();
 
       if (res.accessToken && res.user) {
-        setToken({
+        const token = {
           accessToken: res.accessToken,
           accessTokenExpiresAt: res.accessTokenExpiresAt,
-        });
+        };
+        setToken(token);
         setUser(res?.user);
+        if (onTokenCallback) {
+          await onTokenCallback({
+            token,
+            user: res.user,
+          });
+        }
         const millisecond = getIntervalDiff(res.accessTokenExpiresAt);
         if (millisecond > 0) {
           if (intervalRef) clearInterval(intervalRef);

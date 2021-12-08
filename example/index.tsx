@@ -24,6 +24,9 @@ const App = () => {
               authorizerURL: 'https://authorizer-demo.herokuapp.com',
               redirectURL: window.location.origin,
             }}
+            onTokenCallback={async ({ user, token }) => {
+              console.log(user, token);
+            }}
           >
             <Root />
           </AuthorizerProvider>
