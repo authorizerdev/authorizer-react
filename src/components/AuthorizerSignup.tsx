@@ -15,7 +15,7 @@ import {
 } from '../styles';
 import { isValidEmail } from '../utils/validations';
 import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
-import { AuthorizerMagicLogin } from './AuthorizerMagicLogin';
+import { AuthorizerMagicLinkLogin } from './AuthorizerMagicLinkLogin';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
@@ -39,8 +39,8 @@ export const AuthorizerSignup: FC<{
         setError(``);
         setUser(res.user);
         setToken({
-          accessToken: res.accessToken,
-          accessTokenExpiresAt: res.accessTokenExpiresAt,
+          access_token: res.access_token,
+          expires_at: res.expires_at,
         });
       } else {
         setSuccessMessage(res.message);
@@ -65,128 +65,129 @@ export const AuthorizerSignup: FC<{
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
       <AuthorizerSocialLogin />
-      {config.isBasicAuthenticationEnabled && !config.isMagicLoginEnabled && (
-        <>
-          <Form
-            onSubmit={onSubmit}
-            validate={(values) => {
-              const errors: Record<string, string> = {};
-              if (!values.email) {
-                errors.email = 'Email is required';
-              }
+      {config.is_basic_authentication_enabled &&
+        !config.is_magic_link_login_enabled && (
+          <>
+            <Form
+              onSubmit={onSubmit}
+              validate={(values) => {
+                const errors: Record<string, string> = {};
+                if (!values.email) {
+                  errors.email = 'Email is required';
+                }
 
-              if (
-                values.email &&
-                values.email.trim() &&
-                !isValidEmail(values.email)
-              ) {
-                errors.email = `Please enter valid email`;
-              }
+                if (
+                  values.email &&
+                  values.email.trim() &&
+                  !isValidEmail(values.email)
+                ) {
+                  errors.email = `Please enter valid email`;
+                }
 
-              if (!values.password) {
-                errors.password = 'Password is required';
-              }
+                if (!values.password) {
+                  errors.password = 'Password is required';
+                }
 
-              if (!values.confirmPassword) {
-                errors.password = 'Confirm password is required';
-              }
+                if (!values.confirm_password) {
+                  errors.password = 'Confirm password is required';
+                }
 
-              if (
-                values.password &&
-                values.confirmPassword &&
-                values.confirmPassword !== values.password
-              ) {
-                errors.confirmPassword = `Password and confirm passwords don't match`;
-                errors.password = `Password and confirm passwords don't match`;
-              }
-              return errors;
-            }}
-          >
-            {({ handleSubmit, pristine }) => (
-              <form onSubmit={handleSubmit} name="authorizer-signup-form">
-                <FieldWrapper>
-                  <Field name="email">
-                    {({ input, meta }) => (
-                      <div>
-                        <Label>
-                          <Required>*</Required>Email
-                        </Label>
-                        <Input
-                          {...input}
-                          type="email"
-                          placeholder="eg. foo@bar.com"
-                          hasError={Boolean(meta.error && meta.touched)}
-                        />
-                        {meta.error && meta.touched && (
-                          <Error>{meta.error}</Error>
-                        )}
-                      </div>
-                    )}
-                  </Field>
-                </FieldWrapper>
-                <FieldWrapper>
-                  <Field name="password">
-                    {({ input, meta }) => (
-                      <div>
-                        <Label>
-                          <Required>*</Required>
-                          Password
-                        </Label>
-                        <Input
-                          {...input}
-                          type="password"
-                          placeholder="*********"
-                          hasError={Boolean(meta.error && meta.touched)}
-                        />
-                        {meta.error && meta.touched && (
-                          <Error>{meta.error}</Error>
-                        )}
-                      </div>
-                    )}
-                  </Field>
-                </FieldWrapper>
-                <FieldWrapper>
-                  <Field name="confirmPassword">
-                    {({ input, meta }) => (
-                      <div>
-                        <Label>
-                          <Required>*</Required>
-                          Confirm Password
-                        </Label>
-                        <Input
-                          {...input}
-                          type="password"
-                          placeholder="*********"
-                          hasError={Boolean(meta.error && meta.touched)}
-                        />
-                        {meta.error && meta.touched && (
-                          <Error>{meta.error}</Error>
-                        )}
-                      </div>
-                    )}
-                  </Field>
-                </FieldWrapper>
-                <br />
-                <Button
-                  type="submit"
-                  disabled={pristine || loading}
-                  appearance={ButtonAppearance.Primary}
-                >
-                  {loading ? `Processing ...` : `Sign Up`}
-                </Button>
-              </form>
-            )}
-          </Form>
-          <Footer>
-            <div>
-              Already have an account?{' '}
-              <Link onClick={() => setView(Views.Login)}>Log In</Link>
-            </div>
-          </Footer>
-        </>
-      )}
+                if (
+                  values.password &&
+                  values.confirm_password &&
+                  values.confirm_password !== values.password
+                ) {
+                  errors.confirm_password = `Password and confirm passwords don't match`;
+                  errors.password = `Password and confirm passwords don't match`;
+                }
+                return errors;
+              }}
+            >
+              {({ handleSubmit, pristine }) => (
+                <form onSubmit={handleSubmit} name="authorizer-signup-form">
+                  <FieldWrapper>
+                    <Field name="email">
+                      {({ input, meta }) => (
+                        <div>
+                          <Label>
+                            <Required>*</Required>Email
+                          </Label>
+                          <Input
+                            {...input}
+                            type="email"
+                            placeholder="eg. foo@bar.com"
+                            hasError={Boolean(meta.error && meta.touched)}
+                          />
+                          {meta.error && meta.touched && (
+                            <Error>{meta.error}</Error>
+                          )}
+                        </div>
+                      )}
+                    </Field>
+                  </FieldWrapper>
+                  <FieldWrapper>
+                    <Field name="password">
+                      {({ input, meta }) => (
+                        <div>
+                          <Label>
+                            <Required>*</Required>
+                            Password
+                          </Label>
+                          <Input
+                            {...input}
+                            type="password"
+                            placeholder="*********"
+                            hasError={Boolean(meta.error && meta.touched)}
+                          />
+                          {meta.error && meta.touched && (
+                            <Error>{meta.error}</Error>
+                          )}
+                        </div>
+                      )}
+                    </Field>
+                  </FieldWrapper>
+                  <FieldWrapper>
+                    <Field name="confirm_password">
+                      {({ input, meta }) => (
+                        <div>
+                          <Label>
+                            <Required>*</Required>
+                            Confirm Password
+                          </Label>
+                          <Input
+                            {...input}
+                            type="password"
+                            placeholder="*********"
+                            hasError={Boolean(meta.error && meta.touched)}
+                          />
+                          {meta.error && meta.touched && (
+                            <Error>{meta.error}</Error>
+                          )}
+                        </div>
+                      )}
+                    </Field>
+                  </FieldWrapper>
+                  <br />
+                  <Button
+                    type="submit"
+                    disabled={pristine || loading}
+                    appearance={ButtonAppearance.Primary}
+                  >
+                    {loading ? `Processing ...` : `Sign Up`}
+                  </Button>
+                </form>
+              )}
+            </Form>
+            <Footer>
+              <div>
+                Already have an account?{' '}
+                <Link onClick={() => setView(Views.Login)}>Log In</Link>
+              </div>
+            </Footer>
+          </>
+        )}
 
-      {config.isMagicLoginEnabled && <AuthorizerMagicLogin />}
+      {config.is_magic_link_login_enabled && <AuthorizerMagicLinkLogin />}
     </>
   );
 };

@@ -5,7 +5,7 @@ export const getSearchParams = (search = ''): Record<string, string> => {
   if (!searchPrams && hasWindow()) {
     searchPrams = window.location.search;
   }
-  const urlSearchParams = new URLSearchParams(search);
+  const urlSearchParams = new URLSearchParams(`${searchPrams}`);
   // @ts-ignore
   const params = Object.fromEntries(urlSearchParams.entries());
   return params;

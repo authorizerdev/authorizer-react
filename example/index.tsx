@@ -21,7 +21,7 @@ const App = () => {
         <BrowserRouter>
           <AuthorizerProvider
             config={{
-              authorizerURL: 'https://authorizer-demo.herokuapp.com',
+              authorizerURL: 'http://localhost:8080',
               redirectURL: window.location.origin,
             }}
             onTokenCallback={async ({ user, token }) => {

@@ -8,7 +8,7 @@ import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
-export const AuthorizerMagicLogin: FC<{}> = () => {
+export const AuthorizerMagicLinkLogin: FC<{}> = () => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -18,7 +18,7 @@ export const AuthorizerMagicLogin: FC<{}> = () => {
     try {
       setLoading(true);
 
-      const res = await authorizerRef.magicLogin({ email: values.email });
+      const res = await authorizerRef.magicLinkLogin({ email: values.email });
       setLoading(false);
 
       if (res.message) {

@@ -9,10 +9,12 @@ import { ButtonAppearance } from '../constants';
 export const AuthorizerSocialLogin = () => {
   const { config } = useAuthorizer();
   const hasSocialLogin =
-    config.isGoogleLoginEnabled || config.isGithubLoginEnabled;
+    config.is_google_login_enabled ||
+    config.is_github_login_enabled ||
+    config.is_facebook_login_enabled;
   return (
     <>
-      {config.isGoogleLoginEnabled && (
+      {config.is_google_login_enabled && (
         <>
           <Button
             appearance={ButtonAppearance.Default}
@@ -26,7 +28,7 @@ export const AuthorizerSocialLogin = () => {
           <br />
         </>
       )}
-      {config.isGithubLoginEnabled && (
+      {config.is_github_login_enabled && (
         <>
           <Button
             appearance={ButtonAppearance.Default}
@@ -40,7 +42,7 @@ export const AuthorizerSocialLogin = () => {
           <br />
         </>
       )}
-      {config.isFacebookLoginEnabled && (
+      {config.is_facebook_login_enabled && (
         <>
           <Button
             appearance={ButtonAppearance.Default}
@@ -54,9 +56,9 @@ export const AuthorizerSocialLogin = () => {
           <br />
         </>
       )}
-      {hasSocialLogin && config.isBasicAuthenticationEnabled && (
-        <Separator>OR</Separator>
-      )}
+      {hasSocialLogin &&
+        (config.is_basic_authentication_enabled ||
+          config.is_magic_link_login_enabled) && <Separator>OR</Separator>}
     </>
   );
 };

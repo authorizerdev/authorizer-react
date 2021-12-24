@@ -71,16 +71,16 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
               errors.password = 'Password is required';
             }
 
-            if (!values.confirmPassword) {
+            if (!values.confirm_password) {
               errors.password = 'Confirm password is required';
             }
 
             if (
               values.password &&
-              values.confirmPassword &&
-              values.confirmPassword !== values.password
+              values.confirm_password &&
+              values.confirm_password !== values.password
             ) {
-              errors.confirmPassword = `Password and confirm passwords don't match`;
+              errors.confirm_password = `Password and confirm passwords don't match`;
               errors.password = `Password and confirm passwords don't match`;
             }
             return errors;
@@ -110,7 +110,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
                 </Field>
               </FieldWrapper>
               <FieldWrapper>
-                <Field name="confirmPassword">
+                <Field name="confirm_password">
                   {({ input, meta }) => (
                     <div>
                       <Label>

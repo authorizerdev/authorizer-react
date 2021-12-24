@@ -29,11 +29,12 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   config: {
     authorizerURL: '',
     redirectURL: '/',
-    isGoogleLoginEnabled: false,
-    isGithubLoginEnabled: false,
-    isFacebookLoginEnabled: false,
-    isBasicAuthenticationEnabled: false,
-    isMagicLoginEnabled: false,
+    is_google_login_enabled: false,
+    is_github_login_enabled: false,
+    is_facebook_login_enabled: false,
+    is_email_verification_enabled: false,
+    is_basic_authentication_enabled: false,
+    is_magic_link_login_enabled: false,
   },
   user: null,
   token: null,
@@ -62,11 +63,12 @@ export const AuthorizerProvider: FC<{
   const [loading, setLoading] = useState<boolean>(true);
   const [config, setConfig] = useState({
     ...defaultConfig,
-    isGoogleLoginEnabled: false,
-    isGithubLoginEnabled: false,
-    isFacebookLoginEnabled: false,
-    isBasicAuthenticationEnabled: false,
-    isMagicLoginEnabled: false,
+    is_google_login_enabled: false,
+    is_github_login_enabled: false,
+    is_facebook_login_enabled: false,
+    is_email_verification_enabled: false,
+    is_basic_authentication_enabled: false,
+    is_magic_link_login_enabled: false,
   });
   let intervalRef: any = null;
 
@@ -81,10 +83,10 @@ export const AuthorizerProvider: FC<{
     try {
       const res = await authorizerRef.current.getSession();
 
-      if (res.accessToken && res.user) {
+      if (res.access_token && res.user) {
         const token = {
-          accessToken: res.accessToken,
-          accessTokenExpiresAt: res.accessTokenExpiresAt,
+          access_token: res.access_token,
+          expires_at: res.expires_at,
         };
         setToken(token);
         setUser(res?.user);
@@ -94,7 +96,7 @@ export const AuthorizerProvider: FC<{
             user: res.user,
           });
         }
-        const millisecond = getIntervalDiff(res.accessTokenExpiresAt);
+        const millisecond = getIntervalDiff(res.expires_at);
         if (millisecond > 0) {
           if (intervalRef) clearInterval(intervalRef);
           intervalRef = setInterval(() => {
@@ -125,8 +127,8 @@ export const AuthorizerProvider: FC<{
 
   const handleTokenChange = (data: null | AuthToken) => {
     setToken(data);
-    if (data?.accessToken) {
-      const millisecond = getIntervalDiff(data.accessTokenExpiresAt);
+    if (data?.access_token) {
+      const millisecond = getIntervalDiff(data.expires_at);
       if (millisecond > 0) {
         if (intervalRef) clearInterval(intervalRef);
         intervalRef = setInterval(() => {
