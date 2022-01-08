@@ -2,14 +2,8 @@ import * as React from 'react';
 import { useAuthorizer } from '../../.';
 
 const Dashboard: React.FC = () => {
-  const [loading, setLoading] = React.useState(false);
-  const { user, setToken, authorizerRef } = useAuthorizer();
-  const onLogout = async () => {
-    setLoading(true);
-    await authorizerRef.logout();
-    setLoading(false);
-    setToken(null);
-  };
+  const { user, loading, onLogout } = useAuthorizer();
+
   return (
     <div>
       <h1>Hey 👋,</h1>

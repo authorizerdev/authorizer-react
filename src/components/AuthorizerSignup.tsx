@@ -25,24 +25,27 @@ export const AuthorizerSignup: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
-  const { authorizerRef, config, setToken, setUser } = useAuthorizer();
+  const { authorizerRef, config, setAuthData } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     try {
       setLoading(true);
       const res = await authorizerRef.signup(values);
 
-      setLoading(false);
-
       setError(``);
       if (res.accessToken) {
         setError(``);
-        setUser(res.user);
-        setToken({
-          access_token: res.access_token,
-          expires_at: res.expires_at,
+        setAuthData({
+          user: res.user,
+          token: {
+            access_token: res.access_token,
+            expires_at: res.expires_at,
+          },
+          config,
+          loading: false,
         });
       } else {
+        setLoading(false);
         setSuccessMessage(res.message);
       }
     } catch (err) {

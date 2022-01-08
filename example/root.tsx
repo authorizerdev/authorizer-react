@@ -7,8 +7,9 @@ import ResetPassword from './pages/rest-password';
 
 export default function Root() {
   const { token, loading } = useAuthorizer();
+
   if (loading) {
-    <h1>Loading...</h1>;
+    return <h1>Loading...</h1>;
   }
 
   if (token) {

@@ -23,7 +23,7 @@ export const AuthorizerLogin: FC<{
 }> = ({ setView }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
-  const { setToken, setUser, config, authorizerRef } = useAuthorizer();
+  const { setAuthData, config, authorizerRef } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
@@ -32,13 +32,16 @@ export const AuthorizerLogin: FC<{
         email: values.email,
         password: values.password,
       });
-      setLoading(false);
 
       setError(``);
-      setUser(res.user);
-      setToken({
-        access_token: res.access_token,
-        expires_at: res.expires_at,
+      setAuthData({
+        user: res.user,
+        token: {
+          access_token: res.access_token,
+          expires_at: res.expires_at,
+        },
+        config,
+        loading: false,
       });
     } catch (err) {
       setLoading(false);
