@@ -52,7 +52,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     redirectURL: hasWindow() ? window.location.origin : '/',
   }),
   onTokenCallback: async () => {},
-  onLogout: async () => {},
+  logout: async () => {},
 });
 
 function reducer(
@@ -258,7 +258,7 @@ export const AuthorizerProvider: FC<{
     });
   };
 
-  const onLogout = async () => {
+  const logout = async () => {
     dispatch({
       type: AuthorizerProviderActionType.SET_LOADING,
       payload: {
@@ -291,7 +291,7 @@ export const AuthorizerProvider: FC<{
         setToken: handleTokenChange,
         setAuthData: setAuthData,
         authorizerRef: authorizerRef.current,
-        onLogout,
+        logout,
       }}
     >
       {children}

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useAuthorizer } from '../../.';
 
 const Dashboard: React.FC = () => {
-  const { user, loading, onLogout } = useAuthorizer();
+  const { user, loading, logout } = useAuthorizer();
 
   return (
     <div>
@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
             color: '#3B82F6',
             cursor: 'pointer',
           }}
-          onClick={onLogout}
+          onClick={logout}
         >
           Logout
         </h3>

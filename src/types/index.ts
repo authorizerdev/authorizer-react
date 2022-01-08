@@ -42,5 +42,5 @@ export type AuthorizerContextPropsType = {
   setAuthData: (data: AuthorizerState) => void;
   authorizerRef: any;
   onTokenCallback?: (stateData: AuthorizerState) => Promise<void>;
-  onLogout: () => Promise<void>;
+  logout: () => Promise<void>;
 };
