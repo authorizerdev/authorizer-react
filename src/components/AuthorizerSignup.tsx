@@ -1,5 +1,6 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
+import { AuthToken } from '@authorizerdev/authorizer-js';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -21,7 +22,8 @@ import { Message } from './Message';
 
 export const AuthorizerSignup: FC<{
   setView: (v: Views) => void;
-}> = ({ setView }) => {
+  onSignup?: (data: AuthToken) => void;
+}> = ({ setView, onSignup }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -47,6 +49,10 @@ export const AuthorizerSignup: FC<{
       } else {
         setLoading(false);
         setSuccessMessage(res.message);
+      }
+
+      if (onSignup) {
+        onSignup(res);
       }
     } catch (err) {
       setLoading(false);

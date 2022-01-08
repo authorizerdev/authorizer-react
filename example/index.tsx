@@ -24,7 +24,7 @@ const App = () => {
               authorizerURL: 'http://localhost:8080',
               redirectURL: window.location.origin,
             }}
-            onTokenCallback={async ({ user, token }) => {
+            onStateChangeCallback={async ({ user, token }) => {
               console.log(user, token);
             }}
           >

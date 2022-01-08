@@ -36,11 +36,10 @@ export type AuthorizerContextPropsType = {
   user: null | User;
   token: null | AuthToken;
   loading: boolean;
+  logout: () => Promise<void>;
   setLoading: (data: boolean) => void;
   setUser: (data: null | User) => void;
   setToken: (data: null | AuthToken) => void;
   setAuthData: (data: AuthorizerState) => void;
   authorizerRef: any;
-  onTokenCallback?: (stateData: AuthorizerState) => Promise<void>;
-  logout: () => Promise<void>;
 };

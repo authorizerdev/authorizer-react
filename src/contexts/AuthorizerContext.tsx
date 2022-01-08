@@ -51,7 +51,6 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     authorizerURL: `http://localhost:8080`,
     redirectURL: hasWindow() ? window.location.origin : '/',
   }),
-  onTokenCallback: async () => {},
   logout: async () => {},
 });
 
@@ -105,8 +104,8 @@ let initialState: AuthorizerState = {
 
 export const AuthorizerProvider: FC<{
   config: ConfigType;
-  onTokenCallback?: (stateData: AuthorizerState) => Promise<void>;
-}> = ({ config: defaultConfig, onTokenCallback, children }) => {
+  onStateChangeCallback?: (stateData: AuthorizerState) => Promise<void>;
+}> = ({ config: defaultConfig, onStateChangeCallback, children }) => {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     config: {
@@ -150,9 +149,6 @@ export const AuthorizerProvider: FC<{
           },
         });
 
-        if (onTokenCallback) {
-          await onTokenCallback(state);
-        }
         const millisecond = getIntervalDiff(res.expires_at);
         if (millisecond > 0) {
           if (intervalRef) clearInterval(intervalRef);
@@ -201,6 +197,12 @@ export const AuthorizerProvider: FC<{
     };
   }, []);
 
+  useEffect(() => {
+    if (onStateChangeCallback) {
+      onStateChangeCallback(state);
+    }
+  }, [state]);
+
   const handleTokenChange = (token: AuthToken | null) => {
     dispatch({
       type: AuthorizerProviderActionType.SET_TOKEN,
@@ -208,6 +210,7 @@ export const AuthorizerProvider: FC<{
         token,
       },
     });
+
     if (token?.access_token) {
       const millisecond = getIntervalDiff(token.expires_at);
       if (millisecond > 0) {
@@ -224,10 +227,6 @@ export const AuthorizerProvider: FC<{
       type: AuthorizerProviderActionType.SET_AUTH_DATA,
       payload: data,
     });
-
-    if (onTokenCallback) {
-      onTokenCallback(data);
-    }
 
     if (data.token?.access_token) {
       const millisecond = getIntervalDiff(data.token.expires_at);
@@ -276,10 +275,6 @@ export const AuthorizerProvider: FC<{
       type: AuthorizerProviderActionType.SET_AUTH_DATA,
       payload: loggedOutState,
     });
-
-    if (onTokenCallback) {
-      onTokenCallback(loggedOutState);
-    }
   };
 
   return (

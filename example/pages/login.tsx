@@ -6,7 +6,17 @@ const Login: React.FC = () => {
     <>
       <h1 style={{ textAlign: 'center' }}>Welcome to Authorizer</h1>
       <br />
-      <Authorizer />
+      <Authorizer
+        onLogin={(loginData) => {
+          console.log({ loginData });
+        }}
+        onMagicLinkLogin={(mData) => {
+          console.log({ mData });
+        }}
+        onSignup={(sData) => {
+          console.log({ sData });
+        }}
+      />
     </>
   );
 };
