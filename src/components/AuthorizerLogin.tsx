@@ -1,5 +1,6 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
+import { AuthToken } from '@authorizerdev/authorizer-js';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -20,26 +21,35 @@ import { Message } from './Message';
 
 export const AuthorizerLogin: FC<{
   setView: (v: Views) => void;
-}> = ({ setView }) => {
+  onLogin?: (data: AuthToken) => void;
+  onMagicLinkLogin?: (data: any) => void;
+}> = ({ setView, onLogin, onMagicLinkLogin }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
-  const { setToken, setUser, config, authorizerRef } = useAuthorizer();
+  const { setAuthData, config, authorizerRef } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
     try {
-      const res = await authorizerRef.login({
+      const res: AuthToken = await authorizerRef.login({
         email: values.email,
         password: values.password,
       });
-      setLoading(false);
 
       setError(``);
-      setUser(res.user);
-      setToken({
-        access_token: res.access_token,
-        expires_at: res.expires_at,
+      setAuthData({
+        user: res.user || null,
+        token: {
+          access_token: res.access_token,
+          expires_at: res.expires_at,
+        },
+        config,
+        loading: false,
       });
+
+      if (onLogin) {
+        onLogin(res);
+      }
     } catch (err) {
       setLoading(false);
       setError((err as Error).message);
@@ -152,7 +162,9 @@ export const AuthorizerLogin: FC<{
           </>
         )}
 
-      {config.is_magic_link_login_enabled && <AuthorizerMagicLinkLogin />}
+      {config.is_magic_link_login_enabled && (
+        <AuthorizerMagicLinkLogin onMagicLinkLogin={onMagicLinkLogin} />
+      )}
     </>
   );
 };

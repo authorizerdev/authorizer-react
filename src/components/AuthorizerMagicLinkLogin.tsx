@@ -8,7 +8,9 @@ import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
-export const AuthorizerMagicLinkLogin: FC<{}> = () => {
+export const AuthorizerMagicLinkLogin: FC<{
+  onMagicLinkLogin?: (data: any) => void;
+}> = ({ onMagicLinkLogin }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -24,6 +26,10 @@ export const AuthorizerMagicLinkLogin: FC<{}> = () => {
       if (res.message) {
         setError(``);
         setSuccessMessage(res.message);
+      }
+
+      if (onMagicLinkLogin) {
+        onMagicLinkLogin(res);
       }
     } catch (err) {
       setLoading(false);

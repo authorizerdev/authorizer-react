@@ -19,7 +19,8 @@ import { Message } from './Message';
 
 export const AuthorizerForgotPassword: FC<{
   setView: (v: Views) => void;
-}> = ({ setView }) => {
+  onForgotPassword?: (data: any) => void;
+}> = ({ setView, onForgotPassword }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -35,6 +36,10 @@ export const AuthorizerForgotPassword: FC<{
       if (res.message) {
         setError(``);
         setSuccessMessage(res.message);
+      }
+
+      if (onForgotPassword) {
+        onForgotPassword(res);
       }
     } catch (err) {
       setLoading(false);

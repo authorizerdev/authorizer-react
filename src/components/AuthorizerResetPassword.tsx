@@ -19,7 +19,7 @@ import { ThemeProvider } from 'styled-components';
 import { theme } from '../styles/theme';
 
 type Props = {
-  onReset?: () => void;
+  onReset?: (res: any) => void;
 };
 
 export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
@@ -31,14 +31,14 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
     try {
-      await authorizerRef.resetPassword({
+      const res = await authorizerRef.resetPassword({
         token,
         ...values,
       });
       setLoading(false);
       setError(``);
       if (onReset) {
-        onReset();
+        onReset(res);
       } else {
         window.location.href = config.redirectURL || window.location.origin;
       }
