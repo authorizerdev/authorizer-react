@@ -2,6 +2,7 @@ import {
   AuthorizerProvider,
   useAuthorizer,
 } from './contexts/AuthorizerContext';
+import { AuthorizerSignup } from './components/AuthorizerSignup';
 import { AuthorizerBasicAuthLogin } from './components/AuthorizerBasicAuthLogin';
 import { AuthorizerMagicLinkLogin } from './components/AuthorizerMagicLinkLogin';
 import { AuthorizerForgotPassword } from './components/AuthorizerForgotPassword';
@@ -13,6 +14,7 @@ export {
   useAuthorizer,
   Authorizer,
   AuthorizerProvider,
+  AuthorizerSignup,
   AuthorizerBasicAuthLogin,
   AuthorizerMagicLinkLogin,
   AuthorizerForgotPassword,
