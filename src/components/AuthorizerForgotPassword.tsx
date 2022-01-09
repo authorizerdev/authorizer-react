@@ -18,7 +18,7 @@ import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
 export const AuthorizerForgotPassword: FC<{
-  setView: (v: Views) => void;
+  setView?: (v: Views) => void;
   onForgotPassword?: (data: any) => void;
 }> = ({ setView, onForgotPassword }) => {
   const [error, setError] = useState(``);
@@ -115,12 +115,14 @@ export const AuthorizerForgotPassword: FC<{
           </form>
         )}
       </Form>
-      <Footer>
-        <div>
-          Remember your password?{' '}
-          <Link onClick={() => setView(Views.Login)}>Log In</Link>
-        </div>
-      </Footer>
+      {setView && (
+        <Footer>
+          <div>
+            Remember your password?{' '}
+            <Link onClick={() => setView(Views.Login)}>Log In</Link>
+          </div>
+        </Footer>
+      )}
     </>
   );
 };

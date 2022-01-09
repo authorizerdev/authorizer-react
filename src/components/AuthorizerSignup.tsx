@@ -21,7 +21,7 @@ import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
 export const AuthorizerSignup: FC<{
-  setView: (v: Views) => void;
+  setView?: (v: Views) => void;
   onSignup?: (data: AuthToken) => void;
 }> = ({ setView, onSignup }) => {
   const [error, setError] = useState(``);
@@ -187,12 +187,14 @@ export const AuthorizerSignup: FC<{
                 </form>
               )}
             </Form>
-            <Footer>
-              <div>
-                Already have an account?{' '}
-                <Link onClick={() => setView(Views.Login)}>Log In</Link>
-              </div>
-            </Footer>
+            {setView && (
+              <Footer>
+                <div>
+                  Already have an account?{' '}
+                  <Link onClick={() => setView(Views.Login)}>Log In</Link>
+                </div>
+              </Footer>
+            )}
           </>
         )}
 
