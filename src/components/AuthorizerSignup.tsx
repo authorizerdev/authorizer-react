@@ -15,8 +15,6 @@ import {
   Link,
 } from '../styles';
 import { isValidEmail } from '../utils/validations';
-import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
-import { AuthorizerMagicLinkLogin } from './AuthorizerMagicLinkLogin';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
@@ -73,7 +71,6 @@ export const AuthorizerSignup: FC<{
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
-      <AuthorizerSocialLogin />
       {config.is_basic_authentication_enabled &&
         !config.is_magic_link_login_enabled && (
           <>
@@ -197,8 +194,6 @@ export const AuthorizerSignup: FC<{
             )}
           </>
         )}
-
-      {config.is_magic_link_login_enabled && <AuthorizerMagicLinkLogin />}
     </>
   );
 };
