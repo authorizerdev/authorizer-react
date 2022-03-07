@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "packages": {
+    "@authorizerdev/authorizer-js": {
+      "signature": "9fe2e02735dcecf302d8018171fb2581",
+      "file": true,
+      "replaced": "^0.3.0-beta.0"
+    }
+  }
+}

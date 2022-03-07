@@ -33,13 +33,15 @@ export const AuthorizerSignup: FC<{
       const res = await authorizerRef.signup(values);
 
       setError(``);
-      if (res.accessToken) {
+      if (res.access_token) {
         setError(``);
         setAuthData({
           user: res.user,
           token: {
             access_token: res.access_token,
-            expires_at: res.expires_at,
+            expires_in: res.expires_in,
+            refresh_token: res.refresh_token,
+            id_token: res.id_token,
           },
           config,
           loading: false,

@@ -21,18 +21,11 @@ import {
 import { AuthorizerProviderActionType } from '../constants';
 import { hasWindow } from '../utils/window';
 
-const getIntervalDiff = (accessTokenExpiresAt: number): number => {
-  const expiresAt = accessTokenExpiresAt * 1000 - 300000;
-  const currentDate = new Date();
-
-  const millisecond = new Date(expiresAt).getTime() - currentDate.getTime();
-  return millisecond;
-};
-
 const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   config: {
     authorizerURL: '',
     redirectURL: '/',
+    client_id: '',
     is_google_login_enabled: false,
     is_github_login_enabled: false,
     is_facebook_login_enabled: false,
@@ -50,6 +43,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   authorizerRef: new Authorizer({
     authorizerURL: `http://localhost:8080`,
     redirectURL: hasWindow() ? window.location.origin : '/',
+    clientID: '',
   }),
   logout: async () => {},
 });
@@ -93,6 +87,7 @@ let initialState: AuthorizerState = {
   config: {
     authorizerURL: '',
     redirectURL: '/',
+    client_id: '',
     is_google_login_enabled: false,
     is_github_login_enabled: false,
     is_facebook_login_enabled: false,
@@ -122,6 +117,7 @@ export const AuthorizerProvider: FC<{
       redirectURL: hasWindow()
         ? state.config.redirectURL || window.location.origin
         : state.config.redirectURL || '/',
+      clientID: state.config.client_id,
     })
   );
 
@@ -133,7 +129,9 @@ export const AuthorizerProvider: FC<{
       if (res.access_token && res.user) {
         const token = {
           access_token: res.access_token,
-          expires_at: res.expires_at,
+          expires_in: res.expires_in,
+          id_token: res.id_token,
+          refresh_token: res.refresh_token || '',
         };
         dispatch({
           type: AuthorizerProviderActionType.SET_AUTH_DATA,
@@ -149,13 +147,17 @@ export const AuthorizerProvider: FC<{
           },
         });
 
-        const millisecond = getIntervalDiff(res.expires_at);
-        if (millisecond > 0) {
-          if (intervalRef) clearInterval(intervalRef);
-          intervalRef = setInterval(() => {
-            getToken();
-          }, millisecond);
-        }
+        // const millisecond = getIntervalDiff(res.expires_at);
+        // if (millisecond > 0) {
+        //   if (intervalRef) clearInterval(intervalRef);
+        //   intervalRef = setInterval(() => {
+        //     getToken();
+        //   }, millisecond);
+        // }
+        if (intervalRef) clearInterval(intervalRef);
+        intervalRef = setInterval(() => {
+          getToken();
+        }, res.expires_in * 1000);
       } else {
         dispatch({
           type: AuthorizerProviderActionType.SET_AUTH_DATA,
@@ -212,13 +214,10 @@ export const AuthorizerProvider: FC<{
     });
 
     if (token?.access_token) {
-      const millisecond = getIntervalDiff(token.expires_at);
-      if (millisecond > 0) {
-        if (intervalRef) clearInterval(intervalRef);
-        intervalRef = setInterval(() => {
-          getToken();
-        }, millisecond);
-      }
+      if (intervalRef) clearInterval(intervalRef);
+      intervalRef = setInterval(() => {
+        getToken();
+      }, token.expires_in * 1000);
     }
   };
 
@@ -229,13 +228,10 @@ export const AuthorizerProvider: FC<{
     });
 
     if (data.token?.access_token) {
-      const millisecond = getIntervalDiff(data.token.expires_at);
-      if (millisecond > 0) {
-        if (intervalRef) clearInterval(intervalRef);
-        intervalRef = setInterval(() => {
-          getToken();
-        }, millisecond);
-      }
+      if (intervalRef) clearInterval(intervalRef);
+      intervalRef = setInterval(() => {
+        getToken();
+      }, data.token.expires_in * 1000);
     }
   };
 

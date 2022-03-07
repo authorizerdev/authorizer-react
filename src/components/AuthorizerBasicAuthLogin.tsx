@@ -38,7 +38,9 @@ export const AuthorizerBasicAuthLogin: FC<{
         user: res.user || null,
         token: {
           access_token: res.access_token,
-          expires_at: res.expires_at,
+          expires_in: res.expires_in,
+          refresh_token: res.refresh_token,
+          id_token: res.id_token,
         },
         config,
         loading: false,

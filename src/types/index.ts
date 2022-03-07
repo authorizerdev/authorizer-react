@@ -8,6 +8,7 @@ export type AuthorizerState = {
   config: {
     authorizerURL: string;
     redirectURL: string;
+    client_id: string;
     is_google_login_enabled: boolean;
     is_github_login_enabled: boolean;
     is_facebook_login_enabled: boolean;
@@ -26,6 +27,7 @@ export type AuthorizerContextPropsType = {
   config: {
     authorizerURL: string;
     redirectURL: string;
+    client_id: string;
     is_google_login_enabled: boolean;
     is_facebook_login_enabled: boolean;
     is_github_login_enabled: boolean;

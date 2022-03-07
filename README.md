@@ -37,6 +37,7 @@ const App = () => {
       config={{
         authorizerURL: 'http://localhost:8080',
         redirectURL: window.location.origin,
+        clientID: 'YOUR_CLIENT_ID',
       }}
     >
       <LoginSignup />
