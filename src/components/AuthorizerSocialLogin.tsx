@@ -12,6 +12,7 @@ export const AuthorizerSocialLogin = () => {
     config.is_google_login_enabled ||
     config.is_github_login_enabled ||
     config.is_facebook_login_enabled;
+  const state = sessionStorage.getItem('authorizer_state')?.trim();
   return (
     <>
       {config.is_google_login_enabled && (
@@ -19,7 +20,7 @@ export const AuthorizerSocialLogin = () => {
           <Button
             appearance={ButtonAppearance.Default}
             onClick={() => {
-              window.location.href = `${config.authorizerURL}/oauth_login/google?redirectURL=${config.redirectURL}`;
+              window.location.href = `${config.authorizerURL}/oauth_login/google?redirectURL=${config.redirectURL}?state=${state}`;
             }}
           >
             <Google />
@@ -33,7 +34,7 @@ export const AuthorizerSocialLogin = () => {
           <Button
             appearance={ButtonAppearance.Default}
             onClick={() => {
-              window.location.href = `${config.authorizerURL}/oauth_login/github?redirectURL=${config.redirectURL}`;
+              window.location.href = `${config.authorizerURL}/oauth_login/github?redirectURL=${config.redirectURL}?state=${state}`;
             }}
           >
             <Github />
@@ -47,7 +48,7 @@ export const AuthorizerSocialLogin = () => {
           <Button
             appearance={ButtonAppearance.Default}
             onClick={() => {
-              window.location.href = `${config.authorizerURL}/oauth_login/facebook?redirectURL=${config.redirectURL}`;
+              window.location.href = `${config.authorizerURL}/oauth_login/facebook?redirectURL=${config.redirectURL}?state=${state}`;
             }}
           >
             <Facebook />
