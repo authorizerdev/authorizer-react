@@ -6,12 +6,7 @@ import React, {
   useRef,
   useEffect,
 } from 'react';
-import {
-  Authorizer,
-  User,
-  AuthToken,
-  ConfigType,
-} from '@authorizerdev/authorizer-js';
+import { Authorizer, User, AuthToken } from '@authorizerdev/authorizer-js';
 
 import {
   AuthorizerContextPropsType,
@@ -98,7 +93,11 @@ let initialState: AuthorizerState = {
 };
 
 export const AuthorizerProvider: FC<{
-  config: ConfigType;
+  config: {
+    authorizerURL: string;
+    redirectURL: string;
+    clientID?: string;
+  };
   onStateChangeCallback?: (stateData: AuthorizerState) => Promise<void>;
 }> = ({ config: defaultConfig, onStateChangeCallback, children }) => {
   const [state, dispatch] = useReducer(reducer, {

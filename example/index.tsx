@@ -23,7 +23,6 @@ const App = () => {
             config={{
               authorizerURL: 'http://localhost:8080',
               redirectURL: window.location.origin,
-              clientID: '1a09c605-5700-475e-a866-9adbb21ea7ec',
             }}
             onStateChangeCallback={async ({ user, token }) => {
               console.log(user, token);
