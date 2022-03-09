@@ -20,7 +20,8 @@ import { Message } from './Message';
 export const AuthorizerBasicAuthLogin: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: AuthToken) => void;
-}> = ({ setView, onLogin }) => {
+  urlProps: Record<string, any>;
+}> = ({ setView, onLogin, urlProps }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const { setAuthData, config, authorizerRef } = useAuthorizer();
@@ -28,10 +29,20 @@ export const AuthorizerBasicAuthLogin: FC<{
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
     try {
-      const res: AuthToken = await authorizerRef.login({
+      const data: {
+        email: string;
+        password: string;
+        roles?: string[];
+        scope?: string[];
+      } = {
         email: values.email,
         password: values.password,
-      });
+      };
+      if (urlProps.scope) {
+        data.scope = urlProps.scope;
+      }
+
+      const res: AuthToken = await authorizerRef.login(data);
 
       setError(``);
       setAuthData({

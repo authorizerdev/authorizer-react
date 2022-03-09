@@ -11,7 +11,7 @@ const App = () => {
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <div
         style={{
-          width: '100%',
+          width: '400px',
           margin: `10px auto`,
           border: `1px solid #D1D5DB`,
           padding: `25px 20px`,

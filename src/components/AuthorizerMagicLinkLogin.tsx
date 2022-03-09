@@ -10,7 +10,8 @@ import { Message } from './Message';
 
 export const AuthorizerMagicLinkLogin: FC<{
   onMagicLinkLogin?: (data: any) => void;
-}> = ({ onMagicLinkLogin }) => {
+  urlProps: Record<string, any>;
+}> = ({ onMagicLinkLogin, urlProps }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -20,7 +21,11 @@ export const AuthorizerMagicLinkLogin: FC<{
     try {
       setLoading(true);
 
-      const res = await authorizerRef.magicLinkLogin({ email: values.email });
+      const res = await authorizerRef.magicLinkLogin({
+        email: values.email,
+        state: urlProps.state || '',
+        redirect_uri: urlProps.redirect_uri || '',
+      });
       setLoading(false);
 
       if (res.message) {
@@ -30,6 +35,12 @@ export const AuthorizerMagicLinkLogin: FC<{
 
       if (onMagicLinkLogin) {
         onMagicLinkLogin(res);
+      }
+
+      if (urlProps.redirect_uri) {
+        setTimeout(() => {
+          window.location.replace(urlProps.redirect_uri);
+        }, 3000);
       }
     } catch (err) {
       setLoading(false);

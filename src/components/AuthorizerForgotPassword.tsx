@@ -20,7 +20,8 @@ import { Message } from './Message';
 export const AuthorizerForgotPassword: FC<{
   setView?: (v: Views) => void;
   onForgotPassword?: (data: any) => void;
-}> = ({ setView, onForgotPassword }) => {
+  urlProps: Record<string, any>;
+}> = ({ setView, onForgotPassword, urlProps }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -30,7 +31,11 @@ export const AuthorizerForgotPassword: FC<{
     try {
       setLoading(true);
 
-      const res = await authorizerRef.forgotPassword({ email: values.email });
+      const res = await authorizerRef.forgotPassword({
+        email: values.email,
+        state: urlProps.state || '',
+        redirect_uri: urlProps.redirect_uri || '',
+      });
       setLoading(false);
 
       if (res.message) {

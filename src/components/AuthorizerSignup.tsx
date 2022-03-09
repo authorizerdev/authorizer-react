@@ -21,7 +21,8 @@ import { Message } from './Message';
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
   onSignup?: (data: AuthToken) => void;
-}> = ({ setView, onSignup }) => {
+  urlProps: Record<string, any>;
+}> = ({ setView, onSignup, urlProps }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -30,7 +31,14 @@ export const AuthorizerSignup: FC<{
   const onSubmit = async (values: Record<string, string>) => {
     try {
       setLoading(true);
-      const res = await authorizerRef.signup(values);
+      const data = values;
+      if (urlProps.scope) {
+        data.scope = urlProps.scope;
+      }
+      if (urlProps.roles) {
+        data.roles = urlProps.roles;
+      }
+      const res = await authorizerRef.signup(data);
 
       setError(``);
       if (res.access_token) {

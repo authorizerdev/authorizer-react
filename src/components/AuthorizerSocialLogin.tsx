@@ -5,14 +5,22 @@ import { Facebook } from '../icons/facebook';
 import { Button, Separator } from '../styles';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { ButtonAppearance } from '../constants';
+import { createQueryParams } from '../utils/common';
 
-export const AuthorizerSocialLogin = () => {
+export const AuthorizerSocialLogin: React.FC<{
+  urlProps: Record<string, any>;
+}> = ({ urlProps }) => {
   const { config } = useAuthorizer();
   const hasSocialLogin =
     config.is_google_login_enabled ||
     config.is_github_login_enabled ||
     config.is_facebook_login_enabled;
-  const state = sessionStorage.getItem('authorizer_state')?.trim();
+
+  const queryParams = createQueryParams({
+    ...urlProps,
+    scope: urlProps.scope.join(' '),
+  });
+
   return (
     <>
       {config.is_google_login_enabled && (
@@ -20,7 +28,7 @@ export const AuthorizerSocialLogin = () => {
           <Button
             appearance={ButtonAppearance.Default}
             onClick={() => {
-              window.location.href = `${config.authorizerURL}/oauth_login/google?redirectURL=${config.redirectURL}?state=${state}`;
+              window.location.href = `${config.authorizerURL}/oauth_login/google?${queryParams}`;
             }}
           >
             <Google />
@@ -34,7 +42,7 @@ export const AuthorizerSocialLogin = () => {
           <Button
             appearance={ButtonAppearance.Default}
             onClick={() => {
-              window.location.href = `${config.authorizerURL}/oauth_login/github?redirectURL=${config.redirectURL}?state=${state}`;
+              window.location.href = `${config.authorizerURL}/oauth_login/github?${queryParams}`;
             }}
           >
             <Github />
@@ -48,7 +56,7 @@ export const AuthorizerSocialLogin = () => {
           <Button
             appearance={ButtonAppearance.Default}
             onClick={() => {
-              window.location.href = `${config.authorizerURL}/oauth_login/facebook?redirectURL=${config.redirectURL}?state=${state}`;
+              window.location.href = `${config.authorizerURL}/oauth_login/facebook?${queryParams}`;
             }}
           >
             <Facebook />
