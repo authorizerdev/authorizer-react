@@ -23,7 +23,7 @@ type Props = {
 };
 
 export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
-  const { token } = getSearchParams();
+  const { token, redirect_uri } = getSearchParams();
   const [error, setError] = useState(!token ? `Invalid token` : ``);
   const [loading, setLoading] = useState(false);
   const { authorizerRef, config } = useAuthorizer();
@@ -40,7 +40,8 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
       if (onReset) {
         onReset(res);
       } else {
-        window.location.href = config.redirectURL || window.location.origin;
+        window.location.href =
+          redirect_uri || config.redirectURL || window.location.origin;
       }
     } catch (err) {
       setLoading(false);

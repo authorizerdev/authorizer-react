@@ -162,10 +162,12 @@ export const AuthorizerBasicAuthLogin: FC<{
               Forgot Password?
             </Link>
 
-            <div>
-              Don't have an account?{' '}
-              <Link onClick={() => setView(Views.Signup)}>Sign Up</Link>
-            </div>
+            {config.is_sign_up_enabled && (
+              <div>
+                Don't have an account?{' '}
+                <Link onClick={() => setView(Views.Signup)}>Sign Up</Link>
+              </div>
+            )}
           </Footer>
         )}
       </>

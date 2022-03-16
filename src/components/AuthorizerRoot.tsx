@@ -37,7 +37,7 @@ export const AuthorizerRoot: FC<{
   if (redirectURL) {
     urlProps.redirectURL = redirectURL;
   } else {
-    urlProps.redirectURL = window.location.origin + '/app';
+    urlProps.redirectURL = window.location.origin;
   }
 
   urlProps.redirect_uri = urlProps.redirectURL;
@@ -58,7 +58,8 @@ export const AuthorizerRoot: FC<{
 
         {view === Views.Signup &&
           config.is_basic_authentication_enabled &&
-          !config.is_magic_link_login_enabled && (
+          !config.is_magic_link_login_enabled &&
+          config.is_sign_up_enabled && (
             <AuthorizerSignup
               setView={setView}
               onSignup={onSignup}

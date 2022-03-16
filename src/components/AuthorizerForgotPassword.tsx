@@ -25,7 +25,7 @@ export const AuthorizerForgotPassword: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
-  const { authorizerRef } = useAuthorizer();
+  const { authorizerRef, config } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
     try {
@@ -34,7 +34,8 @@ export const AuthorizerForgotPassword: FC<{
       const res = await authorizerRef.forgotPassword({
         email: values.email,
         state: urlProps.state || '',
-        redirect_uri: urlProps.redirect_uri || '',
+        redirect_uri:
+          urlProps.redirect_uri || config.redirectURL || window.location.origin,
       });
       setLoading(false);
 

@@ -27,6 +27,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     is_email_verification_enabled: false,
     is_basic_authentication_enabled: false,
     is_magic_link_login_enabled: false,
+    is_sign_up_enabled: false,
   },
   user: null,
   token: null,
@@ -89,6 +90,7 @@ let initialState: AuthorizerState = {
     is_email_verification_enabled: false,
     is_basic_authentication_enabled: false,
     is_magic_link_login_enabled: false,
+    is_sign_up_enabled: false,
   },
 };
 
