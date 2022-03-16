@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@authorizerdev/authorizer-js@^0.5.0":
-  "integrity" "sha512-O7T275ry4fJznQObnjYHPXvOtTtbv91NNFPh/x1jGs5iOC8MWvpnd7lbLvcnKbs0vPnZmFTzEUx8kCW2Z0o9Hg=="
-  "resolved" "https://registry.npmjs.org/@authorizerdev/authorizer-js/-/authorizer-js-0.5.0.tgz"
-  "version" "0.5.0"
+"@authorizerdev/authorizer-js@^0.6.0":
+  "integrity" "sha512-WbqeUmhQwLNlvk4ZYTptlbAIINh7aZPyTCVA/B0FE3EoPtx1tNOtkPtJOycrn0H0HyueeXQnBSCDxkvPAP65Bw=="
+  "resolved" "https://registry.npmjs.org/@authorizerdev/authorizer-js/-/authorizer-js-0.6.0.tgz"
+  "version" "0.6.0"
   dependencies:
     "node-fetch" "^2.6.1"
 

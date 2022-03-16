@@ -38,6 +38,9 @@ export const AuthorizerSignup: FC<{
       if (urlProps.roles) {
         data.roles = urlProps.roles;
       }
+      if (urlProps.redirect_uri) {
+        data.redirect_uri = urlProps.redirect_uri;
+      }
       const res = await authorizerRef.signup(data);
 
       setError(``);
