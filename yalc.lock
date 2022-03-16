@@ -2,9 +2,9 @@
   "version": "v1",
   "packages": {
     "@authorizerdev/authorizer-js": {
-      "signature": "9fe2e02735dcecf302d8018171fb2581",
+      "signature": "ddd3063d99218ef8544f41ad6f2c830c",
       "file": true,
-      "replaced": "^0.3.0-beta.0"
+      "replaced": "^0.4.0-beta.3"
     }
   }
 }

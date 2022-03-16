@@ -136,7 +136,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
                 disabled={pristine || loading}
                 appearance={ButtonAppearance.Primary}
               >
-                {loading ? `Processing ...` : `Reset Password`}
+                {loading ? `Processing ...` : `Continue`}
               </Button>
             </form>
           )}

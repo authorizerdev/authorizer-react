@@ -37,8 +37,10 @@ export const AuthorizerRoot: FC<{
   if (redirectURL) {
     urlProps.redirectURL = redirectURL;
   } else {
-    urlProps.redirectURL = window.location.origin;
+    urlProps.redirectURL = window.location.origin + '/app';
   }
+
+  urlProps.redirect_uri = urlProps.redirectURL;
 
   return (
     <ThemeProvider theme={theme}>
