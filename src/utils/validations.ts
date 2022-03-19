@@ -13,6 +13,7 @@ export const validatePassword = (
   hasUpperCase: boolean;
   hasNumericChar: boolean;
   hasSpecialChar: boolean;
+  maxThirtySixChar: boolean;
   isValid: boolean;
 } => {
   const res = {
@@ -23,59 +24,45 @@ export const validatePassword = (
     hasUpperCase: false,
     hasNumericChar: false,
     hasSpecialChar: false,
+    maxThirtySixChar: false,
   };
 
-  const lowerChar = /(?=.*[a-z])/;
-  const upperChar = /(?=.*[A-Z])/;
-  const number = /(?=.*\d)/;
-  const specialChar = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
   if (value.length >= 6) {
-    // Update score and add class
-    res.score = res.score + 1;
+    res.score = res.score + 0.5;
     res.hasSixChar = true;
   }
 
-  if (lowerChar.test(value)) {
-    // Update score and add class
-    res.score = res.score + 0.7;
-    res.hasLowerCase = true;
+  if (value.length > 0 && value.length <= 36) {
+    res.score = res.score + 0.5;
+    res.maxThirtySixChar = true;
   }
 
-  if (upperChar.test(value)) {
-    // Update score and add class
-    res.score = res.score + 0.7;
-    res.hasUpperCase = true;
+  Array.from(value).forEach((char: any) => {
+    if (char >= 'A' && char <= 'Z') {
+      res.score = res.score + 0.7;
+      res.hasUpperCase = true;
+    } else if (char >= 'a' && char <= 'z') {
+      res.score = res.score + 0.7;
+      res.hasLowerCase = true;
+    } else if (char >= '0' && char <= '9') {
+      res.score = res.score + 0.6;
+      res.hasNumericChar = true;
+    } else {
+      res.score = res.score + 1;
+      res.hasSpecialChar = true;
+    }
+  });
+
+  if (res.score <= 4) {
+    res.strength = 'Poor';
+  } else if (res.score <= 6) {
+    res.strength = 'Okay';
+  } else if (res.score <= 8) {
+    res.strength = 'Good';
+  } else {
+    res.strength = 'Strong';
   }
 
-  if (number.test(value)) {
-    res.score = res.score + 0.6;
-    res.hasNumericChar = true;
-  }
-
-  if (specialChar.test(value)) {
-    res.score = res.score + 1;
-    res.hasSpecialChar = true;
-  }
-  switch (Math.trunc(res.score)) {
-    case 1:
-      res.strength = 'Poor';
-      break;
-    case 2:
-      res.strength = 'Okay';
-      break;
-    case 3:
-      res.strength = 'Good';
-      break;
-    case 4:
-      res.strength = 'Great';
-      break;
-    default:
-      if (value.trim()) {
-        res.strength = 'Poor';
-      } else {
-        res.strength = '';
-      }
-  }
   const isValid = Object.values(res).every((i) => Boolean(i));
   return { ...res, isValid };
 };

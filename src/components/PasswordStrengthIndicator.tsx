@@ -40,6 +40,7 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
       hasNumericChar,
       hasSpecialChar,
       hasUpperCase,
+      maxThirtySixChar,
     },
     setValidations,
   ] = React.useState({ ...validatePassword(value || '') });
@@ -56,10 +57,10 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
     <div>
       <PasswordStrengthWrapper>
         <Flex alignItems="center" justifyContent="center" wrap="nowrap">
-          <PasswordStrength isActive={score >= 1} />
-          <PasswordStrength isActive={score >= 2} />
-          <PasswordStrength isActive={score >= 3} />
-          <PasswordStrength isActive={score >= 4} />
+          <PasswordStrength isActive={score > 2} />
+          <PasswordStrength isActive={score > 4} />
+          <PasswordStrength isActive={score > 6} />
+          <PasswordStrength isActive={score > 8} />
           <div>{strength}</div>
         </Flex>
       </PasswordStrengthWrapper>
@@ -90,6 +91,10 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
           <StyledCheckBoxLabel>
             At least 1 special character
           </StyledCheckBoxLabel>
+        </Flex>
+        <Flex justifyContent="start" alignItems="center">
+          <input readOnly type="checkbox" checked={maxThirtySixChar} />
+          <StyledCheckBoxLabel>Maximum 36 characters</StyledCheckBoxLabel>
         </Flex>
       </Flex>
     </div>
