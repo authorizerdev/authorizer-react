@@ -27,8 +27,7 @@ const PasswordStrength = styled.div`
   border-radius: 5px;
   background: rgba(0, 0, 0, 0.2);
   margin-right: 5px;
-  ${(props: PasswordStrengthProps) =>
-    props.isActive && `background: rgb(47, 192, 206);`};
+  ${(props: PasswordStrengthProps) => props.isActive && `background: #3B82F6;`};
 `;
 
 const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
