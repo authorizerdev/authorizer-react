@@ -17,6 +17,7 @@ import {
 import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
+import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
@@ -27,6 +28,7 @@ export const AuthorizerSignup: FC<{
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
   const { authorizerRef, config, setAuthData } = useAuthorizer();
+  const [disableSignupButton, setDisableSignupButton] = useState(false);
 
   const onSubmit = async (values: Record<string, string>) => {
     try {
@@ -147,21 +149,27 @@ export const AuthorizerSignup: FC<{
                   <FieldWrapper>
                     <Field name="password">
                       {({ input, meta }) => (
-                        <div>
-                          <Label>
-                            <Required>*</Required>
-                            Password
-                          </Label>
-                          <Input
-                            {...input}
-                            type="password"
-                            placeholder="*********"
-                            hasError={Boolean(meta.error && meta.touched)}
+                        <>
+                          <div>
+                            <Label>
+                              <Required>*</Required>
+                              Password
+                            </Label>
+                            <Input
+                              {...input}
+                              type="password"
+                              placeholder="*********"
+                              hasError={Boolean(meta.error && meta.touched)}
+                            />
+                            {meta.error && meta.touched && (
+                              <Error>{meta.error}</Error>
+                            )}
+                          </div>
+                          <PasswordStrengthIndicator
+                            value={input.value}
+                            setDisableButton={setDisableSignupButton}
                           />
-                          {meta.error && meta.touched && (
-                            <Error>{meta.error}</Error>
-                          )}
-                        </div>
+                        </>
                       )}
                     </Field>
                   </FieldWrapper>
@@ -189,7 +197,7 @@ export const AuthorizerSignup: FC<{
                   <br />
                   <Button
                     type="submit"
-                    disabled={pristine || loading}
+                    disabled={pristine || loading || disableSignupButton}
                     appearance={ButtonAppearance.Primary}
                   >
                     {loading ? `Processing ...` : `Sign Up`}

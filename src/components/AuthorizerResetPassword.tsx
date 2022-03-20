@@ -17,6 +17,7 @@ import { Message } from './Message';
 import { getSearchParams } from '../utils/url';
 import { ThemeProvider } from 'styled-components';
 import { theme } from '../styles/theme';
+import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 type Props = {
   onReset?: (res: any) => void;
@@ -27,6 +28,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
   const [error, setError] = useState(!token ? `Invalid token` : ``);
   const [loading, setLoading] = useState(false);
   const { authorizerRef, config } = useAuthorizer();
+  const [disableContinueButton, setDisableContinueButton] = useState(false);
 
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
@@ -92,21 +94,27 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
               <FieldWrapper>
                 <Field name="password">
                   {({ input, meta }) => (
-                    <div>
-                      <Label>
-                        <Required>*</Required>
-                        Password
-                      </Label>
-                      <Input
-                        {...input}
-                        type="password"
-                        placeholder="*********"
-                        hasError={Boolean(meta.error && meta.touched)}
+                    <>
+                      <div>
+                        <Label>
+                          <Required>*</Required>
+                          Password
+                        </Label>
+                        <Input
+                          {...input}
+                          type="password"
+                          placeholder="*********"
+                          hasError={Boolean(meta.error && meta.touched)}
+                        />
+                        {meta.error && meta.touched && (
+                          <Error>{meta.error}</Error>
+                        )}
+                      </div>
+                      <PasswordStrengthIndicator
+                        value={input.value}
+                        setDisableButton={setDisableContinueButton}
                       />
-                      {meta.error && meta.touched && (
-                        <Error>{meta.error}</Error>
-                      )}
-                    </div>
+                    </>
                   )}
                 </Field>
               </FieldWrapper>
@@ -134,7 +142,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
               <br />
               <Button
                 type="submit"
-                disabled={pristine || loading}
+                disabled={pristine || loading || disableContinueButton}
                 appearance={ButtonAppearance.Primary}
               >
                 {loading ? `Processing ...` : `Continue`}
