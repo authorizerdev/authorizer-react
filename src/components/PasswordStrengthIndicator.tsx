@@ -4,7 +4,7 @@ import { Flex } from '../styles';
 import { validatePassword } from '../utils/validations';
 
 interface PasswordStrengthProps {
-  isActive: boolean;
+  strength: string;
 }
 
 interface PropTypes {
@@ -20,14 +20,24 @@ const PasswordStrengthWrapper = styled.div`
   margin: 2% 0 0;
 `;
 
+// TODO use based on theme primary color
+const passwordStrengthIndicatorOpacity: Record<string, number> = {
+  default: 0.15,
+  weak: 0.4,
+  good: 0.6,
+  strong: 0.8,
+  veryStrong: 1,
+};
+
 const PasswordStrength = styled.div`
   width: 100%;
   height: 10px;
   flex: 0.75;
   border-radius: 5px;
-  background: rgba(0, 0, 0, 0.2);
   margin-right: 5px;
-  ${(props: PasswordStrengthProps) => props.isActive && `background: #3B82F6;`};
+  background-color: ${(props) => props.theme.colors.primary};
+  opacity: ${(props: PasswordStrengthProps) =>
+    passwordStrengthIndicatorOpacity[props.strength]};
 `;
 
 const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
@@ -44,6 +54,7 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
     },
     setValidations,
   ] = React.useState({ ...validatePassword(value || '') });
+
   React.useEffect(() => {
     const validationData = validatePassword(value || '');
     setValidations({ ...validationData });
@@ -53,19 +64,20 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
       setDisableButton(false);
     }
   }, [value]);
+
   return (
     <div>
       <PasswordStrengthWrapper>
         <Flex alignItems="center" justifyContent="center" wrap="nowrap">
-          <PasswordStrength isActive={score > 2} />
-          <PasswordStrength isActive={score > 4} />
-          <PasswordStrength isActive={score > 6} />
-          <PasswordStrength isActive={score > 8} />
+          <PasswordStrength strength={score > 2 ? `weak` : `default`} />
+          <PasswordStrength strength={score > 3 ? `good` : `default`} />
+          <PasswordStrength strength={score > 4 ? `strong` : `default`} />
+          <PasswordStrength strength={score > 5 ? `veryStrong` : `default`} />
           <div>{strength}</div>
         </Flex>
       </PasswordStrengthWrapper>
       <p>
-        <b>Criteria for a good password:</b>
+        <b>Criteria for a strong password:</b>
       </p>
       <Flex flexDirection="column">
         <Flex justifyContent="start" alignItems="center">

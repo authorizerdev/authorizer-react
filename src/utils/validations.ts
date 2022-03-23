@@ -28,39 +28,39 @@ export const validatePassword = (
   };
 
   if (value.length >= 6) {
-    res.score = res.score + 0.5;
+    res.score = res.score + 1;
     res.hasSixChar = true;
   }
 
   if (value.length > 0 && value.length <= 36) {
-    res.score = res.score + 0.5;
+    res.score = res.score + 1;
     res.maxThirtySixChar = true;
   }
 
   Array.from(value).forEach((char: any) => {
-    if (char >= 'A' && char <= 'Z') {
-      res.score = res.score + 0.7;
+    if (char >= 'A' && char <= 'Z' && !res.hasUpperCase) {
+      res.score = res.score + 1;
       res.hasUpperCase = true;
-    } else if (char >= 'a' && char <= 'z') {
-      res.score = res.score + 0.7;
+    } else if (char >= 'a' && char <= 'z' && !res.hasLowerCase) {
+      res.score = res.score + 1;
       res.hasLowerCase = true;
-    } else if (char >= '0' && char <= '9') {
-      res.score = res.score + 0.6;
+    } else if (char >= '0' && char <= '9' && !res.hasNumericChar) {
+      res.score = res.score + 1;
       res.hasNumericChar = true;
-    } else {
+    } else if (!res.hasSpecialChar) {
       res.score = res.score + 1;
       res.hasSpecialChar = true;
     }
   });
 
-  if (res.score <= 4) {
-    res.strength = 'Poor';
-  } else if (res.score <= 6) {
-    res.strength = 'Okay';
-  } else if (res.score <= 8) {
+  if (res.score <= 2) {
+    res.strength = 'Weak';
+  } else if (res.score <= 4) {
     res.strength = 'Good';
-  } else {
+  } else if (res.score <= 5) {
     res.strength = 'Strong';
+  } else {
+    res.strength = 'Very Strong';
   }
 
   const isValid = Object.values(res).every((i) => Boolean(i));

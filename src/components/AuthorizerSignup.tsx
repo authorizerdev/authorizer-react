@@ -124,7 +124,7 @@ export const AuthorizerSignup: FC<{
                 return errors;
               }}
             >
-              {({ handleSubmit, pristine }) => (
+              {({ handleSubmit, pristine, values }) => (
                 <form onSubmit={handleSubmit} name="authorizer-signup-form">
                   <FieldWrapper>
                     <Field name="email">
@@ -165,10 +165,6 @@ export const AuthorizerSignup: FC<{
                               <Error>{meta.error}</Error>
                             )}
                           </div>
-                          <PasswordStrengthIndicator
-                            value={input.value}
-                            setDisableButton={setDisableSignupButton}
-                          />
                         </>
                       )}
                     </Field>
@@ -194,6 +190,10 @@ export const AuthorizerSignup: FC<{
                       )}
                     </Field>
                   </FieldWrapper>
+                  <PasswordStrengthIndicator
+                    value={values.password}
+                    setDisableButton={setDisableSignupButton}
+                  />
                   <br />
                   <Button
                     type="submit"

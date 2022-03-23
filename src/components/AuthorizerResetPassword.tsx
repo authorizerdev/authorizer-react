@@ -89,7 +89,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
             return errors;
           }}
         >
-          {({ handleSubmit, pristine }) => (
+          {({ handleSubmit, pristine, values }) => (
             <form onSubmit={handleSubmit} name="authorizer-reset-password-form">
               <FieldWrapper>
                 <Field name="password">
@@ -110,10 +110,6 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
                           <Error>{meta.error}</Error>
                         )}
                       </div>
-                      <PasswordStrengthIndicator
-                        value={input.value}
-                        setDisableButton={setDisableContinueButton}
-                      />
                     </>
                   )}
                 </Field>
@@ -139,6 +135,10 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
                   )}
                 </Field>
               </FieldWrapper>
+              <PasswordStrengthIndicator
+                value={values.password}
+                setDisableButton={setDisableContinueButton}
+              />
               <br />
               <Button
                 type="submit"
