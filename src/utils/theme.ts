@@ -1,7 +1,7 @@
 import { theme } from '../styles/theme';
 import { ThemePropsType } from '../types';
 
-export const buildTheme = (customTheme: ThemePropsType | null) => {
+export const buildTheme = (customTheme?: ThemePropsType | null) => {
   return customTheme
     ? {
         ...theme,
