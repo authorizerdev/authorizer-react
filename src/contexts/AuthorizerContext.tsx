@@ -118,7 +118,7 @@ export const AuthorizerProvider: FC<{
       ...initialState.config,
       ...defaultConfig,
     },
-    theme: buildTheme(customTheme),
+    theme: buildTheme(customTheme || null),
   });
 
   let intervalRef: any = null;
@@ -294,7 +294,7 @@ export const AuthorizerProvider: FC<{
         setAuthData: setAuthData,
         authorizerRef: authorizerRef.current,
         logout,
-        theme: buildTheme(customTheme),
+        theme: buildTheme(customTheme || null),
       }}
     >
       {children}
