@@ -17,6 +17,7 @@ export const Wrapper = styled.div`
   color: ${(props) => props.theme.colors.textColor};
   font-size: ${(props) => props.theme.fonts.mediumText};
   box-sizing: border-box;
+  background-color: ${(props) => props.theme.background.color};
 
   *,
   *:before,

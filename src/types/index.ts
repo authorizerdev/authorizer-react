@@ -66,10 +66,12 @@ export type ThemePropsType = {
     smallText: string;
     tinyText: string;
   };
-
   radius: {
     card: string;
     button: string;
     input: string;
+  };
+  background: {
+    color: string;
   };
 };
