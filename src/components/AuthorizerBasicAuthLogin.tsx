@@ -55,6 +55,7 @@ export const AuthorizerBasicAuthLogin: FC<{
         },
         config,
         loading: false,
+        theme: null,
       });
 
       if (onLogin) {

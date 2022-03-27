@@ -12,9 +12,11 @@ import {
   AuthorizerContextPropsType,
   AuthorizerState,
   AuthorizerProviderAction,
+  ThemePropsType,
 } from '../types';
 import { AuthorizerProviderActionType } from '../constants';
 import { hasWindow } from '../utils/window';
+import { buildTheme } from '../utils/theme';
 
 const AuthorizerContext = createContext<AuthorizerContextPropsType>({
   config: {
@@ -42,6 +44,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     clientID: '',
   }),
   logout: async () => {},
+  theme: null,
 });
 
 function reducer(
@@ -92,6 +95,7 @@ let initialState: AuthorizerState = {
     is_magic_link_login_enabled: false,
     is_sign_up_enabled: false,
   },
+  theme: null,
 };
 
 export const AuthorizerProvider: FC<{
@@ -101,13 +105,20 @@ export const AuthorizerProvider: FC<{
     clientID?: string;
   };
   onStateChangeCallback?: (stateData: AuthorizerState) => Promise<void>;
-}> = ({ config: defaultConfig, onStateChangeCallback, children }) => {
+  theme?: ThemePropsType;
+}> = ({
+  config: defaultConfig,
+  onStateChangeCallback,
+  theme: customTheme,
+  children,
+}) => {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     config: {
       ...initialState.config,
       ...defaultConfig,
     },
+    theme: buildTheme(customTheme),
   });
 
   let intervalRef: any = null;
@@ -273,7 +284,6 @@ export const AuthorizerProvider: FC<{
       payload: loggedOutState,
     });
   };
-
   return (
     <AuthorizerContext.Provider
       value={{
@@ -284,6 +294,7 @@ export const AuthorizerProvider: FC<{
         setAuthData: setAuthData,
         authorizerRef: authorizerRef.current,
         logout,
+        theme: buildTheme(customTheme),
       }}
     >
       {children}

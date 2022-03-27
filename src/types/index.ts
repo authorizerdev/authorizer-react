@@ -17,6 +17,7 @@ export type AuthorizerState = {
     is_magic_link_login_enabled: boolean;
     is_sign_up_enabled: boolean;
   };
+  theme: ThemePropsType | null;
 };
 
 export type AuthorizerProviderAction = {
@@ -46,4 +47,29 @@ export type AuthorizerContextPropsType = {
   setToken: (data: null | AuthToken) => void;
   setAuthData: (data: AuthorizerState) => void;
   authorizerRef: any;
+  theme: ThemePropsType | null;
+};
+
+export type ThemePropsType = {
+  colors: {
+    primary: string;
+    primaryDisabled: string;
+    gray: string;
+    danger: string;
+    success: string;
+    textColor: string;
+  };
+  fonts: {
+    fontStack: string;
+    largeText: string;
+    mediumText: string;
+    smallText: string;
+    tinyText: string;
+  };
+
+  radius: {
+    card: string;
+    button: string;
+    input: string;
+  };
 };

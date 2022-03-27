@@ -16,7 +16,6 @@ import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import { getSearchParams } from '../utils/url';
 import { ThemeProvider } from 'styled-components';
-import { theme } from '../styles/theme';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 type Props = {
@@ -27,7 +26,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
   const { token, redirect_uri } = getSearchParams();
   const [error, setError] = useState(!token ? `Invalid token` : ``);
   const [loading, setLoading] = useState(false);
-  const { authorizerRef, config } = useAuthorizer();
+  const { authorizerRef, config, theme } = useAuthorizer();
   const [disableContinueButton, setDisableContinueButton] = useState(false);
 
   const onSubmit = async (values: Record<string, string>) => {
