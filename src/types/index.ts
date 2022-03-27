@@ -51,27 +51,27 @@ export type AuthorizerContextPropsType = {
 };
 
 export type ThemePropsType = {
-  colors: {
-    primary: string;
-    primaryDisabled: string;
-    gray: string;
-    danger: string;
-    success: string;
-    textColor: string;
+  colors?: {
+    primary?: string;
+    primaryDisabled?: string;
+    gray?: string;
+    danger?: string;
+    success?: string;
+    textColor?: string;
   };
-  fonts: {
-    fontStack: string;
-    largeText: string;
-    mediumText: string;
-    smallText: string;
-    tinyText: string;
+  fonts?: {
+    fontStack?: string;
+    largeText?: string;
+    mediumText?: string;
+    smallText?: string;
+    tinyText?: string;
   };
-  radius: {
-    card: string;
-    button: string;
-    input: string;
+  radius?: {
+    card?: string;
+    button?: string;
+    input?: string;
   };
-  background: {
-    color: string;
+  background?: {
+    color?: string;
   };
 };
