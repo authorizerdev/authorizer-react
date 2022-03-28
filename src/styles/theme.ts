@@ -25,4 +25,7 @@ export const theme = {
     button: '5px',
     input: '5px',
   },
+  background: {
+    color: 'inherit',
+  },
 };

@@ -5,7 +5,6 @@ import { AuthToken } from '@authorizerdev/authorizer-js';
 import { AuthorizerBasicAuthLogin } from './AuthorizerBasicAuthLogin';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { Wrapper } from '../styles';
-import { theme } from '../styles/theme';
 import { Views } from '../constants';
 import { AuthorizerSignup } from './AuthorizerSignup';
 import { AuthorizerForgotPassword } from './AuthorizerForgotPassword';
@@ -20,7 +19,7 @@ export const AuthorizerRoot: FC<{
   onForgotPassword?: (data: any) => void;
 }> = ({ onLogin, onSignup, onMagicLinkLogin, onForgotPassword }) => {
   const [view, setView] = useState(Views.Login);
-  const { config } = useAuthorizer();
+  const { config, theme } = useAuthorizer();
   const searchParams = new URLSearchParams(window.location.search);
   const state = searchParams.get('state') || createRandomString();
   const scope = searchParams.get('scope')
