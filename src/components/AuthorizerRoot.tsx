@@ -12,6 +12,7 @@ import { AuthorizerForgotPassword } from './AuthorizerForgotPassword';
 import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
 import { AuthorizerMagicLinkLogin } from './AuthorizerMagicLinkLogin';
 import { createRandomString } from '../utils/common';
+import { hasWindow } from '../utils/window';
 
 export const AuthorizerRoot: FC<{
   onLogin?: (data: AuthToken) => void;
@@ -21,7 +22,9 @@ export const AuthorizerRoot: FC<{
 }> = ({ onLogin, onSignup, onMagicLinkLogin, onForgotPassword }) => {
   const [view, setView] = useState(Views.Login);
   const { config } = useAuthorizer();
-  const searchParams = new URLSearchParams(window.location.search);
+  const searchParams = new URLSearchParams(
+    hasWindow() ? window.location.search : ``
+  );
   const state = searchParams.get('state') || createRandomString();
   const scope = searchParams.get('scope')
     ? searchParams.get('scope')?.toString().split(' ')
@@ -37,7 +40,7 @@ export const AuthorizerRoot: FC<{
   if (redirectURL) {
     urlProps.redirectURL = redirectURL;
   } else {
-    urlProps.redirectURL = window.location.origin;
+    urlProps.redirectURL = hasWindow() ? window.location.origin : redirectURL;
   }
 
   urlProps.redirect_uri = urlProps.redirectURL;

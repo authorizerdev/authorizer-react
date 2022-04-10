@@ -16,6 +16,7 @@ import {
 import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
+import { hasWindow } from '../utils/window';
 
 export const AuthorizerForgotPassword: FC<{
   setView?: (v: Views) => void;
