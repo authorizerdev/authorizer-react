@@ -95,6 +95,7 @@ let initialState: AuthorizerState = {
 };
 
 export const AuthorizerProvider: FC<{
+  children: React.ReactNode;
   config: {
     authorizerURL: string;
     redirectURL: string;
