@@ -1,4 +1,4 @@
-import { AuthToken, User } from '@authorizerdev/authorizer-js';
+import { AuthToken, User, Authorizer } from '@authorizerdev/authorizer-js';
 import { AuthorizerProviderActionType } from '../constants';
 
 export type AuthorizerState = {
@@ -45,5 +45,5 @@ export type AuthorizerContextPropsType = {
   setUser: (data: null | User) => void;
   setToken: (data: null | AuthToken) => void;
   setAuthData: (data: AuthorizerState) => void;
-  authorizerRef: any;
+  authorizerRef: Authorizer;
 };
