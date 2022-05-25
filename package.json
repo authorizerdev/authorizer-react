@@ -42,11 +42,11 @@
   "size-limit": [
     {
       "path": "dist/authorizer-react.cjs.production.min.js",
-      "limit": "100 KB"
+      "limit": "200 KB"
     },
     {
       "path": "dist/authorizer-react.esm.js",
-      "limit": "100 KB"
+      "limit": "200 KB"
     }
   ],
   "devDependencies": {
