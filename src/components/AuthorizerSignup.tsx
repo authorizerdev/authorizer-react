@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
-import { AuthToken } from '@authorizerdev/authorizer-js';
+import { AuthToken, SignupInput } from '@authorizerdev/authorizer-js';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -30,10 +30,10 @@ export const AuthorizerSignup: FC<{
   const { authorizerRef, config, setAuthData } = useAuthorizer();
   const [disableSignupButton, setDisableSignupButton] = useState(false);
 
-  const onSubmit = async (values: Record<string, string>) => {
+  const onSubmit = async (values: SignupInput) => {
     try {
       setLoading(true);
-      const data = values;
+      const data: SignupInput = values;
       if (urlProps.scope) {
         data.scope = urlProps.scope;
       }
@@ -45,27 +45,29 @@ export const AuthorizerSignup: FC<{
       }
       const res = await authorizerRef.signup(data);
 
-      setError(``);
-      if (res.access_token) {
+      if (res) {
         setError(``);
-        setAuthData({
-          user: res.user,
-          token: {
-            access_token: res.access_token,
-            expires_in: res.expires_in,
-            refresh_token: res.refresh_token,
-            id_token: res.id_token,
-          },
-          config,
-          loading: false,
-        });
-      } else {
-        setLoading(false);
-        setSuccessMessage(res.message);
-      }
+        if (res.access_token) {
+          setError(``);
+          setAuthData({
+            user: res.user || null,
+            token: {
+              access_token: res.access_token,
+              expires_in: res.expires_in,
+              refresh_token: res.refresh_token,
+              id_token: res.id_token,
+            },
+            config,
+            loading: false,
+          });
+        } else {
+          setLoading(false);
+          setSuccessMessage(res.message || ``);
+        }
 
-      if (onSignup) {
-        onSignup(res);
+        if (onSignup) {
+          onSignup(res);
+        }
       }
     } catch (err) {
       setLoading(false);

@@ -39,7 +39,7 @@ export const AuthorizerForgotPassword: FC<{
       });
       setLoading(false);
 
-      if (res.message) {
+      if (res && res.message) {
         setError(``);
         setSuccessMessage(res.message);
       }

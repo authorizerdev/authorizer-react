@@ -28,13 +28,13 @@ export const AuthorizerMagicLinkLogin: FC<{
       });
       setLoading(false);
 
-      if (res.message) {
+      if (res) {
         setError(``);
-        setSuccessMessage(res.message);
-      }
+        setSuccessMessage(res.message || ``);
 
-      if (onMagicLinkLogin) {
-        onMagicLinkLogin(res);
+        if (onMagicLinkLogin) {
+          onMagicLinkLogin(res);
+        }
       }
 
       if (urlProps.redirect_uri) {

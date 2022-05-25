@@ -19,7 +19,7 @@ import { Message } from './Message';
 
 export const AuthorizerBasicAuthLogin: FC<{
   setView?: (v: Views) => void;
-  onLogin?: (data: AuthToken) => void;
+  onLogin?: (data: AuthToken | void) => void;
   urlProps: Record<string, any>;
 }> = ({ setView, onLogin, urlProps }) => {
   const [error, setError] = useState(``);
@@ -42,20 +42,22 @@ export const AuthorizerBasicAuthLogin: FC<{
         data.scope = urlProps.scope;
       }
 
-      const res: AuthToken = await authorizerRef.login(data);
+      const res = await authorizerRef.login(data);
 
-      setError(``);
-      setAuthData({
-        user: res.user || null,
-        token: {
-          access_token: res.access_token,
-          expires_in: res.expires_in,
-          refresh_token: res.refresh_token,
-          id_token: res.id_token,
-        },
-        config,
-        loading: false,
-      });
+      if (res) {
+        setError(``);
+        setAuthData({
+          user: res.user || null,
+          token: {
+            access_token: res.access_token,
+            expires_in: res.expires_in,
+            refresh_token: res.refresh_token,
+            id_token: res.id_token,
+          },
+          config,
+          loading: false,
+        });
+      }
 
       if (onLogin) {
         onLogin(res);

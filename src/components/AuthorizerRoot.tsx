@@ -15,8 +15,8 @@ import { createRandomString } from '../utils/common';
 import { hasWindow } from '../utils/window';
 
 export const AuthorizerRoot: FC<{
-  onLogin?: (data: AuthToken) => void;
-  onSignup?: (data: AuthToken) => void;
+  onLogin?: (data: AuthToken | void) => void;
+  onSignup?: (data: AuthToken | void) => void;
   onMagicLinkLogin?: (data: any) => void;
   onForgotPassword?: (data: any) => void;
 }> = ({ onLogin, onSignup, onMagicLinkLogin, onForgotPassword }) => {

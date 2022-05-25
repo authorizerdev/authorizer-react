@@ -35,7 +35,8 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
     try {
       const res = await authorizerRef.resetPassword({
         token,
-        ...values,
+        password: values.password,
+        confirm_password: values.confirm_password,
       });
       setLoading(false);
       setError(``);
