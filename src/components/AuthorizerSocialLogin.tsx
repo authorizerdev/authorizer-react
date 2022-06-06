@@ -6,6 +6,7 @@ import { Button, Separator } from '../styles';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { ButtonAppearance } from '../constants';
 import { createQueryParams } from '../utils/common';
+import { LinkedIn } from '../icons/linkedin';
 
 export const AuthorizerSocialLogin: React.FC<{
   urlProps: Record<string, any>;
@@ -14,7 +15,8 @@ export const AuthorizerSocialLogin: React.FC<{
   const hasSocialLogin =
     config.is_google_login_enabled ||
     config.is_github_login_enabled ||
-    config.is_facebook_login_enabled;
+    config.is_facebook_login_enabled ||
+    config.is_linkedin_login_enabled;
 
   const queryParams = createQueryParams({
     ...urlProps,
@@ -61,6 +63,20 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <Facebook />
             Sign in with Facebook
+          </Button>
+          <br />
+        </>
+      )}
+      {config.is_linkedin_login_enabled && (
+        <>
+          <Button
+            appearance={ButtonAppearance.Default}
+            onClick={() => {
+              window.location.href = `${config.authorizerURL}/oauth_login/linkedin?${queryParams}`;
+            }}
+          >
+            <LinkedIn />
+            Sign in with LinkedIn
           </Button>
           <br />
         </>
