@@ -60,6 +60,8 @@ export const Button = styled.button<{ appearance: ButtonAppearance }>`
   display: flex;
   justify-content: center;
   align-items: center;
+  max-width: 375;
+  max-height: 64px;
   background-color: ${(props) =>
     props.appearance === ButtonAppearance.Primary
       ? props.theme.colors.primary

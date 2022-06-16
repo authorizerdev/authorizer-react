@@ -7,6 +7,7 @@ import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { ButtonAppearance } from '../constants';
 import { createQueryParams } from '../utils/common';
 import { LinkedIn } from '../icons/linkedin';
+import { Apple } from '../icons/apple';
 
 export const AuthorizerSocialLogin: React.FC<{
   urlProps: Record<string, any>;
@@ -16,7 +17,8 @@ export const AuthorizerSocialLogin: React.FC<{
     config.is_google_login_enabled ||
     config.is_github_login_enabled ||
     config.is_facebook_login_enabled ||
-    config.is_linkedin_login_enabled;
+    config.is_linkedin_login_enabled ||
+    config.is_apple_login_enabled;
 
   const queryParams = createQueryParams({
     ...urlProps,
@@ -25,6 +27,20 @@ export const AuthorizerSocialLogin: React.FC<{
 
   return (
     <>
+      {config.is_apple_login_enabled && (
+        <div id="appleid-signin">
+          <Button
+            appearance={ButtonAppearance.Default}
+            onClick={() => {
+              window.location.href = `${config.authorizerURL}/oauth_login/apple?${queryParams}`;
+            }}
+          >
+            <Apple />
+            Sign in with Apple
+          </Button>
+          <br />
+        </div>
+      )}
       {config.is_google_login_enabled && (
         <>
           <Button
