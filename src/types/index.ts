@@ -18,6 +18,7 @@ export type AuthorizerState = {
     is_basic_authentication_enabled: boolean;
     is_magic_link_login_enabled: boolean;
     is_sign_up_enabled: boolean;
+    is_strong_password_enabled: boolean;
   };
 };
 
@@ -40,6 +41,7 @@ export type AuthorizerContextPropsType = {
     is_basic_authentication_enabled: boolean;
     is_magic_link_login_enabled: boolean;
     is_sign_up_enabled: boolean;
+    is_strong_password_enabled: boolean;
   };
   user: null | User;
   token: null | AuthToken;

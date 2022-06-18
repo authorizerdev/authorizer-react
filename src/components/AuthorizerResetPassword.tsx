@@ -136,11 +136,15 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
                   )}
                 </Field>
               </FieldWrapper>
-              <PasswordStrengthIndicator
-                value={values.password}
-                setDisableButton={setDisableContinueButton}
-              />
-              <br />
+              {config.is_strong_password_enabled && (
+                <>
+                  <PasswordStrengthIndicator
+                    value={values.password}
+                    setDisableButton={setDisableContinueButton}
+                  />
+                  <br />
+                </>
+              )}
               <Button
                 type="submit"
                 disabled={pristine || loading || disableContinueButton}

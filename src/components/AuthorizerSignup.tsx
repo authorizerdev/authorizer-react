@@ -192,11 +192,15 @@ export const AuthorizerSignup: FC<{
                       )}
                     </Field>
                   </FieldWrapper>
-                  <PasswordStrengthIndicator
-                    value={values.password}
-                    setDisableButton={setDisableSignupButton}
-                  />
-                  <br />
+                  {config.is_strong_password_enabled && (
+                    <>
+                      <PasswordStrengthIndicator
+                        value={values.password}
+                        setDisableButton={setDisableSignupButton}
+                      />
+                      <br />
+                    </>
+                  )}
                   <Button
                     type="submit"
                     disabled={pristine || loading || disableSignupButton}
