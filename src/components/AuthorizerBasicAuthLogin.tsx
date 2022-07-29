@@ -16,6 +16,13 @@ import {
 } from '../styles';
 import { isValidEmail } from '../utils/validations';
 import { Message } from './Message';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
+import { OtpDataType } from '../types';
+
+const initOtpData: OtpDataType = {
+  isScreenVisible: false,
+  email: '',
+};
 
 export const AuthorizerBasicAuthLogin: FC<{
   setView?: (v: Views) => void;
@@ -24,6 +31,7 @@ export const AuthorizerBasicAuthLogin: FC<{
 }> = ({ setView, onLogin, urlProps }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
+  const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
   const { setAuthData, config, authorizerRef } = useAuthorizer();
 
   const onSubmit = async (values: Record<string, string>) => {
@@ -43,6 +51,14 @@ export const AuthorizerBasicAuthLogin: FC<{
       }
 
       const res = await authorizerRef.login(data);
+
+      if (res && res?.should_show_otp_screen) {
+        setOtpData({
+          isScreenVisible: true,
+          email: data.email,
+        });
+        return;
+      }
 
       if (res) {
         setError(``);
@@ -72,7 +88,9 @@ export const AuthorizerBasicAuthLogin: FC<{
     setError(``);
   };
 
-  return (
+  return otpData.isScreenVisible ? (
+    <AuthorizerVerifyOtp {...{ setView, onLogin, email: otpData.email }} />
+  ) : (
     <>
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />

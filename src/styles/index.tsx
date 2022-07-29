@@ -56,7 +56,7 @@ export const Input = styled.input<{ hasError: boolean }>`
 
 export const Button = styled.button<{ appearance: ButtonAppearance }>`
   padding: 15px 10px;
-  width: 100%;
+  width: ${(props) => (props.style?.width ? props.style.width : '100%')};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -65,11 +65,11 @@ export const Button = styled.button<{ appearance: ButtonAppearance }>`
   background-color: ${(props) =>
     props.appearance === ButtonAppearance.Primary
       ? props.theme.colors.primary
-      : 'white'};
+      : '#ffffff'};
   color: ${(props) =>
     props.appearance === ButtonAppearance.Default
       ? props.theme.colors.textColor
-      : 'white'};
+      : '#ffffff'};
   border-radius: ${(props) => props.theme.radius.button};
   border-color: ${(props) => props.theme.colors.textColor};
   border: ${(props) =>

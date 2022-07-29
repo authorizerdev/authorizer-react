@@ -3,6 +3,11 @@ export const isValidEmail = (email: string): boolean => {
   return re.test(String(email.trim()).toLowerCase());
 };
 
+export const isValidOtp = (otp: string): boolean => {
+  const re = /^([A-Z0-9]{6})$/;
+  return re.test(String(otp.trim()));
+};
+
 export const validatePassword = (
   value: string
 ): {
