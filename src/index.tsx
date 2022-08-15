@@ -8,6 +8,7 @@ import { AuthorizerMagicLinkLogin } from './components/AuthorizerMagicLinkLogin'
 import { AuthorizerForgotPassword } from './components/AuthorizerForgotPassword';
 import { AuthorizerSocialLogin } from './components/AuthorizerSocialLogin';
 import { AuthorizerResetPassword } from './components/AuthorizerResetPassword';
+import { AuthorizerVerifyOtp } from './components/AuthorizerVerifyOtp';
 import { AuthorizerRoot as Authorizer } from './components/AuthorizerRoot';
 
 export {
@@ -20,4 +21,5 @@ export {
   AuthorizerForgotPassword,
   AuthorizerSocialLogin,
   AuthorizerResetPassword,
+  AuthorizerVerifyOtp,
 };

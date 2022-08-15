@@ -53,3 +53,8 @@ export type AuthorizerContextPropsType = {
   setAuthData: (data: AuthorizerState) => void;
   authorizerRef: Authorizer;
 };
+
+export type OtpDataType = {
+  isScreenVisible: boolean;
+  email: string;
+};
