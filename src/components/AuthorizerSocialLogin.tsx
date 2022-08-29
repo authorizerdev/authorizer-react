@@ -8,6 +8,7 @@ import { ButtonAppearance } from '../constants';
 import { createQueryParams } from '../utils/common';
 import { LinkedIn } from '../icons/linkedin';
 import { Apple } from '../icons/apple';
+import { Twitter } from '../icons/twitter';
 
 export const AuthorizerSocialLogin: React.FC<{
   urlProps: Record<string, any>;
@@ -93,6 +94,20 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <LinkedIn />
             Sign in with LinkedIn
+          </Button>
+          <br />
+        </>
+      )}
+      {config.is_twitter_login_enabled && (
+        <>
+          <Button
+            appearance={ButtonAppearance.Default}
+            onClick={() => {
+              window.location.href = `${config.authorizerURL}/oauth_login/twitter?${queryParams}`;
+            }}
+          >
+            <Twitter />
+            Sign in with Twitter
           </Button>
           <br />
         </>
