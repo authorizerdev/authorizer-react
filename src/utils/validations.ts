@@ -52,7 +52,7 @@ export const validatePassword = (
     } else if (char >= '0' && char <= '9' && !res.hasNumericChar) {
       res.score = res.score + 1;
       res.hasNumericChar = true;
-    } else if (!res.hasSpecialChar) {
+    } else if (res.hasSpecialChar) {
       res.score = res.score + 1;
       res.hasSpecialChar = true;
     }
