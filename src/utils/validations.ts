@@ -8,6 +8,11 @@ export const isValidOtp = (otp: string): boolean => {
   return re.test(String(otp.trim()));
 };
 
+export const hasSpecialChar = (char: string): boolean => {
+  const re = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+  return re.test(char);
+};
+
 export const validatePassword = (
   value: string
 ): {
@@ -52,7 +57,7 @@ export const validatePassword = (
     } else if (char >= '0' && char <= '9' && !res.hasNumericChar) {
       res.score = res.score + 1;
       res.hasNumericChar = true;
-    } else if (!res.hasSpecialChar) {
+    } else if (hasSpecialChar(char) && !res.hasSpecialChar) {
       res.score = res.score + 1;
       res.hasSpecialChar = true;
     }
