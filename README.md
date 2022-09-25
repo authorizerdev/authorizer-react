@@ -4,7 +4,7 @@ Authorizer React SDK allows you to implement authentication in your [React](http
 
 Here is a quick guide on getting started with `@authorizerdev/authorizer-react` package.
 
-## Conde Sandbox Demo: https://codesandbox.io/s/authorizer-demo-qgjpw
+## Code Sandbox Demo: https://codesandbox.io/s/authorizer-demo-qgjpw
 
 ## Step 1 - Create Instance
 
