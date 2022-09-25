@@ -18,6 +18,7 @@ import { getSearchParams } from '../utils/url';
 import { ThemeProvider } from 'styled-components';
 import { theme } from '../styles/theme';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+import { hasErrors } from '../utils/validations';
 
 type Props = {
   onReset?: (res: any) => void;
@@ -90,7 +91,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
             return errors;
           }}
         >
-          {({ handleSubmit, pristine, values }) => (
+          {({ handleSubmit, pristine, values, errors }) => (
             <form onSubmit={handleSubmit} name="authorizer-reset-password-form">
               <FieldWrapper>
                 <Field name="password">
@@ -147,7 +148,12 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
               )}
               <Button
                 type="submit"
-                disabled={pristine || loading || disableContinueButton}
+                disabled={
+                  pristine ||
+                  loading ||
+                  disableContinueButton ||
+                  hasErrors(errors)
+                }
                 appearance={ButtonAppearance.Primary}
               >
                 {loading ? `Processing ...` : `Continue`}

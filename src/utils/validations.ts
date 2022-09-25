@@ -76,3 +76,7 @@ export const validatePassword = (
   const isValid = Object.values(res).every((i) => Boolean(i));
   return { ...res, isValid };
 };
+
+export const hasErrors = (fieldsError: any) => {
+  return Object.keys(fieldsError).some((field) => fieldsError[field]);
+};

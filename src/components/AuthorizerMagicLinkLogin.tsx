@@ -4,7 +4,7 @@ import { Form, Field } from 'react-final-form';
 import { ButtonAppearance, MessageType } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { Input, Label, FieldWrapper, Required, Button, Error } from '../styles';
-import { isValidEmail } from '../utils/validations';
+import { hasErrors, isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
@@ -80,7 +80,7 @@ export const AuthorizerMagicLinkLogin: FC<{
           return errors;
         }}
       >
-        {({ handleSubmit, pristine }) => (
+        {({ handleSubmit, pristine, errors }) => (
           <form onSubmit={handleSubmit} name="authorizer-magic-login-form">
             <FieldWrapper>
               <Field name="email">
@@ -103,7 +103,7 @@ export const AuthorizerMagicLinkLogin: FC<{
             <br />
             <Button
               type="submit"
-              disabled={pristine || loading}
+              disabled={pristine || loading || hasErrors(errors)}
               appearance={ButtonAppearance.Primary}
             >
               {loading ? `Processing ...` : `Send Email`}

@@ -58,7 +58,7 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
   React.useEffect(() => {
     const validationData = validatePassword(value || '');
     setValidations({ ...validationData });
-    if (Object.values(validationData).some((isValid) => isValid === false)) {
+    if (!validationData.isValid) {
       setDisableButton(true);
     } else {
       setDisableButton(false);

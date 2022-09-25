@@ -13,7 +13,7 @@ import {
   Footer,
   Link,
 } from '../styles';
-import { isValidEmail } from '../utils/validations';
+import { hasErrors, isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
@@ -90,7 +90,7 @@ export const AuthorizerForgotPassword: FC<{
           return errors;
         }}
       >
-        {({ handleSubmit, pristine }) => (
+        {({ handleSubmit, pristine, errors }) => (
           <form onSubmit={handleSubmit} name="authorizer-forgot-password-form">
             <FieldWrapper>
               <Field name="email">
@@ -113,7 +113,7 @@ export const AuthorizerForgotPassword: FC<{
             <br />
             <Button
               type="submit"
-              disabled={pristine || loading}
+              disabled={pristine || loading || hasErrors(errors)}
               appearance={ButtonAppearance.Primary}
             >
               {loading ? `Processing ...` : `Send Email`}
