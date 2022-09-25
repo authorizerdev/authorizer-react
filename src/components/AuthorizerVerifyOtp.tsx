@@ -13,7 +13,7 @@ import {
   Footer,
   Link,
 } from '../styles';
-import { isValidOtp } from '../utils/validations';
+import { hasErrors, isValidOtp } from '../utils/validations';
 import { Message } from './Message';
 
 export const AuthorizerVerifyOtp: FC<{
@@ -125,7 +125,7 @@ export const AuthorizerVerifyOtp: FC<{
           return errors;
         }}
       >
-        {({ handleSubmit, pristine }) => (
+        {({ handleSubmit, pristine, errors }) => (
           <form onSubmit={handleSubmit} name="authorizer-mfa-otp-form">
             <FieldWrapper>
               <Field name="otp">
@@ -148,7 +148,7 @@ export const AuthorizerVerifyOtp: FC<{
             <br />
             <Button
               type="submit"
-              disabled={pristine || loading}
+              disabled={pristine || loading || hasErrors(errors)}
               appearance={ButtonAppearance.Primary}
             >
               {loading ? `Processing ...` : `Submit`}

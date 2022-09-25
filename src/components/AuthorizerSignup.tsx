@@ -14,7 +14,7 @@ import {
   Footer,
   Link,
 } from '../styles';
-import { isValidEmail } from '../utils/validations';
+import { hasErrors, isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
@@ -112,7 +112,7 @@ export const AuthorizerSignup: FC<{
                 }
 
                 if (!values.confirm_password) {
-                  errors.password = 'Confirm password is required';
+                  errors.confirm_password = 'Confirm password is required';
                 }
 
                 if (
@@ -126,36 +126,59 @@ export const AuthorizerSignup: FC<{
                 return errors;
               }}
             >
-              {({ handleSubmit, pristine, values }) => (
-                <form onSubmit={handleSubmit} name="authorizer-signup-form">
-                  <FieldWrapper>
-                    <Field name="email">
-                      {({ input, meta }) => (
-                        <div>
-                          <Label>
-                            <Required>*</Required>Email
-                          </Label>
-                          <Input
-                            {...input}
-                            type="email"
-                            placeholder="eg. foo@bar.com"
-                            hasError={Boolean(meta.error && meta.touched)}
-                          />
-                          {meta.error && meta.touched && (
-                            <Error>{meta.error}</Error>
-                          )}
-                        </div>
-                      )}
-                    </Field>
-                  </FieldWrapper>
-                  <FieldWrapper>
-                    <Field name="password">
-                      {({ input, meta }) => (
-                        <>
+              {({ handleSubmit, pristine, values, errors }) => (
+                <>
+                  <form onSubmit={handleSubmit} name="authorizer-signup-form">
+                    <FieldWrapper>
+                      <Field name="email">
+                        {({ input, meta }) => (
+                          <div>
+                            <Label>
+                              <Required>*</Required>Email
+                            </Label>
+                            <Input
+                              {...input}
+                              type="email"
+                              placeholder="eg. foo@bar.com"
+                              hasError={Boolean(meta.error && meta.touched)}
+                            />
+                            {meta.error && meta.touched && (
+                              <Error>{meta.error}</Error>
+                            )}
+                          </div>
+                        )}
+                      </Field>
+                    </FieldWrapper>
+                    <FieldWrapper>
+                      <Field name="password">
+                        {({ input, meta }) => (
+                          <>
+                            <div>
+                              <Label>
+                                <Required>*</Required>
+                                Password
+                              </Label>
+                              <Input
+                                {...input}
+                                type="password"
+                                placeholder="*********"
+                                hasError={Boolean(meta.error && meta.touched)}
+                              />
+                              {meta.error && meta.touched && (
+                                <Error>{meta.error}</Error>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </Field>
+                    </FieldWrapper>
+                    <FieldWrapper>
+                      <Field name="confirm_password">
+                        {({ input, meta }) => (
                           <div>
                             <Label>
                               <Required>*</Required>
-                              Password
+                              Confirm Password
                             </Label>
                             <Input
                               {...input}
@@ -167,48 +190,32 @@ export const AuthorizerSignup: FC<{
                               <Error>{meta.error}</Error>
                             )}
                           </div>
-                        </>
-                      )}
-                    </Field>
-                  </FieldWrapper>
-                  <FieldWrapper>
-                    <Field name="confirm_password">
-                      {({ input, meta }) => (
-                        <div>
-                          <Label>
-                            <Required>*</Required>
-                            Confirm Password
-                          </Label>
-                          <Input
-                            {...input}
-                            type="password"
-                            placeholder="*********"
-                            hasError={Boolean(meta.error && meta.touched)}
-                          />
-                          {meta.error && meta.touched && (
-                            <Error>{meta.error}</Error>
-                          )}
-                        </div>
-                      )}
-                    </Field>
-                  </FieldWrapper>
-                  {config.is_strong_password_enabled && (
-                    <>
-                      <PasswordStrengthIndicator
-                        value={values.password}
-                        setDisableButton={setDisableSignupButton}
-                      />
-                      <br />
-                    </>
-                  )}
-                  <Button
-                    type="submit"
-                    disabled={pristine || loading || disableSignupButton}
-                    appearance={ButtonAppearance.Primary}
-                  >
-                    {loading ? `Processing ...` : `Sign Up`}
-                  </Button>
-                </form>
+                        )}
+                      </Field>
+                    </FieldWrapper>
+                    {config.is_strong_password_enabled && (
+                      <>
+                        <PasswordStrengthIndicator
+                          value={values.password}
+                          setDisableButton={setDisableSignupButton}
+                        />
+                        <br />
+                      </>
+                    )}
+                    <Button
+                      type="submit"
+                      disabled={
+                        pristine ||
+                        loading ||
+                        disableSignupButton ||
+                        hasErrors(errors)
+                      }
+                      appearance={ButtonAppearance.Primary}
+                    >
+                      {loading ? `Processing ...` : `Sign Up`}
+                    </Button>
+                  </form>
+                </>
               )}
             </Form>
             {setView && (

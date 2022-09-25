@@ -14,7 +14,7 @@ import {
   Footer,
   Link,
 } from '../styles';
-import { isValidEmail } from '../utils/validations';
+import { hasErrors, isValidEmail } from '../utils/validations';
 import { Message } from './Message';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { OtpDataType } from '../types';
@@ -118,7 +118,7 @@ export const AuthorizerBasicAuthLogin: FC<{
             return errors;
           }}
         >
-          {({ handleSubmit, pristine }) => (
+          {({ handleSubmit, pristine, errors }) => (
             <form onSubmit={handleSubmit} name="authorizer-login-form">
               <FieldWrapper>
                 <Field name="email">
@@ -164,7 +164,7 @@ export const AuthorizerBasicAuthLogin: FC<{
               <br />
               <Button
                 type="submit"
-                disabled={pristine || loading}
+                disabled={pristine || loading || hasErrors(errors)}
                 appearance={ButtonAppearance.Primary}
               >
                 {loading ? `Processing ...` : `Log In`}

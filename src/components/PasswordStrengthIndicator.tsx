@@ -58,7 +58,7 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
   React.useEffect(() => {
     const validationData = validatePassword(value || '');
     setValidations({ ...validationData });
-    if (Object.values(validationData).some((isValid) => isValid === false)) {
+    if (!validationData.isValid) {
       setDisableButton(true);
     } else {
       setDisableButton(false);
@@ -73,7 +73,7 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
           <PasswordStrength strength={score > 3 ? `good` : `default`} />
           <PasswordStrength strength={score > 4 ? `strong` : `default`} />
           <PasswordStrength strength={score > 5 ? `veryStrong` : `default`} />
-          <div>{strength}</div>
+          {!!score && <div>{strength}</div>}
         </Flex>
       </PasswordStrengthWrapper>
       <p>
