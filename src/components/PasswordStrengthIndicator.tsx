@@ -73,7 +73,7 @@ const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {
           <PasswordStrength strength={score > 3 ? `good` : `default`} />
           <PasswordStrength strength={score > 4 ? `strong` : `default`} />
           <PasswordStrength strength={score > 5 ? `veryStrong` : `default`} />
-          <div>{strength}</div>
+          {!!score && <div>{strength}</div>}
         </Flex>
       </PasswordStrengthWrapper>
       <p>
