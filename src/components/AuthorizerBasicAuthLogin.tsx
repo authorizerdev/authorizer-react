@@ -122,7 +122,7 @@ export const AuthorizerBasicAuthLogin: FC<{
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
       <>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} name="authorizer-login-form">
           <StyledFormGroup hasError={!!errorData.email}>
             <label className="form-input-label" htmlFor="email">
               <span>* </span>Email
