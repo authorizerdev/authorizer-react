@@ -158,7 +158,13 @@ export const AuthorizerBasicAuthLogin: FC<{
           <br />
           <Button
             type="submit"
-            disabled={loading}
+            disabled={
+              !!errorData.email ||
+              !!errorData.password ||
+              !formData.email ||
+              !formData.password ||
+              loading
+            }
             appearance={ButtonAppearance.Primary}
           >
             {loading ? `Processing ...` : `Log In`}
