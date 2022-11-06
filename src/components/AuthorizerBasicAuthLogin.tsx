@@ -146,7 +146,7 @@ export const AuthorizerBasicAuthLogin: FC<{
             <input
               name="password"
               className="form-input-field"
-              placeholder="eg. foo@bar.com"
+              placeholder="********"
               type="password"
               value={formData.password || ''}
               onChange={(e) => onInputChange('password', e.target.value)}
