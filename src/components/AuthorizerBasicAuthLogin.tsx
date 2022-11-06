@@ -99,7 +99,7 @@ export const AuthorizerBasicAuthLogin: FC<{
   useEffect(() => {
     if (formData.email === '') {
       setErrorData({ ...errorData, email: 'Email is required' });
-    } else if (!isValidEmail(formData.email)) {
+    } else if (formData.email && !isValidEmail(formData.email)) {
       setErrorData({ ...errorData, email: 'Please enter valid email' });
     } else {
       setErrorData({ ...errorData, email: null });
