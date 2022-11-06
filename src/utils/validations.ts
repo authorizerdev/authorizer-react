@@ -1,4 +1,5 @@
-export const isValidEmail = (email: string): boolean => {
+export const isValidEmail = (email: string | null): boolean => {
+  if (!email) return false;
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email.trim()).toLowerCase());
 };
@@ -77,6 +78,7 @@ export const validatePassword = (
   return { ...res, isValid };
 };
 
+// TODO: remove if not needed
 export const hasErrors = (fieldsError: any) => {
   return Object.keys(fieldsError).some((field) => fieldsError[field]);
 };
