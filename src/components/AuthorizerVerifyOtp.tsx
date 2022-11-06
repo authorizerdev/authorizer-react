@@ -125,7 +125,7 @@ export const AuthorizerVerifyOtp: FC<{
         Please enter the OTP you received on your email address.
       </p>
       <br />
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
         <StyledFormGroup hasError={!!errorData.otp}>
           <label className="form-input-label" htmlFor="otp">
             <span>* </span>OTP (One Time Password)
