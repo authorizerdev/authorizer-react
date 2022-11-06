@@ -1,23 +1,19 @@
-import React, { FC, useState } from 'react';
-import { Form, Field } from 'react-final-form';
+import React, { FC, useEffect, useState } from 'react';
 import { AuthToken, SignupInput } from '@authorizerdev/authorizer-js';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import {
-  Input,
-  Label,
-  FieldWrapper,
-  Required,
-  Button,
-  Error,
-  Footer,
-  Link,
-} from '../styles';
-import { hasErrors, isValidEmail } from '../utils/validations';
+import { Button, Footer, Link, StyledFormGroup } from '../styles';
+import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+
+interface InputDataType {
+  email: string | null;
+  password: string | null;
+  confirmPassword: string | null;
+}
 
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
@@ -27,13 +23,32 @@ export const AuthorizerSignup: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
+  const [formData, setFormData] = useState<InputDataType>({
+    email: null,
+    password: null,
+    confirmPassword: null,
+  });
+  const [errorData, setErrorData] = useState<InputDataType>({
+    email: null,
+    password: null,
+    confirmPassword: null,
+  });
   const { authorizerRef, config, setAuthData } = useAuthorizer();
   const [disableSignupButton, setDisableSignupButton] = useState(false);
 
-  const onSubmit = async (values: SignupInput) => {
+  const onInputChange = async (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const onSubmit = async (e: any) => {
+    e.preventDefault();
     try {
       setLoading(true);
-      const data: SignupInput = values;
+      const data: SignupInput = {
+        email: formData.email || '',
+        password: formData.password || '',
+        confirm_password: formData.confirmPassword || '',
+      };
       if (urlProps.scope) {
         data.scope = urlProps.scope;
       }
@@ -79,6 +94,53 @@ export const AuthorizerSignup: FC<{
     setError(``);
   };
 
+  useEffect(() => {
+    if (formData.email === '') {
+      setErrorData({ ...errorData, email: 'Email is required' });
+    } else if (formData.email && !isValidEmail(formData.email)) {
+      setErrorData({ ...errorData, email: 'Please enter valid email' });
+    } else {
+      setErrorData({ ...errorData, email: null });
+    }
+  }, [formData.email]);
+
+  useEffect(() => {
+    if (formData.password === '') {
+      setErrorData({ ...errorData, password: 'Password is required' });
+    } else {
+      setErrorData({ ...errorData, password: null });
+    }
+  }, [formData.password]);
+
+  useEffect(() => {
+    if (formData.confirmPassword === '') {
+      setErrorData({
+        ...errorData,
+        confirmPassword: 'Confirm password is required',
+      });
+    } else {
+      setErrorData({ ...errorData, confirmPassword: null });
+    }
+  }, [formData.confirmPassword]);
+
+  useEffect(() => {
+    if (formData.password && formData.confirmPassword) {
+      if (formData.confirmPassword !== formData.password) {
+        setErrorData({
+          ...errorData,
+          password: `Password and confirm passwords don't match`,
+          confirmPassword: `Password and confirm passwords don't match`,
+        });
+      } else {
+        setErrorData({
+          ...errorData,
+          password: null,
+          confirmPassword: null,
+        });
+      }
+    }
+  }, [formData.password, formData.confirmPassword]);
+
   if (successMessage) {
     return <Message type={MessageType.Success} text={successMessage} />;
   }
@@ -91,133 +153,86 @@ export const AuthorizerSignup: FC<{
       {config.is_basic_authentication_enabled &&
         !config.is_magic_link_login_enabled && (
           <>
-            <Form
-              onSubmit={onSubmit}
-              validate={(values) => {
-                const errors: Record<string, string> = {};
-                if (!values.email) {
-                  errors.email = 'Email is required';
-                }
-
-                if (
-                  values.email &&
-                  values.email.trim() &&
-                  !isValidEmail(values.email)
-                ) {
-                  errors.email = `Please enter valid email`;
-                }
-
-                if (!values.password) {
-                  errors.password = 'Password is required';
-                }
-
-                if (!values.confirm_password) {
-                  errors.confirm_password = 'Confirm password is required';
-                }
-
-                if (
-                  values.password &&
-                  values.confirm_password &&
-                  values.confirm_password !== values.password
-                ) {
-                  errors.confirm_password = `Password and confirm passwords don't match`;
-                  errors.password = `Password and confirm passwords don't match`;
-                }
-                return errors;
-              }}
-            >
-              {({ handleSubmit, pristine, values, errors }) => (
+            <form onSubmit={onSubmit} name="authorizer-signup-form">
+              <StyledFormGroup hasError={!!errorData.email}>
+                <label className="form-input-label" htmlFor="email">
+                  <span>* </span>Email
+                </label>
+                <input
+                  name="email"
+                  className="form-input-field"
+                  placeholder="eg. foo@bar.com"
+                  type="email"
+                  value={formData.email || ''}
+                  onChange={(e) => onInputChange('email', e.target.value)}
+                />
+                {errorData.email && (
+                  <div className="form-input-error">{errorData.email}</div>
+                )}
+              </StyledFormGroup>
+              <StyledFormGroup hasError={!!errorData.password}>
+                <label className="form-input-label" htmlFor="password">
+                  <span>* </span>Password
+                </label>
+                <input
+                  name="password"
+                  className="form-input-field"
+                  placeholder="********"
+                  type="password"
+                  value={formData.password || ''}
+                  onChange={(e) => onInputChange('password', e.target.value)}
+                />
+                {errorData.password && (
+                  <div className="form-input-error">{errorData.password}</div>
+                )}
+              </StyledFormGroup>
+              <StyledFormGroup hasError={!!errorData.confirmPassword}>
+                <label className="form-input-label" htmlFor="confirmPassword">
+                  <span>* </span>Confirm Password
+                </label>
+                <input
+                  name="confirmPassword"
+                  className="form-input-field"
+                  placeholder="********"
+                  type="password"
+                  value={formData.confirmPassword || ''}
+                  onChange={(e) =>
+                    onInputChange('confirmPassword', e.target.value)
+                  }
+                />
+                {errorData.confirmPassword && (
+                  <div className="form-input-error">
+                    {errorData.confirmPassword}
+                  </div>
+                )}
+              </StyledFormGroup>
+              {config.is_strong_password_enabled && (
                 <>
-                  <form onSubmit={handleSubmit} name="authorizer-signup-form">
-                    <FieldWrapper>
-                      <Field name="email">
-                        {({ input, meta }) => (
-                          <div>
-                            <Label>
-                              <Required>*</Required>Email
-                            </Label>
-                            <Input
-                              {...input}
-                              type="email"
-                              placeholder="eg. foo@bar.com"
-                              hasError={Boolean(meta.error && meta.touched)}
-                            />
-                            {meta.error && meta.touched && (
-                              <Error>{meta.error}</Error>
-                            )}
-                          </div>
-                        )}
-                      </Field>
-                    </FieldWrapper>
-                    <FieldWrapper>
-                      <Field name="password">
-                        {({ input, meta }) => (
-                          <>
-                            <div>
-                              <Label>
-                                <Required>*</Required>
-                                Password
-                              </Label>
-                              <Input
-                                {...input}
-                                type="password"
-                                placeholder="*********"
-                                hasError={Boolean(meta.error && meta.touched)}
-                              />
-                              {meta.error && meta.touched && (
-                                <Error>{meta.error}</Error>
-                              )}
-                            </div>
-                          </>
-                        )}
-                      </Field>
-                    </FieldWrapper>
-                    <FieldWrapper>
-                      <Field name="confirm_password">
-                        {({ input, meta }) => (
-                          <div>
-                            <Label>
-                              <Required>*</Required>
-                              Confirm Password
-                            </Label>
-                            <Input
-                              {...input}
-                              type="password"
-                              placeholder="*********"
-                              hasError={Boolean(meta.error && meta.touched)}
-                            />
-                            {meta.error && meta.touched && (
-                              <Error>{meta.error}</Error>
-                            )}
-                          </div>
-                        )}
-                      </Field>
-                    </FieldWrapper>
-                    {config.is_strong_password_enabled && (
-                      <>
-                        <PasswordStrengthIndicator
-                          value={values.password}
-                          setDisableButton={setDisableSignupButton}
-                        />
-                        <br />
-                      </>
-                    )}
-                    <Button
-                      type="submit"
-                      disabled={
-                        pristine ||
-                        loading ||
-                        disableSignupButton ||
-                        hasErrors(errors)
-                      }
-                      appearance={ButtonAppearance.Primary}
-                    >
-                      {loading ? `Processing ...` : `Sign Up`}
-                    </Button>
-                  </form>
+                  <PasswordStrengthIndicator
+                    value={formData.password || ''}
+                    setDisableButton={setDisableSignupButton}
+                  />
+                  <br />
                 </>
               )}
-            </Form>
+              <br />
+              <Button
+                type="submit"
+                disabled={
+                  loading ||
+                  disableSignupButton ||
+                  !!errorData.email ||
+                  !!errorData.password ||
+                  !!errorData.confirmPassword ||
+                  !formData.email ||
+                  !formData.password ||
+                  !formData.confirmPassword
+                }
+                appearance={ButtonAppearance.Primary}
+              >
+                {loading ? `Processing ...` : `Sign Up`}
+              </Button>
+            </form>
             {setView && (
               <Footer>
                 <div>
