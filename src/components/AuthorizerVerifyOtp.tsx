@@ -145,7 +145,7 @@ export const AuthorizerVerifyOtp: FC<{
         <br />
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || !formData.otp || !!errorData.otp}
           appearance={ButtonAppearance.Primary}
         >
           {loading ? `Processing ...` : `Submit`}
