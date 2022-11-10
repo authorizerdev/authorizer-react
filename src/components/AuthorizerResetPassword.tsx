@@ -1,8 +1,9 @@
 import React, { FC, useEffect, useState } from 'react';
+import styles from '../styles/default.mod.css';
 
 import { ButtonAppearance, MessageType } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Button, Wrapper, StyledFormGroup } from '../styles';
+import { StyledButton, StyledWrapper } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import { getSearchParams } from '../utils/url';
@@ -104,7 +105,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Wrapper>
+      <StyledWrapper>
         {error && (
           <Message
             type={MessageType.Error}
@@ -113,40 +114,46 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
           />
         )}
         <form onSubmit={onSubmit} name="authorizer-reset-password-form">
-          <StyledFormGroup hasError={!!errorData.password}>
-            <label className="form-input-label" htmlFor="password">
+          <div className={styles['styled-form-group']}>
+            <label className={styles['form-input-label']} htmlFor="password">
               <span>* </span>Password
             </label>
             <input
               name="password"
-              className="form-input-field"
+              className={`${styles['form-input-field']} ${
+                errorData.password ? styles['input-error-content'] : null
+              }`}
               placeholder="********"
               type="password"
               value={formData.password || ''}
-              onChange={(e) => onInputChange('password', e.target.value)}
+              onChange={e => onInputChange('password', e.target.value)}
             />
             {errorData.password && (
-              <div className="form-input-error">{errorData.password}</div>
+              <div className={styles['form-input-error']}>
+                {errorData.password}
+              </div>
             )}
-          </StyledFormGroup>
-          <StyledFormGroup hasError={!!errorData.confirmPassword}>
-            <label className="form-input-label" htmlFor="confirmPassword">
+          </div>
+          <div className={styles['styled-form-group']}>
+            <label className={styles['form-input-label']} htmlFor="password">
               <span>* </span>Confirm Password
             </label>
             <input
-              name="confirmPassword"
-              className="form-input-field"
+              name="password"
+              className={`${styles['form-input-field']} ${
+                errorData.confirmPassword ? styles['input-error-content'] : null
+              }`}
               placeholder="********"
               type="password"
               value={formData.confirmPassword || ''}
-              onChange={(e) => onInputChange('confirmPassword', e.target.value)}
+              onChange={e => onInputChange('confirmPassword', e.target.value)}
             />
             {errorData.confirmPassword && (
-              <div className="form-input-error">
+              <div className={styles['form-input-error']}>
                 {errorData.confirmPassword}
               </div>
             )}
-          </StyledFormGroup>
+          </div>
           {config.is_strong_password_enabled && (
             <>
               <PasswordStrengthIndicator
@@ -156,7 +163,7 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
               <br />
             </>
           )}
-          <Button
+          <StyledButton
             type="submit"
             disabled={
               loading ||
@@ -169,9 +176,9 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
             appearance={ButtonAppearance.Primary}
           >
             {loading ? `Processing ...` : `Continue`}
-          </Button>
+          </StyledButton>
         </form>
-      </Wrapper>
+      </StyledWrapper>
     </ThemeProvider>
   );
 };

@@ -1,16 +1,17 @@
 import React, { ReactNode } from 'react';
 import { passwordStrengthIndicatorOpacity } from '../constants';
+import styles from '../styles/default.mod.css';
 
 const StyledPasswordStrength = ({
   strength = 'default',
   children,
 }: {
   strength: string;
-  children: ReactNode;
+  children?: ReactNode;
 }) => {
   return (
     <div
-      className="styled-password-strength"
+      className={styles['styled-password-strength']}
       style={{ opacity: passwordStrengthIndicatorOpacity[strength] }}
     >
       {children}
