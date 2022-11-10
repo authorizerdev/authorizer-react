@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { MouseEventHandler, ReactNode } from 'react';
 import { ButtonAppearance } from '../constants';
 import styles from '../styles/default.mod.css';
 
@@ -16,7 +16,7 @@ const StyledButton = ({
   style?: Record<string, string>;
   appearance?: ButtonAppearance;
   disabled?: boolean;
-  onClick?: () => {};
+  onClick?: MouseEventHandler<HTMLSpanElement>;
   children: ReactNode;
 }) => {
   return (
