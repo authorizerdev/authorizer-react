@@ -1,9 +1,10 @@
 import React, { FC, useEffect, useState } from 'react';
 import { AuthToken, SignupInput } from '@authorizerdev/authorizer-js';
+import styles from '../styles/default.mod.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Button, Footer, Link, StyledFormGroup } from '../styles';
+import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
@@ -154,58 +155,76 @@ export const AuthorizerSignup: FC<{
         !config.is_magic_link_login_enabled && (
           <>
             <form onSubmit={onSubmit} name="authorizer-signup-form">
-              <StyledFormGroup hasError={!!errorData.email}>
-                <label className="form-input-label" htmlFor="email">
+              <div className={styles['styled-form-group']}>
+                <label className={styles['form-input-label']} htmlFor="email">
                   <span>* </span>Email
                 </label>
                 <input
                   name="email"
-                  className="form-input-field"
+                  className={`${styles['form-input-field']} ${
+                    errorData.email ? styles['input-error-content'] : null
+                  }`}
                   placeholder="eg. foo@bar.com"
                   type="email"
                   value={formData.email || ''}
-                  onChange={(e) => onInputChange('email', e.target.value)}
+                  onChange={e => onInputChange('email', e.target.value)}
                 />
                 {errorData.email && (
-                  <div className="form-input-error">{errorData.email}</div>
+                  <div className={styles['form-input-error']}>
+                    {errorData.email}
+                  </div>
                 )}
-              </StyledFormGroup>
-              <StyledFormGroup hasError={!!errorData.password}>
-                <label className="form-input-label" htmlFor="password">
+              </div>
+              <div className={styles['styled-form-group']}>
+                <label
+                  className={styles['form-input-label']}
+                  htmlFor="password"
+                >
                   <span>* </span>Password
                 </label>
                 <input
                   name="password"
-                  className="form-input-field"
+                  className={`${styles['form-input-field']} ${
+                    errorData.password ? styles['input-error-content'] : null
+                  }`}
                   placeholder="********"
                   type="password"
                   value={formData.password || ''}
-                  onChange={(e) => onInputChange('password', e.target.value)}
+                  onChange={e => onInputChange('password', e.target.value)}
                 />
                 {errorData.password && (
-                  <div className="form-input-error">{errorData.password}</div>
+                  <div className={styles['form-input-error']}>
+                    {errorData.password}
+                  </div>
                 )}
-              </StyledFormGroup>
-              <StyledFormGroup hasError={!!errorData.confirmPassword}>
-                <label className="form-input-label" htmlFor="confirmPassword">
+              </div>
+              <div className={styles['styled-form-group']}>
+                <label
+                  className={styles['form-input-label']}
+                  htmlFor="password"
+                >
                   <span>* </span>Confirm Password
                 </label>
                 <input
-                  name="confirmPassword"
-                  className="form-input-field"
+                  name="password"
+                  className={`${styles['form-input-field']} ${
+                    errorData.confirmPassword
+                      ? styles['input-error-content']
+                      : null
+                  }`}
                   placeholder="********"
                   type="password"
                   value={formData.confirmPassword || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     onInputChange('confirmPassword', e.target.value)
                   }
                 />
                 {errorData.confirmPassword && (
-                  <div className="form-input-error">
+                  <div className={styles['form-input-error']}>
                     {errorData.confirmPassword}
                   </div>
                 )}
-              </StyledFormGroup>
+              </div>
               {config.is_strong_password_enabled && (
                 <>
                   <PasswordStrengthIndicator
@@ -216,7 +235,7 @@ export const AuthorizerSignup: FC<{
                 </>
               )}
               <br />
-              <Button
+              <StyledButton
                 type="submit"
                 disabled={
                   loading ||
@@ -231,15 +250,17 @@ export const AuthorizerSignup: FC<{
                 appearance={ButtonAppearance.Primary}
               >
                 {loading ? `Processing ...` : `Sign Up`}
-              </Button>
+              </StyledButton>
             </form>
             {setView && (
-              <Footer>
+              <StyledFooter>
                 <div>
                   Already have an account?{' '}
-                  <Link onClick={() => setView(Views.Login)}>Log In</Link>
+                  <StyledLink onClick={() => setView(Views.Login)}>
+                    Log In
+                  </StyledLink>
                 </div>
-              </Footer>
+              </StyledFooter>
             )}
           </>
         )}
