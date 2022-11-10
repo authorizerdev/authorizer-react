@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react';
-import '../styles/default.css';
 import { passwordStrengthIndicatorOpacity } from '../constants';
 
 const StyledPasswordStrength = ({

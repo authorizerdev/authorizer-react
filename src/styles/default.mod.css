@@ -1,4 +1,4 @@
-body {
+:root {
   --authorizer-primary-color: #3b82f6;
   --authorizer-primary-disabled-color: #60a5fa;
   --authorizer-gray-color: #d1d5db;
@@ -16,7 +16,7 @@ body {
   --authorizer-radius-input: 5px;
 }
 .styled-button {
-  padding: 15px 10px;
+  padding: 15px 10px !important;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -51,14 +51,14 @@ body {
   background-color: var(--authorizer-white-color);
   padding: 0 0 15px;
 }
-.styled-form-group > .form-input-label {
+.form-input-label {
   padding: 2.5px;
 }
-.styled-form-group > .form-input-label > span {
+.form-input-label > span {
   color: var(--authorizer-danger-color);
 }
-.styled-form-group > .form-input-field {
-  width: 94.5%;
+.form-input-field {
+  width: 100%;
   margin-top: 5px;
   padding: 10px;
   display: flex;
@@ -69,16 +69,16 @@ body {
   border-style: solid;
   border-color: var(--authorizer-text-color);
 }
-.styled-form-group > .input-error-content {
+.input-error-content {
   border-color: var(--authorizer-danger-color) !important;
 }
-.styled-form-group > .input-error-content:hover {
+.input-error-content:hover {
   outline-color: var(--authorizer-danger-color);
 }
-.styled-form-group > .input-error-content:focus {
+.input-error-content:focus {
   outline-color: var(--authorizer-danger-color);
 }
-.styled-form-group > .form-input-error {
+.form-input-error {
   font-size: 12px;
   font-weight: 400;
   color: red;

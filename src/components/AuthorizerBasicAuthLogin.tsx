@@ -1,9 +1,10 @@
 import React, { FC, useEffect, useState } from 'react';
 import { AuthToken } from '@authorizerdev/authorizer-js';
+import styles from '../styles/default.mod.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Button, Footer, Link, StyledFormGroup } from '../styles';
+import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { isValidEmail } from '../utils/validations';
 import { Message } from './Message';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
@@ -123,40 +124,48 @@ export const AuthorizerBasicAuthLogin: FC<{
       )}
       <>
         <form onSubmit={onSubmit} name="authorizer-login-form">
-          <StyledFormGroup hasError={!!errorData.email}>
-            <label className="form-input-label" htmlFor="email">
+          <div className={styles['styled-form-group']}>
+            <label className={styles['form-input-label']} htmlFor="email">
               <span>* </span>Email
             </label>
             <input
               name="email"
-              className="form-input-field"
+              className={`${styles['form-input-field']} ${
+                errorData.email ? styles['input-error-content'] : null
+              }`}
               placeholder="eg. foo@bar.com"
               type="email"
               value={formData.email || ''}
-              onChange={(e) => onInputChange('email', e.target.value)}
+              onChange={e => onInputChange('email', e.target.value)}
             />
             {errorData.email && (
-              <div className="form-input-error">{errorData.email}</div>
+              <div className={styles['form-input-error']}>
+                {errorData.email}
+              </div>
             )}
-          </StyledFormGroup>
-          <StyledFormGroup hasError={!!errorData.password}>
-            <label className="form-input-label" htmlFor="password">
+          </div>
+          <div className={styles['styled-form-group']}>
+            <label className={styles['form-input-label']} htmlFor="password">
               <span>* </span>Password
             </label>
             <input
               name="password"
-              className="form-input-field"
+              className={`${styles['form-input-field']} ${
+                errorData.password ? styles['input-error-content'] : null
+              }`}
               placeholder="********"
               type="password"
               value={formData.password || ''}
-              onChange={(e) => onInputChange('password', e.target.value)}
+              onChange={e => onInputChange('password', e.target.value)}
             />
             {errorData.password && (
-              <div className="form-input-error">{errorData.password}</div>
+              <div className={styles['form-input-error']}>
+                {errorData.password}
+              </div>
             )}
-          </StyledFormGroup>
+          </div>
           <br />
-          <Button
+          <StyledButton
             type="submit"
             disabled={
               !!errorData.email ||
@@ -168,25 +177,27 @@ export const AuthorizerBasicAuthLogin: FC<{
             appearance={ButtonAppearance.Primary}
           >
             {loading ? `Processing ...` : `Log In`}
-          </Button>
+          </StyledButton>
         </form>
 
         {setView && (
-          <Footer>
-            <Link
+          <StyledFooter>
+            <StyledLink
               onClick={() => setView(Views.ForgotPassword)}
-              style={{ marginBottom: 10 }}
+              marginBottom="10px"
             >
               Forgot Password?
-            </Link>
+            </StyledLink>
 
             {config.is_sign_up_enabled && (
               <div>
                 Don't have an account?{' '}
-                <Link onClick={() => setView(Views.Signup)}>Sign Up</Link>
+                <StyledLink onClick={() => setView(Views.Signup)}>
+                  Sign Up
+                </StyledLink>
               </div>
             )}
-          </Footer>
+          </StyledFooter>
         )}
       </>
     </>

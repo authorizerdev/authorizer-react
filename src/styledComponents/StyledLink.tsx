@@ -1,15 +1,21 @@
-import React, { ReactNode } from 'react';
-import '../styles/default.css';
+import React, { MouseEventHandler, ReactNode } from 'react';
+import styles from '../styles/default.mod.css';
 
 const StyledLink = ({
   marginBottom = '0px',
   children,
+  onClick,
 }: {
-  marginBottom: string;
+  marginBottom?: string;
   children: ReactNode;
+  onClick: MouseEventHandler<HTMLSpanElement>;
 }) => {
   return (
-    <span className="styled-link" style={{ marginBottom }}>
+    <span
+      className={styles['styled-link']}
+      style={{ marginBottom }}
+      onClick={onClick}
+    >
       {children}
     </span>
   );

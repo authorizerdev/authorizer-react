@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react';
-import '../styles/default.css';
+import styles from '../styles/default.mod.css';
 
 const StyledFormGroup = ({ children }: { children: ReactNode }) => {
-  return <div className="styled-form-group">{children}</div>;
+  return <div className={styles['styled-form-group']}>{children}</div>;
 };
 
 export default StyledFormGroup;

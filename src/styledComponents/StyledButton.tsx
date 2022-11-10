@@ -1,23 +1,28 @@
 import React, { ReactNode } from 'react';
-import '../styles/default.css';
 import { ButtonAppearance } from '../constants';
+import styles from '../styles/default.mod.css';
 
 const StyledButton = ({
   style = {
     width: '100%',
   },
+  type,
   appearance = ButtonAppearance.Default,
   disabled = false,
+  onClick,
   children,
 }: {
-  style: Record<string, string>;
-  appearance: ButtonAppearance;
-  disabled: boolean;
+  type?: 'button' | 'submit' | 'reset' | undefined;
+  style?: Record<string, string>;
+  appearance?: ButtonAppearance;
+  disabled?: boolean;
+  onClick?: () => {};
   children: ReactNode;
 }) => {
   return (
     <button
-      className="styled-button"
+      className={styles['styled-button']}
+      type={type}
       style={{
         width: style.width,
         backgroundColor: disabled
@@ -32,6 +37,7 @@ const StyledButton = ({
         border: appearance === ButtonAppearance.Primary ? '0px' : '1px',
       }}
       disabled={disabled}
+      onClick={onClick}
     >
       {children}
     </button>

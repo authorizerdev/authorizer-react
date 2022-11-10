@@ -1,4 +1,5 @@
 const replace = require('@rollup/plugin-replace');
+const postcss = require('rollup-plugin-postcss');
 
 module.exports = {
   // This function will run for each entry/format/env combination
@@ -10,6 +11,11 @@ module.exports = {
             preventAssignment: true,
           })
         : p
+    );
+    config.plugins.push(
+      postcss({
+        modules: true,
+      })
     );
     return config;
   },
