@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { MessageType } from '../constants';
+import styles from '../styles/default.mod.css';
 
 const StyledMessageWrapper = ({
   type = MessageType.Success,
@@ -10,7 +11,7 @@ const StyledMessageWrapper = ({
 }) => {
   return (
     <div
-      className="styled-message-wrapper"
+      className={styles['styled-message-wrapper']}
       style={{
         backgroundColor:
           type === MessageType.Error

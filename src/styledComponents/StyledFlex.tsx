@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import styles from '../styles/default.mod.css';
 
 const StyledFlex = ({
   flexDirection = 'row',
@@ -8,16 +9,16 @@ const StyledFlex = ({
   width = 'inherit',
   children,
 }: {
-  flexDirection: 'row' | 'row-reverse' | 'column' | 'column-reverse';
-  alignItems: string;
-  justifyContent: string;
-  wrap: 'nowrap' | 'wrap' | 'wrap-reverse';
-  width: string;
+  flexDirection?: 'row' | 'row-reverse' | 'column' | 'column-reverse';
+  alignItems?: string;
+  justifyContent?: string;
+  wrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
+  width?: string;
   children: ReactNode;
 }) => {
   return (
     <div
-      className="styled-flex"
+      className={styles['styled-flex']}
       style={{
         flexDirection,
         alignItems,

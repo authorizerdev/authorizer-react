@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { MessageType } from '../constants';
 import { IconClose } from '../icons/close';
-import { MessageWrapper, Flex } from '../styles';
+import { StyledMessageWrapper, StyledFlex } from '../styledComponents';
 import { capitalizeFirstLetter } from '../utils/format';
 
 type Props = {
@@ -13,16 +13,16 @@ type Props = {
 export const Message: FC<Props> = ({ type, text, onClose }) => {
   if (text.trim()) {
     return (
-      <MessageWrapper type={type}>
-        <Flex alignItems="center" justifyContent="space-between">
+      <StyledMessageWrapper type={type}>
+        <StyledFlex alignItems="center" justifyContent="space-between">
           <div style={{ flex: 1 }}>{capitalizeFirstLetter(text)}</div>
           {onClose && (
             <span style={{ cursor: 'pointer' }} onClick={onClose}>
-              <IconClose height={10} width={10} />
+              <IconClose />
             </span>
           )}
-        </Flex>
-      </MessageWrapper>
+        </StyledFlex>
+      </StyledMessageWrapper>
     );
   }
 
