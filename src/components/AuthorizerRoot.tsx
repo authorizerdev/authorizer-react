@@ -4,7 +4,7 @@ import { AuthToken } from '@authorizerdev/authorizer-js';
 
 import { AuthorizerBasicAuthLogin } from './AuthorizerBasicAuthLogin';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Wrapper } from '../styles';
+import { StyledWrapper } from '../styledComponents';
 import { theme } from '../styles/theme';
 import { Views } from '../constants';
 import { AuthorizerSignup } from './AuthorizerSignup';
@@ -27,7 +27,10 @@ export const AuthorizerRoot: FC<{
   );
   const state = searchParams.get('state') || createRandomString();
   const scope = searchParams.get('scope')
-    ? searchParams.get('scope')?.toString().split(' ')
+    ? searchParams
+        .get('scope')
+        ?.toString()
+        .split(' ')
     : ['openid', 'profile', 'email'];
 
   const urlProps: Record<string, any> = {
@@ -47,7 +50,7 @@ export const AuthorizerRoot: FC<{
 
   return (
     <ThemeProvider theme={theme}>
-      <Wrapper>
+      <StyledWrapper>
         <AuthorizerSocialLogin urlProps={urlProps} />
         {view === Views.Login &&
           config.is_basic_authentication_enabled &&
@@ -84,7 +87,7 @@ export const AuthorizerRoot: FC<{
             urlProps={urlProps}
           />
         )}
-      </Wrapper>
+      </StyledWrapper>
     </ThemeProvider>
   );
 };
