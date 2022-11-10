@@ -7,8 +7,6 @@ import { StyledButton, StyledWrapper } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import { getSearchParams } from '../utils/url';
-import { ThemeProvider } from 'styled-components';
-import { theme } from '../styles/theme';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 type Props = {
@@ -104,81 +102,75 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
   }, [formData.password, formData.confirmPassword]);
 
   return (
-    <ThemeProvider theme={theme}>
-      <StyledWrapper>
-        {error && (
-          <Message
-            type={MessageType.Error}
-            text={error}
-            onClose={onErrorClose}
+    <StyledWrapper>
+      {error && (
+        <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
+      )}
+      <form onSubmit={onSubmit} name="authorizer-reset-password-form">
+        <div className={styles['styled-form-group']}>
+          <label className={styles['form-input-label']} htmlFor="password">
+            <span>* </span>Password
+          </label>
+          <input
+            name="password"
+            className={`${styles['form-input-field']} ${
+              errorData.password ? styles['input-error-content'] : null
+            }`}
+            placeholder="********"
+            type="password"
+            value={formData.password || ''}
+            onChange={e => onInputChange('password', e.target.value)}
           />
-        )}
-        <form onSubmit={onSubmit} name="authorizer-reset-password-form">
-          <div className={styles['styled-form-group']}>
-            <label className={styles['form-input-label']} htmlFor="password">
-              <span>* </span>Password
-            </label>
-            <input
-              name="password"
-              className={`${styles['form-input-field']} ${
-                errorData.password ? styles['input-error-content'] : null
-              }`}
-              placeholder="********"
-              type="password"
-              value={formData.password || ''}
-              onChange={e => onInputChange('password', e.target.value)}
-            />
-            {errorData.password && (
-              <div className={styles['form-input-error']}>
-                {errorData.password}
-              </div>
-            )}
-          </div>
-          <div className={styles['styled-form-group']}>
-            <label className={styles['form-input-label']} htmlFor="password">
-              <span>* </span>Confirm Password
-            </label>
-            <input
-              name="password"
-              className={`${styles['form-input-field']} ${
-                errorData.confirmPassword ? styles['input-error-content'] : null
-              }`}
-              placeholder="********"
-              type="password"
-              value={formData.confirmPassword || ''}
-              onChange={e => onInputChange('confirmPassword', e.target.value)}
-            />
-            {errorData.confirmPassword && (
-              <div className={styles['form-input-error']}>
-                {errorData.confirmPassword}
-              </div>
-            )}
-          </div>
-          {config.is_strong_password_enabled && (
-            <>
-              <PasswordStrengthIndicator
-                value={formData.password || ''}
-                setDisableButton={setDisableContinueButton}
-              />
-              <br />
-            </>
+          {errorData.password && (
+            <div className={styles['form-input-error']}>
+              {errorData.password}
+            </div>
           )}
-          <StyledButton
-            type="submit"
-            disabled={
-              loading ||
-              disableContinueButton ||
-              !!errorData.password ||
-              !!errorData.confirmPassword ||
-              !formData.password ||
-              !formData.confirmPassword
-            }
-            appearance={ButtonAppearance.Primary}
-          >
-            {loading ? `Processing ...` : `Continue`}
-          </StyledButton>
-        </form>
-      </StyledWrapper>
-    </ThemeProvider>
+        </div>
+        <div className={styles['styled-form-group']}>
+          <label className={styles['form-input-label']} htmlFor="password">
+            <span>* </span>Confirm Password
+          </label>
+          <input
+            name="password"
+            className={`${styles['form-input-field']} ${
+              errorData.confirmPassword ? styles['input-error-content'] : null
+            }`}
+            placeholder="********"
+            type="password"
+            value={formData.confirmPassword || ''}
+            onChange={e => onInputChange('confirmPassword', e.target.value)}
+          />
+          {errorData.confirmPassword && (
+            <div className={styles['form-input-error']}>
+              {errorData.confirmPassword}
+            </div>
+          )}
+        </div>
+        {config.is_strong_password_enabled && (
+          <>
+            <PasswordStrengthIndicator
+              value={formData.password || ''}
+              setDisableButton={setDisableContinueButton}
+            />
+            <br />
+          </>
+        )}
+        <StyledButton
+          type="submit"
+          disabled={
+            loading ||
+            disableContinueButton ||
+            !!errorData.password ||
+            !!errorData.confirmPassword ||
+            !formData.password ||
+            !formData.confirmPassword
+          }
+          appearance={ButtonAppearance.Primary}
+        >
+          {loading ? `Processing ...` : `Continue`}
+        </StyledButton>
+      </form>
+    </StyledWrapper>
   );
 };
