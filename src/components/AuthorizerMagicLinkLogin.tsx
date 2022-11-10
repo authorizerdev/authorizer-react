@@ -1,8 +1,9 @@
 import React, { FC, useEffect, useState } from 'react';
+import styles from '../styles/default.mod.css';
 
 import { ButtonAppearance, MessageType } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Button, StyledFormGroup } from '../styles';
+import { StyledButton } from '../styledComponents';
 import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
@@ -86,30 +87,32 @@ export const AuthorizerMagicLinkLogin: FC<{
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
       <form onSubmit={onSubmit} name="authorizer-magic-login-form">
-        <StyledFormGroup hasError={!!errorData.email}>
-          <label className="form-input-label" htmlFor="email">
+        <div className={styles['styled-form-group']}>
+          <label className={styles['form-input-label']} htmlFor="email">
             <span>* </span>Email
           </label>
           <input
             name="email"
-            className="form-input-field"
+            className={`${styles['form-input-field']} ${
+              errorData.email ? styles['input-error-content'] : null
+            }`}
             placeholder="eg. foo@bar.com"
             type="email"
             value={formData.email || ''}
-            onChange={(e) => onInputChange('email', e.target.value)}
+            onChange={e => onInputChange('email', e.target.value)}
           />
           {errorData.email && (
-            <div className="form-input-error">{errorData.email}</div>
+            <div className={styles['form-input-error']}>{errorData.email}</div>
           )}
-        </StyledFormGroup>
+        </div>
         <br />
-        <Button
+        <StyledButton
           type="submit"
           disabled={loading || !!errorData.email || !formData.email}
           appearance={ButtonAppearance.Primary}
         >
           {loading ? `Processing ...` : `Send Email`}
-        </Button>
+        </StyledButton>
       </form>
     </>
   );

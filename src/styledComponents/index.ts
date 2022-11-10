@@ -5,7 +5,6 @@ import StyledSeparator from './StyledSeparator';
 import StyledFooter from './StyledFooter';
 import StyledMessageWrapper from './StyledMessageWrapper';
 import StyledFlex from './StyledFlex';
-import StyledFormGroup from './StyledFormGroup';
 import StyledCheckbox from './StyledCheckbox';
 import StyledPasswordStrength from './StyledPasswordStrength';
 import StyledPasswordStrengthWrapper from './StyledPasswordStrengthWrapper';
@@ -18,7 +17,6 @@ export {
   StyledFooter,
   StyledMessageWrapper,
   StyledFlex,
-  StyledFormGroup,
   StyledCheckbox,
   StyledPasswordStrength,
   StyledPasswordStrengthWrapper,
