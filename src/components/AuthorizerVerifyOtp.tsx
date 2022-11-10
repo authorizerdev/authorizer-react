@@ -1,8 +1,9 @@
 import React, { FC, useEffect, useState } from 'react';
+import styles from '../styles/default.mod.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Button, Footer, Link, StyledFormGroup } from '../styles';
+import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { isValidOtp } from '../utils/validations';
 import { Message } from './Message';
 
@@ -126,47 +127,51 @@ export const AuthorizerVerifyOtp: FC<{
       </p>
       <br />
       <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
-        <StyledFormGroup hasError={!!errorData.otp}>
-          <label className="form-input-label" htmlFor="otp">
+        <div className={styles['styled-form-group']}>
+          <label className={styles['form-input-label']} htmlFor="otp">
             <span>* </span>OTP (One Time Password)
           </label>
           <input
             name="otp"
-            className="form-input-field"
+            className={`${styles['form-input-field']} ${
+              errorData.otp ? styles['input-error-content'] : null
+            }`}
             placeholder="e.g.- AB123C"
             type="password"
             value={formData.otp || ''}
-            onChange={(e) => onInputChange('otp', e.target.value)}
+            onChange={e => onInputChange('otp', e.target.value)}
           />
           {errorData.otp && (
-            <div className="form-input-error">{errorData.otp}</div>
+            <div className={styles['form-input-error']}>{errorData.otp}</div>
           )}
-        </StyledFormGroup>
+        </div>
         <br />
-        <Button
+        <StyledButton
           type="submit"
           disabled={loading || !formData.otp || !!errorData.otp}
           appearance={ButtonAppearance.Primary}
         >
           {loading ? `Processing ...` : `Submit`}
-        </Button>
+        </StyledButton>
       </form>
       {setView && (
-        <Footer>
+        <StyledFooter>
           {sendingOtp ? (
             <div style={{ marginBottom: '10px' }}>Sending ...</div>
           ) : (
-            <Link onClick={resendOtp} style={{ marginBottom: 10 }}>
+            <StyledLink onClick={resendOtp} marginBottom="10px">
               Resend OTP
-            </Link>
+            </StyledLink>
           )}
           {config.is_sign_up_enabled && (
             <div>
               Don't have an account?{' '}
-              <Link onClick={() => setView(Views.Signup)}>Sign Up</Link>
+              <StyledLink onClick={() => setView(Views.Signup)}>
+                Sign Up
+              </StyledLink>
             </div>
           )}
-        </Footer>
+        </StyledFooter>
       )}
     </>
   );
