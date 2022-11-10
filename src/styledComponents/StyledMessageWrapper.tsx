@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { MessageType } from '../constants';
-import styles from '../styles/default.mod.css';
+import styles from '../styles/default.css';
 
 const StyledMessageWrapper = ({
   type = MessageType.Success,

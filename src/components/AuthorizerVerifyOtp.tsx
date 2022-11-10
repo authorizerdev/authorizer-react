@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import styles from '../styles/default.mod.css';
+import styles from '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';

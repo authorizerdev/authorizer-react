@@ -1,5 +1,5 @@
 import React, { MouseEventHandler, ReactNode } from 'react';
-import styles from '../styles/default.mod.css';
+import styles from '../styles/default.css';
 
 const StyledLink = ({
   marginBottom = '0px',

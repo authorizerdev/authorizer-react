@@ -1,6 +1,6 @@
 import React, { MouseEventHandler, ReactNode } from 'react';
 import { ButtonAppearance } from '../constants';
-import styles from '../styles/default.mod.css';
+import styles from '../styles/default.css';
 
 const StyledButton = ({
   style = {
