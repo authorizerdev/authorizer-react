@@ -1,3 +1,4 @@
+import { VerifyOtpInput } from '@authorizerdev/authorizer-js';
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
 
@@ -20,7 +21,8 @@ export const AuthorizerVerifyOtp: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: any) => void;
   email: string;
-}> = ({ setView, onLogin, email }) => {
+  urlProps: Record<string, any>;
+}> = ({ setView, onLogin, email, urlProps }) => {
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
@@ -31,11 +33,15 @@ export const AuthorizerVerifyOtp: FC<{
     setSuccessMessage(``);
     try {
       setLoading(true);
-
-      const res = await authorizerRef.verifyOtp({
+      const data: VerifyOtpInput = {
         email,
         otp: values.otp,
-      });
+      };
+      if (urlProps.state) {
+        data.state = urlProps.state;
+      }
+
+      const res = await authorizerRef.verifyOtp(data);
       setLoading(false);
 
       if (res) {

@@ -43,6 +43,9 @@ export const AuthorizerSignup: FC<{
       if (urlProps.redirect_uri) {
         data.redirect_uri = urlProps.redirect_uri;
       }
+      if (urlProps.state) {
+        data.state = urlProps.state;
+      }
       const res = await authorizerRef.signup(data);
 
       if (res) {
