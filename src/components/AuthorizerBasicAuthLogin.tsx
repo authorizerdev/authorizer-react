@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { Form, Field } from 'react-final-form';
-import { AuthToken } from '@authorizerdev/authorizer-js';
+import { AuthToken, LoginInput } from '@authorizerdev/authorizer-js';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -37,17 +37,15 @@ export const AuthorizerBasicAuthLogin: FC<{
   const onSubmit = async (values: Record<string, string>) => {
     setLoading(true);
     try {
-      const data: {
-        email: string;
-        password: string;
-        roles?: string[];
-        scope?: string[];
-      } = {
+      const data: LoginInput = {
         email: values.email,
         password: values.password,
       };
       if (urlProps.scope) {
         data.scope = urlProps.scope;
+      }
+      if (urlProps.state) {
+        data.state = urlProps.state;
       }
 
       const res = await authorizerRef.login(data);
@@ -89,7 +87,10 @@ export const AuthorizerBasicAuthLogin: FC<{
   };
 
   return otpData.isScreenVisible ? (
-    <AuthorizerVerifyOtp {...{ setView, onLogin, email: otpData.email }} />
+    <AuthorizerVerifyOtp
+      {...{ setView, onLogin, email: otpData.email }}
+      urlProps={urlProps}
+    />
   ) : (
     <>
       {error && (
