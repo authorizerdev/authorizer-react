@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
+import { VerifyOtpInput } from '@authorizerdev/authorizer-js';
 import styles from '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
@@ -15,7 +16,8 @@ export const AuthorizerVerifyOtp: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: any) => void;
   email: string;
-}> = ({ setView, onLogin, email }) => {
+  urlProps: Record<string, any>;
+}> = ({ setView, onLogin, email, urlProps }) => {
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
@@ -37,11 +39,15 @@ export const AuthorizerVerifyOtp: FC<{
     setSuccessMessage(``);
     try {
       setLoading(true);
-
-      const res = await authorizerRef.verifyOtp({
+      const data: VerifyOtpInput = {
         email,
         otp: formData.otp || '',
-      });
+      };
+      if (urlProps.state) {
+        data.state = urlProps.state;
+      }
+
+      const res = await authorizerRef.verifyOtp(data);
       setLoading(false);
 
       if (res) {
@@ -139,7 +145,7 @@ export const AuthorizerVerifyOtp: FC<{
             placeholder="e.g.- AB123C"
             type="password"
             value={formData.otp || ''}
-            onChange={e => onInputChange('otp', e.target.value)}
+            onChange={(e) => onInputChange('otp', e.target.value)}
           />
           {errorData.otp && (
             <div className={styles['form-input-error']}>{errorData.otp}</div>

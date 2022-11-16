@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { AuthToken } from '@authorizerdev/authorizer-js';
+import { AuthToken, LoginInput } from '@authorizerdev/authorizer-js';
 import styles from '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
@@ -46,17 +46,15 @@ export const AuthorizerBasicAuthLogin: FC<{
     e.preventDefault();
     setLoading(true);
     try {
-      const data: {
-        email: string;
-        password: string;
-        roles?: string[];
-        scope?: string[];
-      } = {
+      const data: LoginInput = {
         email: formData.email || '',
         password: formData.password || '',
       };
       if (urlProps.scope) {
         data.scope = urlProps.scope;
+      }
+      if (urlProps.state) {
+        data.state = urlProps.state;
       }
 
       const res = await authorizerRef.login(data);
@@ -116,7 +114,10 @@ export const AuthorizerBasicAuthLogin: FC<{
   }, [formData.password]);
 
   return otpData.isScreenVisible ? (
-    <AuthorizerVerifyOtp {...{ setView, onLogin, email: otpData.email }} />
+    <AuthorizerVerifyOtp
+      {...{ setView, onLogin, email: otpData.email }}
+      urlProps={urlProps}
+    />
   ) : (
     <>
       {error && (
@@ -136,7 +137,7 @@ export const AuthorizerBasicAuthLogin: FC<{
               placeholder="eg. foo@bar.com"
               type="email"
               value={formData.email || ''}
-              onChange={e => onInputChange('email', e.target.value)}
+              onChange={(e) => onInputChange('email', e.target.value)}
             />
             {errorData.email && (
               <div className={styles['form-input-error']}>
@@ -156,7 +157,7 @@ export const AuthorizerBasicAuthLogin: FC<{
               placeholder="********"
               type="password"
               value={formData.password || ''}
-              onChange={e => onInputChange('password', e.target.value)}
+              onChange={(e) => onInputChange('password', e.target.value)}
             />
             {errorData.password && (
               <div className={styles['form-input-error']}>
