@@ -8,16 +8,8 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: '@',
-        replacement: path.resolve(__dirname, 'src'),
-      },
-      {
         find: 'authorizer-react',
         replacement: path.resolve(__dirname, '../dist/authorizer-react.esm.js'),
-      },
-      {
-        find: '@types/authorizer-react',
-        replacement: path.resolve(__dirname, '../dist/types/index.d.ts'),
       },
     ],
   },
