@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useAuthorizer } from 'authorizer-react';
 import Dashboard from './pages/dashboard';
 import Login from './pages/login';
-import ResetPassword from './pages/rest-password';
+import ResetPassword from './pages/resetPassword';
 
 function App() {
   const { token, loading } = useAuthorizer();
