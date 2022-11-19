@@ -77,6 +77,7 @@ export const validatePassword = (
   return { ...res, isValid };
 };
 
+// TODO: remove if not needed
 export const hasErrors = (fieldsError: any) => {
   return Object.keys(fieldsError).some((field) => fieldsError[field]);
 };

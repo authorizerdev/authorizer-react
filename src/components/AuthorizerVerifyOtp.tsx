@@ -1,21 +1,16 @@
+import React, { FC, useEffect, useState } from 'react';
 import { VerifyOtpInput } from '@authorizerdev/authorizer-js';
-import React, { FC, useState } from 'react';
-import { Form, Field } from 'react-final-form';
+import styles from '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import {
-  Input,
-  Label,
-  FieldWrapper,
-  Required,
-  Button,
-  Error,
-  Footer,
-  Link,
-} from '../styles';
-import { hasErrors, isValidOtp } from '../utils/validations';
+import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
+import { isValidOtp } from '../utils/validations';
 import { Message } from './Message';
+
+interface InputDataType {
+  otp: string | null;
+}
 
 export const AuthorizerVerifyOtp: FC<{
   setView?: (v: Views) => void;
@@ -27,15 +22,26 @@ export const AuthorizerVerifyOtp: FC<{
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
+  const [formData, setFormData] = useState<InputDataType>({
+    otp: null,
+  });
+  const [errorData, setErrorData] = useState<InputDataType>({
+    otp: null,
+  });
   const { authorizerRef, config, setAuthData } = useAuthorizer();
 
-  const onSubmit = async (values: Record<string, string>) => {
+  const onInputChange = async (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const onSubmit = async (e: any) => {
+    e.preventDefault();
     setSuccessMessage(``);
     try {
       setLoading(true);
       const data: VerifyOtpInput = {
         email,
-        otp: values.otp,
+        otp: formData.otp || '',
       };
       if (urlProps.state) {
         data.state = urlProps.state;
@@ -100,6 +106,16 @@ export const AuthorizerVerifyOtp: FC<{
     }
   };
 
+  useEffect(() => {
+    if (formData.otp === '') {
+      setErrorData({ ...errorData, otp: 'OTP is required' });
+    } else if (formData.otp && !isValidOtp(formData.otp)) {
+      setErrorData({ ...errorData, otp: 'Please enter valid OTP' });
+    } else {
+      setErrorData({ ...errorData, otp: null });
+    }
+  }, [formData.otp]);
+
   return (
     <>
       {successMessage && (
@@ -116,68 +132,52 @@ export const AuthorizerVerifyOtp: FC<{
         Please enter the OTP you received on your email address.
       </p>
       <br />
-      <Form
-        onSubmit={onSubmit}
-        validate={(values) => {
-          const errors: Record<string, string> = {};
-          if (!values.otp) {
-            errors.otp = 'OTP is required';
-          }
-
-          if (values.otp && values.otp.trim() && !isValidOtp(values.otp)) {
-            errors.otp = `Please enter valid OTP`;
-          }
-
-          return errors;
-        }}
-      >
-        {({ handleSubmit, pristine, errors }) => (
-          <form onSubmit={handleSubmit} name="authorizer-mfa-otp-form">
-            <FieldWrapper>
-              <Field name="otp">
-                {({ input, meta }) => (
-                  <div>
-                    <Label>
-                      <Required>*</Required>OTP (One Time Password)
-                    </Label>
-                    <Input
-                      {...input}
-                      type="text"
-                      placeholder="e.g.- AB123C"
-                      hasError={Boolean(meta.error && meta.touched)}
-                    />
-                    {meta.error && meta.touched && <Error>{meta.error}</Error>}
-                  </div>
-                )}
-              </Field>
-            </FieldWrapper>
-            <br />
-            <Button
-              type="submit"
-              disabled={pristine || loading || hasErrors(errors)}
-              appearance={ButtonAppearance.Primary}
-            >
-              {loading ? `Processing ...` : `Submit`}
-            </Button>
-          </form>
-        )}
-      </Form>
+      <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
+        <div className={styles['styled-form-group']}>
+          <label className={styles['form-input-label']} htmlFor="otp">
+            <span>* </span>OTP (One Time Password)
+          </label>
+          <input
+            name="otp"
+            className={`${styles['form-input-field']} ${
+              errorData.otp ? styles['input-error-content'] : null
+            }`}
+            placeholder="e.g.- AB123C"
+            type="password"
+            value={formData.otp || ''}
+            onChange={(e) => onInputChange('otp', e.target.value)}
+          />
+          {errorData.otp && (
+            <div className={styles['form-input-error']}>{errorData.otp}</div>
+          )}
+        </div>
+        <br />
+        <StyledButton
+          type="submit"
+          disabled={loading || !formData.otp || !!errorData.otp}
+          appearance={ButtonAppearance.Primary}
+        >
+          {loading ? `Processing ...` : `Submit`}
+        </StyledButton>
+      </form>
       {setView && (
-        <Footer>
+        <StyledFooter>
           {sendingOtp ? (
             <div style={{ marginBottom: '10px' }}>Sending ...</div>
           ) : (
-            <Link onClick={resendOtp} style={{ marginBottom: 10 }}>
+            <StyledLink onClick={resendOtp} marginBottom="10px">
               Resend OTP
-            </Link>
+            </StyledLink>
           )}
           {config.is_sign_up_enabled && (
             <div>
               Don't have an account?{' '}
-              <Link onClick={() => setView(Views.Signup)}>Sign Up</Link>
+              <StyledLink onClick={() => setView(Views.Signup)}>
+                Sign Up
+              </StyledLink>
             </div>
           )}
-        </Footer>
+        </StyledFooter>
       )}
     </>
   );

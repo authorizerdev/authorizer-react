@@ -21,3 +21,12 @@ export enum AuthorizerProviderActionType {
   SET_AUTH_DATA = 'SET_AUTH_DATA',
   SET_CONFIG = 'SET_CONFIG',
 }
+
+// TODO use based on theme primary color
+export const passwordStrengthIndicatorOpacity: Record<string, number> = {
+  default: 0.15,
+  weak: 0.4,
+  good: 0.6,
+  strong: 0.8,
+  veryStrong: 1,
+};

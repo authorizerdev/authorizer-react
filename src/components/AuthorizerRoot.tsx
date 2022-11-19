@@ -1,11 +1,9 @@
 import React, { FC, useState } from 'react';
-import { ThemeProvider } from 'styled-components';
 import { AuthToken } from '@authorizerdev/authorizer-js';
 
 import { AuthorizerBasicAuthLogin } from './AuthorizerBasicAuthLogin';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { Wrapper } from '../styles';
-import { theme } from '../styles/theme';
+import { StyledWrapper } from '../styledComponents';
 import { Views } from '../constants';
 import { AuthorizerSignup } from './AuthorizerSignup';
 import { AuthorizerForgotPassword } from './AuthorizerForgotPassword';
@@ -27,7 +25,10 @@ export const AuthorizerRoot: FC<{
   );
   const state = searchParams.get('state') || createRandomString();
   const scope = searchParams.get('scope')
-    ? searchParams.get('scope')?.toString().split(' ')
+    ? searchParams
+        .get('scope')
+        ?.toString()
+        .split(' ')
     : ['openid', 'profile', 'email'];
 
   const urlProps: Record<string, any> = {
@@ -46,45 +47,43 @@ export const AuthorizerRoot: FC<{
   urlProps.redirect_uri = urlProps.redirectURL;
 
   return (
-    <ThemeProvider theme={theme}>
-      <Wrapper>
-        <AuthorizerSocialLogin urlProps={urlProps} />
-        {view === Views.Login &&
-          config.is_basic_authentication_enabled &&
-          !config.is_magic_link_login_enabled && (
-            <AuthorizerBasicAuthLogin
-              setView={setView}
-              onLogin={onLogin}
-              urlProps={urlProps}
-            />
-          )}
-
-        {view === Views.Signup &&
-          config.is_basic_authentication_enabled &&
-          !config.is_magic_link_login_enabled &&
-          config.is_sign_up_enabled && (
-            <AuthorizerSignup
-              setView={setView}
-              onSignup={onSignup}
-              urlProps={urlProps}
-            />
-          )}
-
-        {view === Views.Login && config.is_magic_link_login_enabled && (
-          <AuthorizerMagicLinkLogin
-            onMagicLinkLogin={onMagicLinkLogin}
-            urlProps={urlProps}
-          />
-        )}
-
-        {view === Views.ForgotPassword && (
-          <AuthorizerForgotPassword
+    <StyledWrapper>
+      <AuthorizerSocialLogin urlProps={urlProps} />
+      {view === Views.Login &&
+        config.is_basic_authentication_enabled &&
+        !config.is_magic_link_login_enabled && (
+          <AuthorizerBasicAuthLogin
             setView={setView}
-            onForgotPassword={onForgotPassword}
+            onLogin={onLogin}
             urlProps={urlProps}
           />
         )}
-      </Wrapper>
-    </ThemeProvider>
+
+      {view === Views.Signup &&
+        config.is_basic_authentication_enabled &&
+        !config.is_magic_link_login_enabled &&
+        config.is_sign_up_enabled && (
+          <AuthorizerSignup
+            setView={setView}
+            onSignup={onSignup}
+            urlProps={urlProps}
+          />
+        )}
+
+      {view === Views.Login && config.is_magic_link_login_enabled && (
+        <AuthorizerMagicLinkLogin
+          onMagicLinkLogin={onMagicLinkLogin}
+          urlProps={urlProps}
+        />
+      )}
+
+      {view === Views.ForgotPassword && (
+        <AuthorizerForgotPassword
+          setView={setView}
+          onForgotPassword={onForgotPassword}
+          urlProps={urlProps}
+        />
+      )}
+    </StyledWrapper>
   );
 };

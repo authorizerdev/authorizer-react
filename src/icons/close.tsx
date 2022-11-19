@@ -1,43 +1,17 @@
-import React, { FC } from 'react';
-import { IconRoot } from '../components/IconRoot';
+import React from 'react';
 
-export const IconClose: FC<{ height: number; width: number }> = ({
-  height,
-  width,
-  ...rest
-}) => (
-  <IconRoot
-    width={width}
-    height={height}
-    viewBox="0 0 17.205 16.919"
-    style={{ fill: 'currentColor' }}
-    {...rest}
+export const IconClose = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1000 1000"
+    width="10px"
+    height="10px"
   >
-    <g
-      id="Close_Blip"
-      data-name="Close Blip"
-      transform="translate(2.121 2.121)"
-    >
-      <line
-        id="Line_139"
-        data-name="Line 139"
-        x2="12.963"
-        y2="12.677"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="3"
-      />
-      <line
-        id="Line_140"
-        data-name="Line 140"
-        y1="12.677"
-        x2="12.963"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="3"
+    <g>
+      <path
+        fill="#ffffff"
+        d="M617.2,495.8l349.1,350.9c31.7,31.8,31.7,83.5,0,115.3c-31.7,31.9-83.1,31.9-114.8,0L502.4,611.2L149.8,965.6c-32,32.2-83.8,32.2-115.8,0c-32-32.1-32-84.3,0-116.4l352.6-354.5L48.2,154.6c-31.7-31.9-31.7-83.5,0-115.4c31.7-31.9,83.1-31.9,114.7,0l338.4,340.2l343.3-345c32-32.1,83.8-32.1,115.8,0c32,32.2,32,84.3,0,116.4L617.2,495.8z"
       />
     </g>
-  </IconRoot>
+  </svg>
 );

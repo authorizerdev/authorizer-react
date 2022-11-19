@@ -2,7 +2,7 @@ import React from 'react';
 import { Github } from '../icons/github';
 import { Google } from '../icons/google';
 import { Facebook } from '../icons/facebook';
-import { Button, Separator } from '../styles';
+import { StyledButton, StyledSeparator } from '../styledComponents';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { ButtonAppearance } from '../constants';
 import { createQueryParams } from '../utils/common';
@@ -30,7 +30,7 @@ export const AuthorizerSocialLogin: React.FC<{
     <>
       {config.is_apple_login_enabled && (
         <div id="appleid-signin">
-          <Button
+          <StyledButton
             appearance={ButtonAppearance.Default}
             onClick={() => {
               window.location.href = `${config.authorizerURL}/oauth_login/apple?${queryParams}`;
@@ -38,13 +38,13 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <Apple />
             Sign in with Apple
-          </Button>
+          </StyledButton>
           <br />
         </div>
       )}
       {config.is_google_login_enabled && (
         <>
-          <Button
+          <StyledButton
             appearance={ButtonAppearance.Default}
             onClick={() => {
               window.location.href = `${config.authorizerURL}/oauth_login/google?${queryParams}`;
@@ -52,13 +52,13 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <Google />
             Sign in with Google
-          </Button>
+          </StyledButton>
           <br />
         </>
       )}
       {config.is_github_login_enabled && (
         <>
-          <Button
+          <StyledButton
             appearance={ButtonAppearance.Default}
             onClick={() => {
               window.location.href = `${config.authorizerURL}/oauth_login/github?${queryParams}`;
@@ -66,13 +66,13 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <Github />
             Sign in with Github
-          </Button>
+          </StyledButton>
           <br />
         </>
       )}
       {config.is_facebook_login_enabled && (
         <>
-          <Button
+          <StyledButton
             appearance={ButtonAppearance.Default}
             onClick={() => {
               window.location.href = `${config.authorizerURL}/oauth_login/facebook?${queryParams}`;
@@ -80,13 +80,13 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <Facebook />
             Sign in with Facebook
-          </Button>
+          </StyledButton>
           <br />
         </>
       )}
       {config.is_linkedin_login_enabled && (
         <>
-          <Button
+          <StyledButton
             appearance={ButtonAppearance.Default}
             onClick={() => {
               window.location.href = `${config.authorizerURL}/oauth_login/linkedin?${queryParams}`;
@@ -94,13 +94,13 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <LinkedIn />
             Sign in with LinkedIn
-          </Button>
+          </StyledButton>
           <br />
         </>
       )}
       {config.is_twitter_login_enabled && (
         <>
-          <Button
+          <StyledButton
             appearance={ButtonAppearance.Default}
             onClick={() => {
               window.location.href = `${config.authorizerURL}/oauth_login/twitter?${queryParams}`;
@@ -108,13 +108,15 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <Twitter />
             Sign in with Twitter
-          </Button>
+          </StyledButton>
           <br />
         </>
       )}
       {hasSocialLogin &&
         (config.is_basic_authentication_enabled ||
-          config.is_magic_link_login_enabled) && <Separator>OR</Separator>}
+          config.is_magic_link_login_enabled) && (
+          <StyledSeparator>OR</StyledSeparator>
+        )}
     </>
   );
 };
