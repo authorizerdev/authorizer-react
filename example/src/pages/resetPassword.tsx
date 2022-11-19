@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AuthorizerResetPassword } from '../../.';
+import { AuthorizerResetPassword } from 'authorizer-react';
 
 const ResetPassword: React.FC = () => {
   return (

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useAuthorizer } from '../../.';
+import { useAuthorizer } from 'authorizer-react';
 
 const Dashboard: React.FC = () => {
   const { user, loading, logout } = useAuthorizer();

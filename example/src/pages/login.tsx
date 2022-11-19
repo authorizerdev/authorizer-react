@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Authorizer } from '../../.';
+import { Authorizer } from 'authorizer-react';
 
 const Login: React.FC = () => {
   return (
@@ -7,13 +7,13 @@ const Login: React.FC = () => {
       <h1 style={{ textAlign: 'center' }}>Welcome to Authorizer</h1>
       <br />
       <Authorizer
-        onLogin={(loginData) => {
+        onLogin={(loginData: any) => {
           console.log({ loginData });
         }}
-        onMagicLinkLogin={(mData) => {
+        onMagicLinkLogin={(mData: any) => {
           console.log({ mData });
         }}
-        onSignup={(sData) => {
+        onSignup={(sData: any) => {
           console.log({ sData });
         }}
       />

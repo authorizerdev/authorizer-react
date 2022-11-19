@@ -1,13 +1,12 @@
-import 'react-app-polyfill/ie11';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthorizerProvider } from '../.';
-import Root from './root';
+import { AuthorizerProvider } from 'authorizer-react';
+import App from './App';
 import './index.css';
 
-const App = () => {
-  return (
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+  <React.StrictMode>
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <div
         style={{
@@ -24,16 +23,14 @@ const App = () => {
               authorizerURL: 'http://localhost:8080',
               redirectURL: window.location.origin,
             }}
-            onStateChangeCallback={async ({ user, token }) => {
+            onStateChangeCallback={async ({ user, token }: any) => {
               console.log(user, token);
             }}
           >
-            <Root />
+            <App />
           </AuthorizerProvider>
         </BrowserRouter>
       </div>
     </div>
-  );
-};
-
-ReactDOM.render(<App />, document.getElementById('root'));
+  </React.StrictMode>
+);
