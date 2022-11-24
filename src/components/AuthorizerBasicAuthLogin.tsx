@@ -24,7 +24,8 @@ export const AuthorizerBasicAuthLogin: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: AuthToken | void) => void;
   urlProps: Record<string, any>;
-}> = ({ setView, onLogin, urlProps }) => {
+  roles?: string[];
+}> = ({ setView, onLogin, urlProps, roles }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
@@ -55,6 +56,10 @@ export const AuthorizerBasicAuthLogin: FC<{
       }
       if (urlProps.state) {
         data.state = urlProps.state;
+      }
+
+      if (roles && roles.length) {
+        data.roles = roles;
       }
 
       const res = await authorizerRef.login(data);

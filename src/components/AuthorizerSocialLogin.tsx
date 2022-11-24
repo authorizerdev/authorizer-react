@@ -12,7 +12,8 @@ import { Twitter } from '../icons/twitter';
 
 export const AuthorizerSocialLogin: React.FC<{
   urlProps: Record<string, any>;
-}> = ({ urlProps }) => {
+  roles?: string[];
+}> = ({ urlProps, roles }) => {
   const { config } = useAuthorizer();
   const hasSocialLogin =
     config.is_google_login_enabled ||
@@ -21,10 +22,19 @@ export const AuthorizerSocialLogin: React.FC<{
     config.is_linkedin_login_enabled ||
     config.is_apple_login_enabled;
 
-  const queryParams = createQueryParams({
+  const data: {
+    scope?: string;
+    roles?: string[];
+  } = {
     ...urlProps,
     scope: urlProps.scope.join(' '),
-  });
+  };
+
+  if (roles && roles.length) {
+    data.roles = roles;
+  }
+
+  const queryParams = createQueryParams(data);
 
   return (
     <>

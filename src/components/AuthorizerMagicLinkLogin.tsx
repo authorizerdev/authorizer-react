@@ -7,6 +7,7 @@ import { StyledButton } from '../styledComponents';
 import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
+import { MagicLinkLoginInput } from '@authorizerdev/authorizer-js';
 
 interface InputDataType {
   email: string | null;
@@ -15,7 +16,8 @@ interface InputDataType {
 export const AuthorizerMagicLinkLogin: FC<{
   onMagicLinkLogin?: (data: any) => void;
   urlProps: Record<string, any>;
-}> = ({ onMagicLinkLogin, urlProps }) => {
+  roles?: string[];
+}> = ({ onMagicLinkLogin, urlProps, roles }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -36,11 +38,16 @@ export const AuthorizerMagicLinkLogin: FC<{
     try {
       setLoading(true);
 
-      const res = await authorizerRef.magicLinkLogin({
+      const data: MagicLinkLoginInput = {
         email: formData.email || '',
         state: urlProps.state || '',
         redirect_uri: urlProps.redirect_uri || '',
-      });
+      };
+
+      if (roles && roles.length) {
+        data.roles = roles;
+      }
+      const res = await authorizerRef.magicLinkLogin(data);
       setLoading(false);
 
       if (res) {
@@ -99,7 +106,7 @@ export const AuthorizerMagicLinkLogin: FC<{
             placeholder="eg. foo@bar.com"
             type="email"
             value={formData.email || ''}
-            onChange={e => onInputChange('email', e.target.value)}
+            onChange={(e) => onInputChange('email', e.target.value)}
           />
           {errorData.email && (
             <div className={styles['form-input-error']}>{errorData.email}</div>
