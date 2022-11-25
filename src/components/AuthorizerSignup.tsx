@@ -20,7 +20,8 @@ export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
   onSignup?: (data: AuthToken) => void;
   urlProps: Record<string, any>;
-}> = ({ setView, onSignup, urlProps }) => {
+  roles?: string[];
+}> = ({ setView, onSignup, urlProps, roles }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -61,6 +62,9 @@ export const AuthorizerSignup: FC<{
       }
       if (urlProps.state) {
         data.state = urlProps.state;
+      }
+      if (roles && roles.length) {
+        data.roles;
       }
       const res = await authorizerRef.signup(data);
 
@@ -170,7 +174,7 @@ export const AuthorizerSignup: FC<{
                   placeholder="eg. foo@bar.com"
                   type="email"
                   value={formData.email || ''}
-                  onChange={e => onInputChange('email', e.target.value)}
+                  onChange={(e) => onInputChange('email', e.target.value)}
                 />
                 {errorData.email && (
                   <div className={styles['form-input-error']}>
@@ -193,7 +197,7 @@ export const AuthorizerSignup: FC<{
                   placeholder="********"
                   type="password"
                   value={formData.password || ''}
-                  onChange={e => onInputChange('password', e.target.value)}
+                  onChange={(e) => onInputChange('password', e.target.value)}
                 />
                 {errorData.password && (
                   <div className={styles['form-input-error']}>
@@ -218,7 +222,7 @@ export const AuthorizerSignup: FC<{
                   placeholder="********"
                   type="password"
                   value={formData.confirmPassword || ''}
-                  onChange={e =>
+                  onChange={(e) =>
                     onInputChange('confirmPassword', e.target.value)
                   }
                 />

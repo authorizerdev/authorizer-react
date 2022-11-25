@@ -17,7 +17,8 @@ export const AuthorizerRoot: FC<{
   onSignup?: (data: AuthToken | void) => void;
   onMagicLinkLogin?: (data: any) => void;
   onForgotPassword?: (data: any) => void;
-}> = ({ onLogin, onSignup, onMagicLinkLogin, onForgotPassword }) => {
+  roles?: string[];
+}> = ({ onLogin, onSignup, onMagicLinkLogin, onForgotPassword, roles }) => {
   const [view, setView] = useState(Views.Login);
   const { config } = useAuthorizer();
   const searchParams = new URLSearchParams(
@@ -25,10 +26,7 @@ export const AuthorizerRoot: FC<{
   );
   const state = searchParams.get('state') || createRandomString();
   const scope = searchParams.get('scope')
-    ? searchParams
-        .get('scope')
-        ?.toString()
-        .split(' ')
+    ? searchParams.get('scope')?.toString().split(' ')
     : ['openid', 'profile', 'email'];
 
   const urlProps: Record<string, any> = {
@@ -48,7 +46,7 @@ export const AuthorizerRoot: FC<{
 
   return (
     <StyledWrapper>
-      <AuthorizerSocialLogin urlProps={urlProps} />
+      <AuthorizerSocialLogin urlProps={urlProps} roles={roles} />
       {view === Views.Login &&
         config.is_basic_authentication_enabled &&
         !config.is_magic_link_login_enabled && (
@@ -56,6 +54,7 @@ export const AuthorizerRoot: FC<{
             setView={setView}
             onLogin={onLogin}
             urlProps={urlProps}
+            roles={roles}
           />
         )}
 
@@ -67,6 +66,7 @@ export const AuthorizerRoot: FC<{
             setView={setView}
             onSignup={onSignup}
             urlProps={urlProps}
+            roles={roles}
           />
         )}
 
@@ -74,6 +74,7 @@ export const AuthorizerRoot: FC<{
         <AuthorizerMagicLinkLogin
           onMagicLinkLogin={onMagicLinkLogin}
           urlProps={urlProps}
+          roles={roles}
         />
       )}
 
