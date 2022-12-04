@@ -23,7 +23,7 @@ interface InputDataType {
 export const AuthorizerBasicAuthLogin: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: AuthToken | void) => void;
-  urlProps: Record<string, any> | null;
+  urlProps?: Record<string, any>;
   roles?: string[];
 }> = ({ setView, onLogin, urlProps, roles }) => {
   const [error, setError] = useState(``);
