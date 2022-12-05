@@ -11,7 +11,7 @@ import { Apple } from '../icons/apple';
 import { Twitter } from '../icons/twitter';
 
 export const AuthorizerSocialLogin: React.FC<{
-  urlProps: Record<string, any>;
+  urlProps?: Record<string, any>;
   roles?: string[];
 }> = ({ urlProps, roles }) => {
   const { config } = useAuthorizer();
@@ -26,8 +26,8 @@ export const AuthorizerSocialLogin: React.FC<{
     scope?: string;
     roles?: string[];
   } = {
-    ...urlProps,
-    scope: urlProps.scope.join(' '),
+    ...(urlProps || {}),
+    scope: urlProps?.scope.join(' '),
   };
 
   if (roles && roles.length) {

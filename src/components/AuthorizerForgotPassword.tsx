@@ -15,7 +15,7 @@ interface InputDataType {
 export const AuthorizerForgotPassword: FC<{
   setView?: (v: Views) => void;
   onForgotPassword?: (data: any) => void;
-  urlProps: Record<string, any>;
+  urlProps?: Record<string, any>;
 }> = ({ setView, onForgotPassword, urlProps }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
@@ -39,9 +39,11 @@ export const AuthorizerForgotPassword: FC<{
 
       const res = await authorizerRef.forgotPassword({
         email: formData.email || '',
-        state: urlProps.state || '',
+        state: urlProps?.state || '',
         redirect_uri:
-          urlProps.redirect_uri || config.redirectURL || window.location.origin,
+          urlProps?.redirect_uri ||
+          config.redirectURL ||
+          window.location.origin,
       });
       setLoading(false);
 
@@ -100,7 +102,7 @@ export const AuthorizerForgotPassword: FC<{
             placeholder="eg. foo@bar.com"
             type="email"
             value={formData.email || ''}
-            onChange={e => onInputChange('email', e.target.value)}
+            onChange={(e) => onInputChange('email', e.target.value)}
           />
           {errorData.email && (
             <div className={styles['form-input-error']}>{errorData.email}</div>
