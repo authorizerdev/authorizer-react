@@ -19,7 +19,7 @@ interface InputDataType {
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
   onSignup?: (data: AuthToken) => void;
-  urlProps: Record<string, any>;
+  urlProps?: Record<string, any>;
   roles?: string[];
 }> = ({ setView, onSignup, urlProps, roles }) => {
   const [error, setError] = useState(``);
@@ -51,16 +51,16 @@ export const AuthorizerSignup: FC<{
         password: formData.password || '',
         confirm_password: formData.confirmPassword || '',
       };
-      if (urlProps.scope) {
+      if (urlProps?.scope) {
         data.scope = urlProps.scope;
       }
-      if (urlProps.roles) {
+      if (urlProps?.roles) {
         data.roles = urlProps.roles;
       }
-      if (urlProps.redirect_uri) {
+      if (urlProps?.redirect_uri) {
         data.redirect_uri = urlProps.redirect_uri;
       }
-      if (urlProps.state) {
+      if (urlProps?.state) {
         data.state = urlProps.state;
       }
       if (roles && roles.length) {
