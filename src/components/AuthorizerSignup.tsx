@@ -64,7 +64,7 @@ export const AuthorizerSignup: FC<{
         data.state = urlProps.state;
       }
       if (roles && roles.length) {
-        data.roles;
+        data.roles = roles;
       }
       const res = await authorizerRef.signup(data);
 
