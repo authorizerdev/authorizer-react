@@ -16,7 +16,7 @@ export const AuthorizerVerifyOtp: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: any) => void;
   email: string;
-  urlProps: Record<string, any>;
+  urlProps?: Record<string, any>;
 }> = ({ setView, onLogin, email, urlProps }) => {
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -43,7 +43,7 @@ export const AuthorizerVerifyOtp: FC<{
         email,
         otp: formData.otp || '',
       };
-      if (urlProps.state) {
+      if (urlProps?.state) {
         data.state = urlProps.state;
       }
 

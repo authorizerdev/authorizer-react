@@ -15,7 +15,7 @@ interface InputDataType {
 
 export const AuthorizerMagicLinkLogin: FC<{
   onMagicLinkLogin?: (data: any) => void;
-  urlProps: Record<string, any>;
+  urlProps?: Record<string, any>;
   roles?: string[];
 }> = ({ onMagicLinkLogin, urlProps, roles }) => {
   const [error, setError] = useState(``);
@@ -40,8 +40,8 @@ export const AuthorizerMagicLinkLogin: FC<{
 
       const data: MagicLinkLoginInput = {
         email: formData.email || '',
-        state: urlProps.state || '',
-        redirect_uri: urlProps.redirect_uri || '',
+        state: urlProps?.state || '',
+        redirect_uri: urlProps?.redirect_uri || '',
       };
 
       if (roles && roles.length) {
@@ -59,7 +59,7 @@ export const AuthorizerMagicLinkLogin: FC<{
         }
       }
 
-      if (urlProps.redirect_uri) {
+      if (urlProps?.redirect_uri) {
         setTimeout(() => {
           window.location.replace(urlProps.redirect_uri);
         }, 3000);

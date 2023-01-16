@@ -23,7 +23,7 @@ interface InputDataType {
 export const AuthorizerBasicAuthLogin: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: AuthToken | void) => void;
-  urlProps: Record<string, any>;
+  urlProps?: Record<string, any>;
   roles?: string[];
 }> = ({ setView, onLogin, urlProps, roles }) => {
   const [error, setError] = useState(``);
@@ -51,10 +51,10 @@ export const AuthorizerBasicAuthLogin: FC<{
         email: formData.email || '',
         password: formData.password || '',
       };
-      if (urlProps.scope) {
+      if (urlProps?.scope) {
         data.scope = urlProps.scope;
       }
-      if (urlProps.state) {
+      if (urlProps?.state) {
         data.state = urlProps.state;
       }
 
