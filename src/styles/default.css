@@ -32,9 +32,6 @@
   cursor: not-allowed;
   background-color: var(--authorizer-primary-disabled-color);
 }
-.styled-checkbox {
-  margin-left: 5px;
-}
 .styled-flex {
   display: flex;
 }
