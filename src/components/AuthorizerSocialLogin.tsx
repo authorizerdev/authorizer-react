@@ -9,6 +9,7 @@ import { createQueryParams } from '../utils/common';
 import { LinkedIn } from '../icons/linkedin';
 import { Apple } from '../icons/apple';
 import { Twitter } from '../icons/twitter';
+import { Microsoft } from '../icons/microsoft';
 
 export const AuthorizerSocialLogin: React.FC<{
   urlProps?: Record<string, any>;
@@ -20,7 +21,9 @@ export const AuthorizerSocialLogin: React.FC<{
     config.is_github_login_enabled ||
     config.is_facebook_login_enabled ||
     config.is_linkedin_login_enabled ||
-    config.is_apple_login_enabled;
+    config.is_apple_login_enabled ||
+    config.is_twitter_login_enabled ||
+    config.is_microsoft_login_enabled;
 
   const data: {
     scope?: string;
@@ -47,7 +50,7 @@ export const AuthorizerSocialLogin: React.FC<{
             }}
           >
             <Apple />
-            Sign in with Apple
+            Continue with Apple
           </StyledButton>
           <br />
         </div>
@@ -61,7 +64,7 @@ export const AuthorizerSocialLogin: React.FC<{
             }}
           >
             <Google />
-            Sign in with Google
+            Continue with Google
           </StyledButton>
           <br />
         </>
@@ -75,7 +78,7 @@ export const AuthorizerSocialLogin: React.FC<{
             }}
           >
             <Github />
-            Sign in with Github
+            Continue with Github
           </StyledButton>
           <br />
         </>
@@ -89,7 +92,7 @@ export const AuthorizerSocialLogin: React.FC<{
             }}
           >
             <Facebook />
-            Sign in with Facebook
+            Continue with Facebook
           </StyledButton>
           <br />
         </>
@@ -103,7 +106,7 @@ export const AuthorizerSocialLogin: React.FC<{
             }}
           >
             <LinkedIn />
-            Sign in with LinkedIn
+            Continue with LinkedIn
           </StyledButton>
           <br />
         </>
@@ -117,7 +120,21 @@ export const AuthorizerSocialLogin: React.FC<{
             }}
           >
             <Twitter />
-            Sign in with Twitter
+            Continue with Twitter
+          </StyledButton>
+          <br />
+        </>
+      )}
+      {config.is_microsoft_login_enabled && (
+        <>
+          <StyledButton
+            appearance={ButtonAppearance.Default}
+            onClick={() => {
+              window.location.href = `${config.authorizerURL}/oauth_login/microsoft?${queryParams}`;
+            }}
+          >
+            <Microsoft />
+            Continue with Microsoft
           </StyledButton>
           <br />
         </>
