@@ -163,11 +163,15 @@ export const AuthorizerSignup: FC<{
           <>
             <form onSubmit={onSubmit} name="authorizer-signup-form">
               <div className={styles['styled-form-group']}>
-                <label className={styles['form-input-label']} htmlFor="email">
+                <label
+                  className={styles['form-input-label']}
+                  htmlFor="authorizer-sign-up-email"
+                >
                   <span>* </span>Email
                 </label>
                 <input
                   name="email"
+                  id="authorizer-sign-up-email"
                   className={`${styles['form-input-field']} ${
                     errorData.email ? styles['input-error-content'] : null
                   }`}
@@ -185,12 +189,13 @@ export const AuthorizerSignup: FC<{
               <div className={styles['styled-form-group']}>
                 <label
                   className={styles['form-input-label']}
-                  htmlFor="password"
+                  htmlFor="authorizer-sign-up-password"
                 >
                   <span>* </span>Password
                 </label>
                 <input
                   name="password"
+                  id="authorizer-sign-up-password"
                   className={`${styles['form-input-field']} ${
                     errorData.password ? styles['input-error-content'] : null
                   }`}
@@ -208,12 +213,13 @@ export const AuthorizerSignup: FC<{
               <div className={styles['styled-form-group']}>
                 <label
                   className={styles['form-input-label']}
-                  htmlFor="password"
+                  htmlFor="authorizer-sign-up-confirm-password"
                 >
                   <span>* </span>Confirm Password
                 </label>
                 <input
-                  name="password"
+                  name="confirmPassword"
+                  id="authorizer-sign-up-confirm-password"
                   className={`${styles['form-input-field']} ${
                     errorData.confirmPassword
                       ? styles['input-error-content']

@@ -108,18 +108,22 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
       )}
       <form onSubmit={onSubmit} name="authorizer-reset-password-form">
         <div className={styles['styled-form-group']}>
-          <label className={styles['form-input-label']} htmlFor="password">
+          <label
+            className={styles['form-input-label']}
+            htmlFor="authorizer-reset-password"
+          >
             <span>* </span>Password
           </label>
           <input
             name="password"
+            id="authorizer-reset-password"
             className={`${styles['form-input-field']} ${
               errorData.password ? styles['input-error-content'] : null
             }`}
             placeholder="********"
             type="password"
             value={formData.password || ''}
-            onChange={e => onInputChange('password', e.target.value)}
+            onChange={(e) => onInputChange('password', e.target.value)}
           />
           {errorData.password && (
             <div className={styles['form-input-error']}>
@@ -128,18 +132,22 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
           )}
         </div>
         <div className={styles['styled-form-group']}>
-          <label className={styles['form-input-label']} htmlFor="password">
+          <label
+            className={styles['form-input-label']}
+            htmlFor="authorizer-reset-confirm-password"
+          >
             <span>* </span>Confirm Password
           </label>
           <input
-            name="password"
+            name="confirmPassword"
+            id="authorizer-reset-confirm-password"
             className={`${styles['form-input-field']} ${
               errorData.confirmPassword ? styles['input-error-content'] : null
             }`}
             placeholder="********"
             type="password"
             value={formData.confirmPassword || ''}
-            onChange={e => onInputChange('confirmPassword', e.target.value)}
+            onChange={(e) => onInputChange('confirmPassword', e.target.value)}
           />
           {errorData.confirmPassword && (
             <div className={styles['form-input-error']}>

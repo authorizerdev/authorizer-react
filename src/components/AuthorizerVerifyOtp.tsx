@@ -134,11 +134,15 @@ export const AuthorizerVerifyOtp: FC<{
       <br />
       <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
         <div className={styles['styled-form-group']}>
-          <label className={styles['form-input-label']} htmlFor="otp">
+          <label
+            className={styles['form-input-label']}
+            htmlFor="authorizer-verify-otp"
+          >
             <span>* </span>OTP (One Time Password)
           </label>
           <input
             name="otp"
+            id="authorizer-verify-otp"
             className={`${styles['form-input-field']} ${
               errorData.otp ? styles['input-error-content'] : null
             }`}

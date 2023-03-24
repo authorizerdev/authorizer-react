@@ -131,11 +131,15 @@ export const AuthorizerBasicAuthLogin: FC<{
       <>
         <form onSubmit={onSubmit} name="authorizer-login-form">
           <div className={styles['styled-form-group']}>
-            <label className={styles['form-input-label']} htmlFor="email">
+            <label
+              className={styles['form-input-label']}
+              htmlFor="authorizer-login-email"
+            >
               <span>* </span>Email
             </label>
             <input
               name="email"
+              id="authorizer-login-email"
               className={`${styles['form-input-field']} ${
                 errorData.email ? styles['input-error-content'] : null
               }`}
@@ -151,11 +155,15 @@ export const AuthorizerBasicAuthLogin: FC<{
             )}
           </div>
           <div className={styles['styled-form-group']}>
-            <label className={styles['form-input-label']} htmlFor="password">
+            <label
+              className={styles['form-input-label']}
+              htmlFor="authorizer-login-password"
+            >
               <span>* </span>Password
             </label>
             <input
               name="password"
+              id="authorizer-login-password"
               className={`${styles['form-input-field']} ${
                 errorData.password ? styles['input-error-content'] : null
               }`}

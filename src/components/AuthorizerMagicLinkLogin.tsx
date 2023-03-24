@@ -95,11 +95,15 @@ export const AuthorizerMagicLinkLogin: FC<{
       )}
       <form onSubmit={onSubmit} name="authorizer-magic-login-form">
         <div className={styles['styled-form-group']}>
-          <label className={styles['form-input-label']} htmlFor="email">
+          <label
+            className={styles['form-input-label']}
+            htmlFor="authorizer-magic-link-login-email"
+          >
             <span>* </span>Email
           </label>
           <input
             name="email"
+            id="authorizer-magic-link-login-email"
             className={`${styles['form-input-field']} ${
               errorData.email ? styles['input-error-content'] : null
             }`}

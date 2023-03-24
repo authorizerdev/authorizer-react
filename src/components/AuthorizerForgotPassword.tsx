@@ -91,11 +91,15 @@ export const AuthorizerForgotPassword: FC<{
       <br />
       <form onSubmit={onSubmit} name="authorizer-forgot-password-form">
         <div className={styles['styled-form-group']}>
-          <label className={styles['form-input-label']} htmlFor="email">
+          <label
+            className={styles['form-input-label']}
+            htmlFor="authorizer-forgot-password-email"
+          >
             <span>* </span>Email
           </label>
           <input
             name="email"
+            id="authorizer-forgot-password-email"
             className={`${styles['form-input-field']} ${
               errorData.email ? styles['input-error-content'] : null
             }`}
