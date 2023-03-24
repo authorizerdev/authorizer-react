@@ -161,7 +161,7 @@ export const AuthorizerSignup: FC<{
       {config.is_basic_authentication_enabled &&
         !config.is_magic_link_login_enabled && (
           <>
-            <form onSubmit={onSubmit} name="authorizer-signup-form">
+            <form onSubmit={onSubmit} name="authorizer-sign-up-form">
               <div className={styles['styled-form-group']}>
                 <label
                   className={styles['form-input-label']}
