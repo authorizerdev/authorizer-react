@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@authorizerdev/authorizer-js': ^1.2.1
+  '@authorizerdev/authorizer-js': ^1.2.2-beta.1
   '@babel/core': ^7.20.2
   '@size-limit/preset-small-lib': ^8.1.0
   '@types/react': ^18.0.25
@@ -19,7 +19,7 @@ specifiers:
   typescript: ^4.9.3
 
 dependencies:
-  '@authorizerdev/authorizer-js': 1.2.1
+  '@authorizerdev/authorizer-js': 1.2.2-beta.1
 
 devDependencies:
   '@babel/core': 7.21.3
@@ -48,9 +48,9 @@ packages:
       '@jridgewell/trace-mapping': 0.3.17
     dev: true
 
-  /@authorizerdev/authorizer-js/1.2.1:
-    resolution: {integrity: sha512-/nFARvsHyZUsGFKrcYi8hgpnbThYR/NMJ2BJdQpWy/x7QsBnfLeCChBYWncbYHSIjFCa5PPKKfvhXM56HqVqsw==}
-    engines: {node: '>=10'}
+  /@authorizerdev/authorizer-js/1.2.2-beta.1:
+    resolution: {integrity: sha512-H1LFUcSZXTz4YX2dcx6K109+3js4tPlrVxN1Uv77C3AHwMWQ+NjmTM4hRnWAKBv/zu+Gkinq2M341ZuWtfuwWg==}
+    engines: {node: '>=16'}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
