@@ -64,7 +64,7 @@ export const AuthorizerBasicAuthLogin: FC<{
 
       const res = await authorizerRef.login(data);
 
-      if (res && res?.should_show_otp_screen) {
+      if (res && res?.should_show_email_otp_screen) {
         setOtpData({
           isScreenVisible: true,
           email: data.email,
