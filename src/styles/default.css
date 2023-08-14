@@ -20,7 +20,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 375px;
+  min-width: 250px;
   max-height: 64px;
   border-radius: var(--authorizer-radius-button);
   border-color: var(--authorizer-text-color) !important;
@@ -131,6 +131,7 @@
   font-size: var(--authorizer-fonts-medium-text);
   box-sizing: border-box;
   width: 100%;
+  min-width: 300px;
 }
 .styled-wrapper *,
 *:before,
