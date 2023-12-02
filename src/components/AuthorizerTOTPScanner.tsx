@@ -28,17 +28,20 @@ export const AuthorizerTOTPScanner: FC<{
   const handleContinue = () => {
     setIsOTPScreenVisisble(true);
   };
+  console.log({ isOTPScreenVisisble });
 
   if (isOTPScreenVisisble) {
-    <AuthorizerVerifyOtp
-      {...{
-        setView,
-        onLogin,
-        email,
-        phone_number,
-        urlProps,
-      }}
-    />;
+    return (
+      <AuthorizerVerifyOtp
+        {...{
+          setView,
+          onLogin,
+          email,
+          phone_number,
+          urlProps,
+        }}
+      />
+    );
   }
 
   return (
