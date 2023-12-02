@@ -61,13 +61,14 @@ export type AuthorizerContextPropsType = {
 };
 
 export type OtpDataType = {
-  isScreenVisible: boolean;
+  is_screen_visible: boolean;
   email?: string;
   phone_number?: string;
+  is_totp?: boolean;
 };
 
 export type TotpDataType = {
-  isScreenVisible: boolean;
+  is_screen_visible: boolean;
   email?: string;
   phone_number?: string;
   authenticator_scanner_image: string;

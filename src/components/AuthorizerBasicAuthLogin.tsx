@@ -12,13 +12,13 @@ import { OtpDataType, TotpDataType } from '../types';
 import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
 
 const initOtpData: OtpDataType = {
-  isScreenVisible: false,
+  is_screen_visible: false,
   email: '',
   phone_number: '',
 };
 
 const initTotpData: TotpDataType = {
-  isScreenVisible: false,
+  is_screen_visible: false,
   email: '',
   phone_number: '',
   authenticator_scanner_image: '',
@@ -85,7 +85,7 @@ export const AuthorizerBasicAuthLogin: FC<{
         res.authenticator_recovery_codes
       ) {
         setTotpData({
-          isScreenVisible: true,
+          is_screen_visible: true,
           email: data.email || ``,
           phone_number: data.phone_number || ``,
           authenticator_scanner_image: res.authenticator_scanner_image,
@@ -101,9 +101,10 @@ export const AuthorizerBasicAuthLogin: FC<{
           res?.should_show_totp_screen)
       ) {
         setOtpData({
-          isScreenVisible: true,
+          is_screen_visible: true,
           email: data.email || ``,
           phone_number: data.phone_number || ``,
+          is_totp: res?.should_show_totp_screen || false,
         });
         return;
       }
@@ -163,7 +164,7 @@ export const AuthorizerBasicAuthLogin: FC<{
     }
   }, [formData.password]);
 
-  if (totpData.isScreenVisible) {
+  if (totpData.is_screen_visible) {
     return (
       <AuthorizerTOTPScanner
         {...{
@@ -181,7 +182,7 @@ export const AuthorizerBasicAuthLogin: FC<{
     );
   }
 
-  if (otpData.isScreenVisible) {
+  if (otpData.is_screen_visible) {
     return (
       <AuthorizerVerifyOtp
         {...{
@@ -189,6 +190,7 @@ export const AuthorizerBasicAuthLogin: FC<{
           onLogin,
           email: otpData.email || ``,
           phone_number: otpData.phone_number || ``,
+          is_totp: otpData.is_totp || false,
         }}
         urlProps={urlProps}
       />
@@ -207,7 +209,7 @@ export const AuthorizerBasicAuthLogin: FC<{
               className={styles['form-input-label']}
               htmlFor="authorizer-login-email"
             >
-              <span>* </span>Email
+              <span>* </span>Email / Phone Number
             </label>
             <input
               name="email_or_phone_number"

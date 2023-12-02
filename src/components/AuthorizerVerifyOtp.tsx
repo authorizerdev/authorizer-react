@@ -18,7 +18,8 @@ export const AuthorizerVerifyOtp: FC<{
   email?: string;
   phone_number?: string;
   urlProps?: Record<string, any>;
-}> = ({ setView, onLogin, email, phone_number, urlProps }) => {
+  is_totp?: boolean;
+}> = ({ setView, onLogin, email, phone_number, urlProps, is_totp }) => {
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,7 @@ export const AuthorizerVerifyOtp: FC<{
       if (urlProps?.state) {
         data.state = urlProps.state;
       }
-
+      data.is_totp = !!is_totp;
       const res = await authorizerRef.verifyOtp(data);
       setLoading(false);
 

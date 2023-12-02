@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { StyledButton } from '../styledComponents';
+import { StyledButton, StyledFlex, StyledSeparator } from '../styledComponents';
 import { ButtonAppearance, Views } from '../constants';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 
@@ -46,10 +46,12 @@ export const AuthorizerTOTPScanner: FC<{
       <p style={{ margin: '10px 0px', fontWeight: 'bold' }}>
         Scan the QR code or enter the secret key into your authenticator app.
       </p>
-      <img
-        src={`data:image/jpeg;base64,${authenticator_scanner_image}`}
-        alt="scanner"
-      />
+      <StyledFlex justifyContent="center">
+        <img
+          src={`data:image/jpeg;base64,${authenticator_scanner_image}`}
+          alt="scanner"
+        />
+      </StyledFlex>
       <p style={{ margin: '10px 0px' }}>
         If you are unable to scan the QR code, please enter the secret key
         manually.
@@ -57,6 +59,7 @@ export const AuthorizerTOTPScanner: FC<{
       <p style={{ margin: '10px 0px', fontWeight: 'bold' }}>
         {authenticator_secret}
       </p>
+      <StyledSeparator />
       <p style={{ margin: '10px 0px' }}>
         If you lose access to your authenticator app, you can use the recovery
         codes below to regain access to your account. Please save these codes

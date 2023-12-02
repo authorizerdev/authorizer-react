@@ -65,6 +65,6 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@authorizerdev/authorizer-js": "^1.2.15"
+    "@authorizerdev/authorizer-js": "^1.2.17"
   }
 }

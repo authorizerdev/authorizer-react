@@ -10,6 +10,7 @@ import { AuthorizerSocialLogin } from './components/AuthorizerSocialLogin';
 import { AuthorizerResetPassword } from './components/AuthorizerResetPassword';
 import { AuthorizerVerifyOtp } from './components/AuthorizerVerifyOtp';
 import { AuthorizerRoot as Authorizer } from './components/AuthorizerRoot';
+import { AuthorizerTOTPScanner } from './components/AuthorizerTOTPScanner';
 
 export {
   useAuthorizer,
@@ -22,4 +23,5 @@ export {
   AuthorizerSocialLogin,
   AuthorizerResetPassword,
   AuthorizerVerifyOtp,
+  AuthorizerTOTPScanner,
 };
