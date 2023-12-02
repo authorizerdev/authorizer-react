@@ -15,9 +15,10 @@ interface InputDataType {
 export const AuthorizerVerifyOtp: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: any) => void;
-  email: string;
+  email?: string;
+  phone_number?: string;
   urlProps?: Record<string, any>;
-}> = ({ setView, onLogin, email, urlProps }) => {
+}> = ({ setView, onLogin, email, phone_number, urlProps }) => {
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
@@ -29,6 +30,11 @@ export const AuthorizerVerifyOtp: FC<{
     otp: null,
   });
   const { authorizerRef, config, setAuthData } = useAuthorizer();
+  useEffect(() => {
+    if (!email && !phone_number) {
+      setError(`Email or Phone Number is required`);
+    }
+  }, []);
 
   const onInputChange = async (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -129,7 +135,7 @@ export const AuthorizerVerifyOtp: FC<{
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
       <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-        Please enter the OTP you received on your email address.
+        Please enter the OTP sent to your email or phone number or authenticator
       </p>
       <br />
       <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">

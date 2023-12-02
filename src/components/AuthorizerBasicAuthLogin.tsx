@@ -8,15 +8,26 @@ import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { isValidEmail } from '../utils/validations';
 import { Message } from './Message';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
-import { OtpDataType } from '../types';
+import { OtpDataType, TotpDataType } from '../types';
+import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
 
 const initOtpData: OtpDataType = {
   isScreenVisible: false,
   email: '',
+  phone_number: '',
+};
+
+const initTotpData: TotpDataType = {
+  isScreenVisible: false,
+  email: '',
+  phone_number: '',
+  authenticator_scanner_image: '',
+  authenticator_secret: '',
+  authenticator_recovery_codes: [],
 };
 
 interface InputDataType {
-  email: string | null;
+  email_or_phone_number: string | null;
   password: string | null;
 }
 
@@ -29,12 +40,13 @@ export const AuthorizerBasicAuthLogin: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
+  const [totpData, setTotpData] = useState<TotpDataType>({ ...initTotpData });
   const [formData, setFormData] = useState<InputDataType>({
-    email: null,
+    email_or_phone_number: null,
     password: null,
   });
   const [errorData, setErrorData] = useState<InputDataType>({
-    email: null,
+    email_or_phone_number: null,
     password: null,
   });
   const { setAuthData, config, authorizerRef } = useAuthorizer();
@@ -48,7 +60,8 @@ export const AuthorizerBasicAuthLogin: FC<{
     setLoading(true);
     try {
       const data: LoginInput = {
-        email: formData.email || '',
+        email: formData.email_or_phone_number || '',
+        phone_number: formData.email_or_phone_number || '',
         password: formData.password || '',
       };
       if (urlProps?.scope) {
@@ -63,11 +76,34 @@ export const AuthorizerBasicAuthLogin: FC<{
       }
 
       const res = await authorizerRef.login(data);
-
-      if (res && res?.should_show_email_otp_screen) {
+      // if totp is enabled for the first time show totp screen with scanner
+      if (
+        res &&
+        res.should_show_totp_screen &&
+        res.authenticator_scanner_image &&
+        res.authenticator_secret &&
+        res.authenticator_recovery_codes
+      ) {
+        setTotpData({
+          isScreenVisible: true,
+          email: data.email || ``,
+          phone_number: data.phone_number || ``,
+          authenticator_scanner_image: res.authenticator_scanner_image,
+          authenticator_secret: res.authenticator_secret,
+          authenticator_recovery_codes: res.authenticator_recovery_codes,
+        });
+        return;
+      }
+      if (
+        res &&
+        (res?.should_show_email_otp_screen ||
+          res?.should_show_mobile_otp_screen ||
+          res?.should_show_totp_screen)
+      ) {
         setOtpData({
           isScreenVisible: true,
-          email: data.email,
+          email: data.email || ``,
+          phone_number: data.phone_number || ``,
         });
         return;
       }
@@ -101,14 +137,23 @@ export const AuthorizerBasicAuthLogin: FC<{
   };
 
   useEffect(() => {
-    if (formData.email === '') {
-      setErrorData({ ...errorData, email: 'Email is required' });
-    } else if (formData.email && !isValidEmail(formData.email)) {
-      setErrorData({ ...errorData, email: 'Please enter valid email' });
+    if (formData.email_or_phone_number === '') {
+      setErrorData({
+        ...errorData,
+        email_or_phone_number: 'Email OR Phone Number is required',
+      });
+    } else if (
+      formData.email_or_phone_number &&
+      !isValidEmail(formData.email_or_phone_number)
+    ) {
+      setErrorData({
+        ...errorData,
+        email_or_phone_number: 'Please enter valid email',
+      });
     } else {
-      setErrorData({ ...errorData, email: null });
+      setErrorData({ ...errorData, email_or_phone_number: null });
     }
-  }, [formData.email]);
+  }, [formData.email_or_phone_number]);
 
   useEffect(() => {
     if (formData.password === '') {
@@ -118,12 +163,39 @@ export const AuthorizerBasicAuthLogin: FC<{
     }
   }, [formData.password]);
 
-  return otpData.isScreenVisible ? (
-    <AuthorizerVerifyOtp
-      {...{ setView, onLogin, email: otpData.email }}
-      urlProps={urlProps}
-    />
-  ) : (
+  if (totpData.isScreenVisible) {
+    return (
+      <AuthorizerTOTPScanner
+        {...{
+          setView,
+          onLogin,
+          email: totpData.email || ``,
+          phone_number: totpData.phone_number || ``,
+          authenticator_scanner_image: totpData.authenticator_scanner_image,
+          authenticator_secret: totpData.authenticator_secret,
+          authenticator_recovery_codes:
+            totpData.authenticator_recovery_codes || [],
+        }}
+        urlProps={urlProps}
+      />
+    );
+  }
+
+  if (otpData.isScreenVisible) {
+    return (
+      <AuthorizerVerifyOtp
+        {...{
+          setView,
+          onLogin,
+          email: otpData.email || ``,
+          phone_number: otpData.phone_number || ``,
+        }}
+        urlProps={urlProps}
+      />
+    );
+  }
+
+  return (
     <>
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
@@ -138,19 +210,23 @@ export const AuthorizerBasicAuthLogin: FC<{
               <span>* </span>Email
             </label>
             <input
-              name="email"
-              id="authorizer-login-email"
+              name="email_or_phone_number"
+              id="authorizer-login-email-or-phone-number"
               className={`${styles['form-input-field']} ${
-                errorData.email ? styles['input-error-content'] : null
+                errorData.email_or_phone_number
+                  ? styles['input-error-content']
+                  : null
               }`}
-              placeholder="eg. foo@bar.com"
-              type="email"
-              value={formData.email || ''}
-              onChange={(e) => onInputChange('email', e.target.value)}
+              placeholder="eg. foo@bar.com / +919999999999"
+              type="text"
+              value={formData.email_or_phone_number || ''}
+              onChange={(e) =>
+                onInputChange('email_or_phone_number', e.target.value)
+              }
             />
-            {errorData.email && (
+            {errorData.email_or_phone_number && (
               <div className={styles['form-input-error']}>
-                {errorData.email}
+                {errorData.email_or_phone_number}
               </div>
             )}
           </div>
@@ -182,9 +258,9 @@ export const AuthorizerBasicAuthLogin: FC<{
           <StyledButton
             type="submit"
             disabled={
-              !!errorData.email ||
+              !!errorData.email_or_phone_number ||
               !!errorData.password ||
-              !formData.email ||
+              !formData.email_or_phone_number ||
               !formData.password ||
               loading
             }
