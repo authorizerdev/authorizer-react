@@ -28,7 +28,6 @@ export const AuthorizerTOTPScanner: FC<{
   const handleContinue = () => {
     setIsOTPScreenVisisble(true);
   };
-  console.log({ isOTPScreenVisisble });
 
   if (isOTPScreenVisisble) {
     return (
