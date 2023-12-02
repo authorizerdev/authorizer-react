@@ -10,6 +10,7 @@ import { LinkedIn } from '../icons/linkedin';
 import { Apple } from '../icons/apple';
 import { Twitter } from '../icons/twitter';
 import { Microsoft } from '../icons/microsoft';
+import { Twitch } from '../icons/twitch';
 
 export const AuthorizerSocialLogin: React.FC<{
   urlProps?: Record<string, any>;
@@ -23,7 +24,8 @@ export const AuthorizerSocialLogin: React.FC<{
     config.is_linkedin_login_enabled ||
     config.is_apple_login_enabled ||
     config.is_twitter_login_enabled ||
-    config.is_microsoft_login_enabled;
+    config.is_microsoft_login_enabled ||
+    config.is_twitch_login_enabled;
 
   const data: {
     scope?: string;
@@ -135,6 +137,20 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <Microsoft />
             Continue with Microsoft
+          </StyledButton>
+          <br />
+        </>
+      )}
+      {config.is_twitch_login_enabled && (
+        <>
+          <StyledButton
+            appearance={ButtonAppearance.Default}
+            onClick={() => {
+              window.location.href = `${config.authorizerURL}/oauth_login/twitch?${queryParams}`;
+            }}
+          >
+            <Twitch />
+            Continue with Twitch
           </StyledButton>
           <br />
         </>
