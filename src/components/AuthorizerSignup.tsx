@@ -1,17 +1,18 @@
 import React, { FC, useEffect, useState } from 'react';
 import { AuthToken, SignupInput } from '@authorizerdev/authorizer-js';
-import styles from '../styles/default.css';
+import isEmail from 'validator/es/lib/isEmail';
+import isMobilePhone from 'validator/es/lib/isMobilePhone';
 
+import styles from '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
-import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 interface InputDataType {
-  email: string | null;
+  email_or_phone_number: string | null;
   password: string | null;
   confirmPassword: string | null;
 }
@@ -26,12 +27,12 @@ export const AuthorizerSignup: FC<{
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
   const [formData, setFormData] = useState<InputDataType>({
-    email: null,
+    email_or_phone_number: null,
     password: null,
     confirmPassword: null,
   });
   const [errorData, setErrorData] = useState<InputDataType>({
-    email: null,
+    email_or_phone_number: null,
     password: null,
     confirmPassword: null,
   });
@@ -46,8 +47,26 @@ export const AuthorizerSignup: FC<{
     e.preventDefault();
     try {
       setLoading(true);
+      let email: string = '';
+      let phone_number: string = '';
+      if (formData.email_or_phone_number) {
+        if (isEmail(formData.email_or_phone_number)) {
+          email = formData.email_or_phone_number;
+        } else if (isMobilePhone(formData.email_or_phone_number)) {
+          phone_number = formData.email_or_phone_number;
+        }
+      }
+      if (!email && !phone_number) {
+        setErrorData({
+          ...errorData,
+          email_or_phone_number: 'Invalid email or phone number',
+        });
+        setLoading(false);
+        return;
+      }
       const data: SignupInput = {
-        email: formData.email || '',
+        email: email,
+        phone_number: phone_number,
         password: formData.password || '',
         confirm_password: formData.confirmPassword || '',
       };
@@ -103,14 +122,23 @@ export const AuthorizerSignup: FC<{
   };
 
   useEffect(() => {
-    if (formData.email === '') {
-      setErrorData({ ...errorData, email: 'Email is required' });
-    } else if (formData.email && !isValidEmail(formData.email)) {
-      setErrorData({ ...errorData, email: 'Please enter valid email' });
+    if (formData.email_or_phone_number === '') {
+      setErrorData({
+        ...errorData,
+        email_or_phone_number: 'Email OR Phone Number is required',
+      });
+    } else if (
+      !isEmail(formData.email_or_phone_number || '') &&
+      !isMobilePhone(formData.email_or_phone_number || '')
+    ) {
+      setErrorData({
+        ...errorData,
+        email_or_phone_number: 'Invalid Email OR Phone Number',
+      });
     } else {
-      setErrorData({ ...errorData, email: null });
+      setErrorData({ ...errorData, email_or_phone_number: null });
     }
-  }, [formData.email]);
+  }, [formData.email_or_phone_number]);
 
   useEffect(() => {
     if (formData.password === '') {
@@ -158,7 +186,8 @@ export const AuthorizerSignup: FC<{
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
-      {config.is_basic_authentication_enabled &&
+      {(config.is_basic_authentication_enabled ||
+        config.is_mobile_basic_authentication_enabled) &&
         !config.is_magic_link_login_enabled && (
           <>
             <form onSubmit={onSubmit} name="authorizer-sign-up-form">
@@ -167,22 +196,24 @@ export const AuthorizerSignup: FC<{
                   className={styles['form-input-label']}
                   htmlFor="authorizer-sign-up-email"
                 >
-                  <span>* </span>Email
+                  <span>* </span>Email / Phone Number
                 </label>
                 <input
-                  name="email"
-                  id="authorizer-sign-up-email"
+                  name="eemail_or_phone_numbermail"
+                  id="authorizer-login-email-or-phone-number"
                   className={`${styles['form-input-field']} ${
-                    errorData.email ? styles['input-error-content'] : null
+                    errorData.email_or_phone_number
+                      ? styles['input-error-content']
+                      : null
                   }`}
-                  placeholder="eg. foo@bar.com"
-                  type="email"
-                  value={formData.email || ''}
+                  placeholder="eg. hello@world.com / +919999999999"
+                  type="text"
+                  value={formData.email_or_phone_number || ''}
                   onChange={(e) => onInputChange('email', e.target.value)}
                 />
-                {errorData.email && (
+                {errorData.email_or_phone_number && (
                   <div className={styles['form-input-error']}>
-                    {errorData.email}
+                    {errorData.email_or_phone_number}
                   </div>
                 )}
               </div>
@@ -253,10 +284,10 @@ export const AuthorizerSignup: FC<{
                 disabled={
                   loading ||
                   disableSignupButton ||
-                  !!errorData.email ||
+                  !!errorData.email_or_phone_number ||
                   !!errorData.password ||
                   !!errorData.confirmPassword ||
-                  !formData.email ||
+                  !formData.email_or_phone_number ||
                   !formData.password ||
                   !formData.confirmPassword
                 }

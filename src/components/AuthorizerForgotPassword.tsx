@@ -1,10 +1,10 @@
 import React, { FC, useEffect, useState } from 'react';
-import styles from '../styles/default.css';
+import isEmail from 'validator/es/lib/isEmail';
 
+import styles from '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
-import { isValidEmail } from '../utils/validations';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 
@@ -68,7 +68,7 @@ export const AuthorizerForgotPassword: FC<{
   useEffect(() => {
     if (formData.email === '') {
       setErrorData({ ...errorData, email: 'Email is required' });
-    } else if (formData.email && !isValidEmail(formData.email)) {
+    } else if (formData.email && !isEmail(formData.email)) {
       setErrorData({ ...errorData, email: 'Please enter valid email' });
     } else {
       setErrorData({ ...errorData, email: null });

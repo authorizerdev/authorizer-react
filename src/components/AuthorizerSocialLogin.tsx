@@ -157,6 +157,7 @@ export const AuthorizerSocialLogin: React.FC<{
       )}
       {hasSocialLogin &&
         (config.is_basic_authentication_enabled ||
+          config.is_mobile_basic_authentication_enabled ||
           config.is_magic_link_login_enabled) && (
           <StyledSeparator>OR</StyledSeparator>
         )}

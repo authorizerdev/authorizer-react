@@ -34,6 +34,9 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     is_magic_link_login_enabled: false,
     is_sign_up_enabled: false,
     is_strong_password_enabled: true,
+    is_multi_factor_auth_enabled: false,
+    is_mobile_basic_authentication_enabled: false,
+    is_phone_verification_enabled: false,
   },
   user: null,
   token: null,
@@ -103,6 +106,9 @@ let initialState: AuthorizerState = {
     is_magic_link_login_enabled: false,
     is_sign_up_enabled: false,
     is_strong_password_enabled: true,
+    is_multi_factor_auth_enabled: false,
+    is_mobile_basic_authentication_enabled: false,
+    is_phone_verification_enabled: false,
   },
 };
 

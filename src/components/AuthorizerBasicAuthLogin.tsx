@@ -1,11 +1,12 @@
 import React, { FC, useEffect, useState } from 'react';
 import { AuthToken, LoginInput } from '@authorizerdev/authorizer-js';
-import styles from '../styles/default.css';
+import isEmail from 'validator/es/lib/isEmail';
+import isMobilePhone from 'validator/es/lib/isMobilePhone';
 
+import styles from '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
-import { isValidEmail } from '../utils/validations';
 import { Message } from './Message';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { OtpDataType, TotpDataType } from '../types';
@@ -59,9 +60,26 @@ export const AuthorizerBasicAuthLogin: FC<{
     e.preventDefault();
     setLoading(true);
     try {
+      let email: string = '';
+      let phone_number: string = '';
+      if (formData.email_or_phone_number) {
+        if (isEmail(formData.email_or_phone_number)) {
+          email = formData.email_or_phone_number;
+        } else if (isMobilePhone(formData.email_or_phone_number)) {
+          phone_number = formData.email_or_phone_number;
+        }
+      }
+      if (!email && !phone_number) {
+        setErrorData({
+          ...errorData,
+          email_or_phone_number: 'Invalid email or phone number',
+        });
+        setLoading(false);
+        return;
+      }
       const data: LoginInput = {
-        email: formData.email_or_phone_number || '',
-        phone_number: formData.email_or_phone_number || '',
+        email: email,
+        phone_number: phone_number,
         password: formData.password || '',
       };
       if (urlProps?.scope) {
@@ -144,12 +162,12 @@ export const AuthorizerBasicAuthLogin: FC<{
         email_or_phone_number: 'Email OR Phone Number is required',
       });
     } else if (
-      formData.email_or_phone_number &&
-      !isValidEmail(formData.email_or_phone_number)
+      !isEmail(formData.email_or_phone_number || '') &&
+      !isMobilePhone(formData.email_or_phone_number || '')
     ) {
       setErrorData({
         ...errorData,
-        email_or_phone_number: 'Please enter valid email',
+        email_or_phone_number: 'Invalid Email OR Phone Number',
       });
     } else {
       setErrorData({ ...errorData, email_or_phone_number: null });
@@ -219,7 +237,7 @@ export const AuthorizerBasicAuthLogin: FC<{
                   ? styles['input-error-content']
                   : null
               }`}
-              placeholder="eg. foo@bar.com / +919999999999"
+              placeholder="eg. hello@world.com / +919999999999"
               type="text"
               value={formData.email_or_phone_number || ''}
               onChange={(e) =>

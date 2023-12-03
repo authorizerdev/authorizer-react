@@ -48,7 +48,8 @@ export const AuthorizerRoot: FC<{
     <StyledWrapper>
       <AuthorizerSocialLogin urlProps={urlProps} roles={roles} />
       {view === Views.Login &&
-        config.is_basic_authentication_enabled &&
+        (config.is_basic_authentication_enabled ||
+          config.is_mobile_basic_authentication_enabled) &&
         !config.is_magic_link_login_enabled && (
           <AuthorizerBasicAuthLogin
             setView={setView}
@@ -59,7 +60,8 @@ export const AuthorizerRoot: FC<{
         )}
 
       {view === Views.Signup &&
-        config.is_basic_authentication_enabled &&
+        (config.is_basic_authentication_enabled ||
+          config.is_mobile_basic_authentication_enabled) &&
         !config.is_magic_link_login_enabled &&
         config.is_sign_up_enabled && (
           <AuthorizerSignup

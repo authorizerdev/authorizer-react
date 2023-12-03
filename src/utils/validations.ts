@@ -1,8 +1,3 @@
-export const isValidEmail = (email: string): boolean => {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email.trim()).toLowerCase());
-};
-
 export const isValidOtp = (otp: string): boolean => {
   const re = /^([A-Z0-9]{6})$/;
   return re.test(String(otp.trim()));
@@ -75,9 +70,4 @@ export const validatePassword = (
 
   const isValid = Object.values(res).every((i) => Boolean(i));
   return { ...res, isValid };
-};
-
-// TODO: remove if not needed
-export const hasErrors = (fieldsError: any) => {
-  return Object.keys(fieldsError).some((field) => fieldsError[field]);
 };
