@@ -116,8 +116,6 @@ export const AuthorizerVerifyOtp: FC<{
   useEffect(() => {
     if (formData.otp === '') {
       setErrorData({ ...errorData, otp: 'OTP is required' });
-    } else if (formData.otp && !isValidOtp(formData.otp)) {
-      setErrorData({ ...errorData, otp: 'Please enter valid OTP' });
     } else {
       setErrorData({ ...errorData, otp: null });
     }
@@ -160,6 +158,15 @@ export const AuthorizerVerifyOtp: FC<{
           />
           {errorData.otp && (
             <div className={styles['form-input-error']}>{errorData.otp}</div>
+          )}
+          {is_totp && (
+            <Message
+              type={MessageType.Info}
+              text={`If you have lost access to your device, please enter recovery code that were shared while enabling Multifactor Authentication.`}
+              extraStyles={{
+                color: 'var(--authorizer-text-color)',
+              }}
+            />
           )}
         </div>
         <br />

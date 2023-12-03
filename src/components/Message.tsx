@@ -8,12 +8,13 @@ type Props = {
   type: MessageType;
   text: string;
   onClose?: () => void;
+  extraStyles?: Record<string, string>;
 };
 
-export const Message: FC<Props> = ({ type, text, onClose }) => {
+export const Message: FC<Props> = ({ type, text, extraStyles, onClose }) => {
   if (text.trim()) {
     return (
-      <StyledMessageWrapper type={type}>
+      <StyledMessageWrapper type={type} styles={extraStyles}>
         <StyledFlex alignItems="center" justifyContent="space-between">
           <div style={{ flex: 1 }}>{capitalizeFirstLetter(text)}</div>
           {onClose && (

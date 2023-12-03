@@ -12,6 +12,7 @@ export enum ButtonAppearance {
 export enum MessageType {
   Error,
   Success,
+  Info,
 }
 
 export enum AuthorizerProviderActionType {

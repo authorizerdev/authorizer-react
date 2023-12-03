@@ -39,6 +39,7 @@ export const AuthorizerTOTPScanner: FC<{
           phone_number,
           urlProps,
         }}
+        is_totp
       />
     );
   }
