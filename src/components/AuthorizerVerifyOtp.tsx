@@ -5,7 +5,6 @@ import styles from '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
-import { isValidOtp } from '../utils/validations';
 import { Message } from './Message';
 
 interface InputDataType {
