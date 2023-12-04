@@ -209,7 +209,9 @@ export const AuthorizerSignup: FC<{
                   placeholder="eg. hello@world.com / +919999999999"
                   type="text"
                   value={formData.email_or_phone_number || ''}
-                  onChange={(e) => onInputChange('email', e.target.value)}
+                  onChange={(e) =>
+                    onInputChange('email_or_phone_number', e.target.value)
+                  }
                 />
                 {errorData.email_or_phone_number && (
                   <div className={styles['form-input-error']}>
