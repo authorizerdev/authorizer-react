@@ -53,9 +53,12 @@ export const AuthorizerVerifyOtp: FC<{
         data.state = urlProps.state;
       }
       data.is_totp = !!is_totp;
-      const res = await authorizerRef.verifyOtp(data);
+      const { data: res, errors } = await authorizerRef.verifyOtp(data);
       setLoading(false);
-
+      if (errors && errors.length) {
+        setError(errors[0]?.message || ``);
+        return;
+      }
       if (res) {
         setError(``);
         setAuthData({
@@ -93,10 +96,14 @@ export const AuthorizerVerifyOtp: FC<{
     try {
       setSendingOtp(true);
 
-      const res = await authorizerRef.resendOtp({
+      const { data: res, errors } = await authorizerRef.resendOtp({
         email,
       });
       setSendingOtp(false);
+      if (errors && errors.length) {
+        setError(errors[0]?.message || ``);
+        return;
+      }
 
       if (res && res?.message) {
         setError(``);

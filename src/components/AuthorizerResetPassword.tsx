@@ -41,12 +41,16 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await authorizerRef.resetPassword({
+      const { data: res, errors } = await authorizerRef.resetPassword({
         token,
         password: formData.password || '',
         confirm_password: formData.confirmPassword || '',
       });
       setLoading(false);
+      if (errors && errors.length) {
+        setError(formatErrorMessage(errors[0]?.message));
+        return;
+      }
       setError(``);
       if (onReset) {
         onReset(res);

@@ -142,11 +142,17 @@ export const AuthorizerProvider: FC<{
   );
 
   const getToken = async () => {
-    const metaRes = await authorizerRef.current.getMetaData();
-
+    const { data: metaRes, errors: metaResErrors } =
+      await authorizerRef.current.getMetaData();
     try {
-      const res = await authorizerRef.current.getSession();
-      if (res.access_token && res.user) {
+      if (metaResErrors && metaResErrors.length) {
+        throw new Error(metaResErrors[0].message);
+      }
+      const { data: res, errors } = await authorizerRef.current.getSession();
+      if (errors && errors.length) {
+        throw new Error(errors[0].message);
+      }
+      if (res && res.access_token && res.user) {
         const token = {
           access_token: res.access_token,
           expires_in: res.expires_in,

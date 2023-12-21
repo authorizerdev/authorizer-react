@@ -85,7 +85,12 @@ export const AuthorizerSignup: FC<{
       if (roles && roles.length) {
         data.roles = roles;
       }
-      const res = await authorizerRef.signup(data);
+      const { data: res, errors } = await authorizerRef.signup(data);
+      if (errors && errors.length) {
+        setError(formatErrorMessage(errors[0]?.message));
+        setLoading(false);
+        return;
+      }
 
       if (res) {
         setError(``);
