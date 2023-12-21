@@ -110,6 +110,7 @@ export const AuthorizerForgotPassword: FC<{
         email_or_phone_number: 'Email OR Phone Number is required',
       });
     } else if (
+      formData.email_or_phone_number !== '' &&
       !isEmail(formData.email_or_phone_number || '') &&
       !isMobilePhone(formData.email_or_phone_number || '')
     ) {
@@ -157,17 +158,17 @@ export const AuthorizerForgotPassword: FC<{
             className={styles['form-input-label']}
             htmlFor="authorizer-forgot-password-email-or-phone-number"
           >
-            <span>* </span>Email
+            <span>* </span>Email / Phone Number
           </label>
           <input
             name="email_or_phone_number"
-            id="authorizer-forgot-password-email-or-"
+            id="authorizer-forgot-password-email-or-phone-number"
             className={`${styles['form-input-field']} ${
               errorData.email_or_phone_number
                 ? styles['input-error-content']
                 : null
             }`}
-            placeholder="eg. foo@bar.com"
+            placeholder="eg. hello@world.com / +919999999999"
             type="text"
             value={formData.email_or_phone_number || ''}
             onChange={(e) =>
