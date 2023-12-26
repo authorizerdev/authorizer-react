@@ -10,23 +10,32 @@ import { getSearchParams } from '../utils/url';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 type Props = {
+  showOTPInput?: boolean;
   onReset?: (res: any) => void;
+  phone_number?: string;
 };
 
 interface InputDataType {
+  otp: string | null;
   password: string | null;
   confirmPassword: string | null;
 }
 
-export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
+export const AuthorizerResetPassword: FC<Props> = ({
+  onReset,
+  showOTPInput,
+  phone_number,
+}) => {
   const { token, redirect_uri } = getSearchParams();
-  const [error, setError] = useState(!token ? `Invalid token` : ``);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<InputDataType>({
+    otp: null,
     password: null,
     confirmPassword: null,
   });
   const [errorData, setErrorData] = useState<InputDataType>({
+    otp: null,
     password: null,
     confirmPassword: null,
   });
@@ -43,6 +52,8 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
     try {
       const { data: res, errors } = await authorizerRef.resetPassword({
         token,
+        otp: formData.otp || '',
+        phone_number: phone_number || '',
         password: formData.password || '',
         confirm_password: formData.confirmPassword || '',
       });
@@ -111,6 +122,30 @@ export const AuthorizerResetPassword: FC<Props> = ({ onReset }) => {
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
       <form onSubmit={onSubmit} name="authorizer-reset-password-form">
+        {showOTPInput && (
+          <div className={styles['styled-form-group']}>
+            <label
+              className={styles['form-input-label']}
+              htmlFor="authorizer-verify-otp"
+            >
+              <span>* </span>OTP (One Time Password)
+            </label>
+            <input
+              name="otp"
+              id="authorizer-verify-otp"
+              className={`${styles['form-input-field']} ${
+                errorData.otp ? styles['input-error-content'] : null
+              }`}
+              placeholder="e.g.- AB123C"
+              type="password"
+              value={formData.otp || ''}
+              onChange={(e) => onInputChange('otp', e.target.value)}
+            />
+            {errorData.otp && (
+              <div className={styles['form-input-error']}>{errorData.otp}</div>
+            )}
+          </div>
+        )}
         <div className={styles['styled-form-group']}>
           <label
             className={styles['form-input-label']}

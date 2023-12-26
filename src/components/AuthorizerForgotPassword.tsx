@@ -8,8 +8,8 @@ import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
-import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { OtpDataType } from '../types';
+import { AuthorizerResetPassword } from './AuthorizerResetPassword';
 
 interface InputDataType {
   email_or_phone_number: string | null;
@@ -24,8 +24,9 @@ const initOtpData: OtpDataType = {
 export const AuthorizerForgotPassword: FC<{
   setView?: (v: Views) => void;
   onForgotPassword?: (data: any) => void;
+  onPasswordReset?: () => void;
   urlProps?: Record<string, any>;
-}> = ({ setView, onForgotPassword, urlProps }) => {
+}> = ({ setView, onForgotPassword, onPasswordReset, urlProps }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -110,7 +111,7 @@ export const AuthorizerForgotPassword: FC<{
         email_or_phone_number: 'Email OR Phone Number is required',
       });
     } else if (
-      formData.email_or_phone_number !== '' &&
+      formData.email_or_phone_number !== null &&
       !isEmail(formData.email_or_phone_number || '') &&
       !isMobilePhone(formData.email_or_phone_number || '')
     ) {
@@ -124,21 +125,17 @@ export const AuthorizerForgotPassword: FC<{
   }, [formData.email_or_phone_number]);
 
   if (successMessage) {
-    return <Message type={MessageType.Success} text={successMessage} />;
-  }
-
-  if (otpData.is_screen_visible) {
     return (
-      <AuthorizerVerifyOtp
-        email={otpData.email}
-        phone_number={otpData.phone_number}
-        urlProps={urlProps}
-        onLogin={() => {
-          if (onForgotPassword) {
-            onForgotPassword({});
-          }
-        }}
-      />
+      <>
+        <Message type={MessageType.Success} text={successMessage} />
+        {otpData.is_screen_visible && (
+          <AuthorizerResetPassword
+            showOTPInput
+            onReset={onPasswordReset}
+            phone_number={otpData.phone_number}
+          />
+        )}
+      </>
     );
   }
 
@@ -191,7 +188,7 @@ export const AuthorizerForgotPassword: FC<{
           }
           appearance={ButtonAppearance.Primary}
         >
-          {loading ? `Processing ...` : `Send Email`}
+          {loading ? `Processing ...` : `Request Change`}
         </StyledButton>
       </form>
       {setView && (
