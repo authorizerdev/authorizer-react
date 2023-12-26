@@ -17,8 +17,16 @@ export const AuthorizerRoot: FC<{
   onSignup?: (data: AuthToken | void) => void;
   onMagicLinkLogin?: (data: any) => void;
   onForgotPassword?: (data: any) => void;
+  onPasswordReset?: () => void;
   roles?: string[];
-}> = ({ onLogin, onSignup, onMagicLinkLogin, onForgotPassword, roles }) => {
+}> = ({
+  onLogin,
+  onSignup,
+  onMagicLinkLogin,
+  onForgotPassword,
+  onPasswordReset,
+  roles,
+}) => {
   const [view, setView] = useState(Views.Login);
   const { config } = useAuthorizer();
   const searchParams = new URLSearchParams(
@@ -84,6 +92,7 @@ export const AuthorizerRoot: FC<{
         <AuthorizerForgotPassword
           setView={setView}
           onForgotPassword={onForgotPassword}
+          onPasswordReset={onPasswordReset}
           urlProps={urlProps}
         />
       )}

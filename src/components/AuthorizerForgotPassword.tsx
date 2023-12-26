@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import isEmail from 'validator/es/lib/isEmail';
+import isMobilePhone from 'validator/es/lib/isMobilePhone';
 
 import styles from '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
@@ -7,24 +8,34 @@ import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
+import { OtpDataType } from '../types';
+import { AuthorizerResetPassword } from './AuthorizerResetPassword';
 
 interface InputDataType {
-  email: string | null;
+  email_or_phone_number: string | null;
 }
+
+const initOtpData: OtpDataType = {
+  is_screen_visible: false,
+  email: '',
+  phone_number: '',
+};
 
 export const AuthorizerForgotPassword: FC<{
   setView?: (v: Views) => void;
   onForgotPassword?: (data: any) => void;
+  onPasswordReset?: () => void;
   urlProps?: Record<string, any>;
-}> = ({ setView, onForgotPassword, urlProps }) => {
+}> = ({ setView, onForgotPassword, onPasswordReset, urlProps }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
+  const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
   const [formData, setFormData] = useState<InputDataType>({
-    email: null,
+    email_or_phone_number: null,
   });
   const [errorData, setErrorData] = useState<InputDataType>({
-    email: null,
+    email_or_phone_number: null,
   });
   const { authorizerRef, config } = useAuthorizer();
 
@@ -36,9 +47,26 @@ export const AuthorizerForgotPassword: FC<{
     e.preventDefault();
     try {
       setLoading(true);
-
-      const res = await authorizerRef.forgotPassword({
-        email: formData.email || '',
+      let email: string = '';
+      let phone_number: string = '';
+      if (formData.email_or_phone_number) {
+        if (isEmail(formData.email_or_phone_number)) {
+          email = formData.email_or_phone_number;
+        } else if (isMobilePhone(formData.email_or_phone_number)) {
+          phone_number = formData.email_or_phone_number;
+        }
+      }
+      if (!email && !phone_number) {
+        setErrorData({
+          ...errorData,
+          email_or_phone_number: 'Invalid email or phone number',
+        });
+        setLoading(false);
+        return;
+      }
+      const { data: res, errors } = await authorizerRef.forgotPassword({
+        email: email,
+        phone_number: phone_number,
         state: urlProps?.state || '',
         redirect_uri:
           urlProps?.redirect_uri ||
@@ -46,12 +74,23 @@ export const AuthorizerForgotPassword: FC<{
           window.location.origin,
       });
       setLoading(false);
-
-      if (res && res.message) {
+      if (errors && errors.length) {
+        setError(formatErrorMessage(errors[0]?.message));
+        return;
+      }
+      if (res?.message) {
         setError(``);
         setSuccessMessage(res.message);
+        if (res?.should_show_mobile_otp_screen) {
+          setOtpData({
+            ...otpData,
+            is_screen_visible: true,
+            email: email,
+            phone_number: phone_number,
+          });
+          return;
+        }
       }
-
       if (onForgotPassword) {
         onForgotPassword(res);
       }
@@ -66,17 +105,38 @@ export const AuthorizerForgotPassword: FC<{
   };
 
   useEffect(() => {
-    if (formData.email === '') {
-      setErrorData({ ...errorData, email: 'Email is required' });
-    } else if (formData.email && !isEmail(formData.email)) {
-      setErrorData({ ...errorData, email: 'Please enter valid email' });
+    if (formData.email_or_phone_number === '') {
+      setErrorData({
+        ...errorData,
+        email_or_phone_number: 'Email OR Phone Number is required',
+      });
+    } else if (
+      formData.email_or_phone_number !== null &&
+      !isEmail(formData.email_or_phone_number || '') &&
+      !isMobilePhone(formData.email_or_phone_number || '')
+    ) {
+      setErrorData({
+        ...errorData,
+        email_or_phone_number: 'Invalid Email OR Phone Number',
+      });
     } else {
-      setErrorData({ ...errorData, email: null });
+      setErrorData({ ...errorData, email_or_phone_number: null });
     }
-  }, [formData.email]);
+  }, [formData.email_or_phone_number]);
 
   if (successMessage) {
-    return <Message type={MessageType.Success} text={successMessage} />;
+    return (
+      <>
+        <Message type={MessageType.Success} text={successMessage} />
+        {otpData.is_screen_visible && (
+          <AuthorizerResetPassword
+            showOTPInput
+            onReset={onPasswordReset}
+            phone_number={otpData.phone_number}
+          />
+        )}
+      </>
+    );
   }
 
   return (
@@ -93,32 +153,42 @@ export const AuthorizerForgotPassword: FC<{
         <div className={styles['styled-form-group']}>
           <label
             className={styles['form-input-label']}
-            htmlFor="authorizer-forgot-password-email"
+            htmlFor="authorizer-forgot-password-email-or-phone-number"
           >
-            <span>* </span>Email
+            <span>* </span>Email / Phone Number
           </label>
           <input
-            name="email"
-            id="authorizer-forgot-password-email"
+            name="email_or_phone_number"
+            id="authorizer-forgot-password-email-or-phone-number"
             className={`${styles['form-input-field']} ${
-              errorData.email ? styles['input-error-content'] : null
+              errorData.email_or_phone_number
+                ? styles['input-error-content']
+                : null
             }`}
-            placeholder="eg. foo@bar.com"
-            type="email"
-            value={formData.email || ''}
-            onChange={(e) => onInputChange('email', e.target.value)}
+            placeholder="eg. hello@world.com / +919999999999"
+            type="text"
+            value={formData.email_or_phone_number || ''}
+            onChange={(e) =>
+              onInputChange('email_or_phone_number', e.target.value)
+            }
           />
-          {errorData.email && (
-            <div className={styles['form-input-error']}>{errorData.email}</div>
+          {errorData.email_or_phone_number && (
+            <div className={styles['form-input-error']}>
+              {errorData.email_or_phone_number}
+            </div>
           )}
         </div>
         <br />
         <StyledButton
           type="submit"
-          disabled={loading || !!errorData.email || !formData.email}
+          disabled={
+            loading ||
+            !!errorData.email_or_phone_number ||
+            !formData.email_or_phone_number
+          }
           appearance={ButtonAppearance.Primary}
         >
-          {loading ? `Processing ...` : `Send Email`}
+          {loading ? `Processing ...` : `Request Change`}
         </StyledButton>
       </form>
       {setView && (

@@ -93,7 +93,12 @@ export const AuthorizerBasicAuthLogin: FC<{
         data.roles = roles;
       }
 
-      const res = await authorizerRef.login(data);
+      const { data: res, errors } = await authorizerRef.login(data);
+      if (errors && errors.length) {
+        setError(errors[0].message);
+        setLoading(false);
+        return;
+      }
       // if totp is enabled for the first time show totp screen with scanner
       if (
         res &&

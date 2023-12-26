@@ -47,8 +47,12 @@ export const AuthorizerMagicLinkLogin: FC<{
       if (roles && roles.length) {
         data.roles = roles;
       }
-      const res = await authorizerRef.magicLinkLogin(data);
+      const { data: res, errors } = await authorizerRef.magicLinkLogin(data);
       setLoading(false);
+      if (errors && errors.length) {
+        setError(formatErrorMessage(errors[0]?.message));
+        return;
+      }
 
       if (res) {
         setError(``);

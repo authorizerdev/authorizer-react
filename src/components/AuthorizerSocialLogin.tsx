@@ -30,6 +30,8 @@ export const AuthorizerSocialLogin: React.FC<{
   const data: {
     scope?: string;
     roles?: string[];
+    redirect_uri?: string;
+    redirectURL?: string;
   } = {
     ...(urlProps || {}),
     scope: urlProps?.scope.join(' '),
@@ -37,6 +39,10 @@ export const AuthorizerSocialLogin: React.FC<{
 
   if (roles && roles.length) {
     data.roles = roles;
+  }
+
+  if (!data.redirect_uri && !data.redirectURL) {
+    data.redirect_uri = config.redirectURL;
   }
 
   const queryParams = createQueryParams(data);
