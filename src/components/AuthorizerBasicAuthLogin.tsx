@@ -245,7 +245,7 @@ export const AuthorizerBasicAuthLogin: FC<{
               placeholder="eg. hello@world.com / +919999999999"
               type="text"
               value={formData.email_or_phone_number || ''}
-              onChange={(e) =>
+              onChange={e =>
                 onInputChange('email_or_phone_number', e.target.value)
               }
             />
@@ -271,7 +271,7 @@ export const AuthorizerBasicAuthLogin: FC<{
               placeholder="********"
               type="password"
               value={formData.password || ''}
-              onChange={(e) => onInputChange('password', e.target.value)}
+              onChange={e => onInputChange('password', e.target.value)}
             />
             {errorData.password && (
               <div className={styles['form-input-error']}>

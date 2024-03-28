@@ -34,7 +34,10 @@ export const AuthorizerRoot: FC<{
   );
   const state = searchParams.get('state') || createRandomString();
   const scope = searchParams.get('scope')
-    ? searchParams.get('scope')?.toString().split(' ')
+    ? searchParams
+        .get('scope')
+        ?.toString()
+        .split(' ')
     : ['openid', 'profile', 'email'];
 
   const urlProps: Record<string, any> = {
@@ -51,7 +54,6 @@ export const AuthorizerRoot: FC<{
   }
 
   urlProps.redirect_uri = urlProps.redirectURL;
-
   return (
     <StyledWrapper>
       <AuthorizerSocialLogin urlProps={urlProps} roles={roles} />

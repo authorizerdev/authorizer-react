@@ -47,6 +47,7 @@ export const AuthorizerVerifyOtp: FC<{
       setLoading(true);
       const data: VerifyOtpInput = {
         email,
+        phone_number,
         otp: formData.otp || '',
       };
       if (urlProps?.state) {
@@ -98,6 +99,7 @@ export const AuthorizerVerifyOtp: FC<{
 
       const { data: res, errors } = await authorizerRef.resendOtp({
         email,
+        phone_number,
       });
       setSendingOtp(false);
       if (errors && errors.length) {
@@ -160,7 +162,7 @@ export const AuthorizerVerifyOtp: FC<{
             placeholder="e.g.- AB123C"
             type="password"
             value={formData.otp || ''}
-            onChange={(e) => onInputChange('otp', e.target.value)}
+            onChange={e => onInputChange('otp', e.target.value)}
           />
           {errorData.otp && (
             <div className={styles['form-input-error']}>{errorData.otp}</div>

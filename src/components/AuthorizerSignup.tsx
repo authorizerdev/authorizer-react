@@ -10,12 +10,20 @@ import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+import { OtpDataType } from '../types';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 
 interface InputDataType {
   email_or_phone_number: string | null;
   password: string | null;
   confirmPassword: string | null;
 }
+
+const initOtpData: OtpDataType = {
+  is_screen_visible: false,
+  email: '',
+  phone_number: '',
+};
 
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
@@ -25,6 +33,7 @@ export const AuthorizerSignup: FC<{
 }> = ({ setView, onSignup, urlProps, roles }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
+  const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
   const [successMessage, setSuccessMessage] = useState(``);
   const [formData, setFormData] = useState<InputDataType>({
     email_or_phone_number: null,
@@ -91,7 +100,18 @@ export const AuthorizerSignup: FC<{
         setLoading(false);
         return;
       }
-
+      if (
+        res &&
+        (res?.should_show_email_otp_screen ||
+          res?.should_show_mobile_otp_screen)
+      ) {
+        setOtpData({
+          is_screen_visible: true,
+          email: data.email || ``,
+          phone_number: data.phone_number || ``,
+        });
+        return;
+      }
       if (res) {
         setError(``);
         if (res.access_token) {
@@ -182,14 +202,33 @@ export const AuthorizerSignup: FC<{
     }
   }, [formData.password, formData.confirmPassword]);
 
-  if (successMessage) {
-    return <Message type={MessageType.Success} text={successMessage} />;
+  if (otpData.is_screen_visible) {
+    return (
+      <>
+        {successMessage && (
+          <Message type={MessageType.Success} text={successMessage} />
+        )}
+        <AuthorizerVerifyOtp
+          {...{
+            setView,
+            onLogin: onSignup,
+            email: otpData.email || ``,
+            phone_number: otpData.phone_number || ``,
+            is_totp: otpData.is_totp || false,
+          }}
+          urlProps={urlProps}
+        />
+      </>
+    );
   }
 
   return (
     <>
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
+      )}
+      {successMessage && (
+        <Message type={MessageType.Success} text={successMessage} />
       )}
       {(config.is_basic_authentication_enabled ||
         config.is_mobile_basic_authentication_enabled) &&
@@ -214,7 +253,7 @@ export const AuthorizerSignup: FC<{
                   placeholder="eg. hello@world.com / +919999999999"
                   type="text"
                   value={formData.email_or_phone_number || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     onInputChange('email_or_phone_number', e.target.value)
                   }
                 />
@@ -240,7 +279,7 @@ export const AuthorizerSignup: FC<{
                   placeholder="********"
                   type="password"
                   value={formData.password || ''}
-                  onChange={(e) => onInputChange('password', e.target.value)}
+                  onChange={e => onInputChange('password', e.target.value)}
                 />
                 {errorData.password && (
                   <div className={styles['form-input-error']}>
@@ -266,7 +305,7 @@ export const AuthorizerSignup: FC<{
                   placeholder="********"
                   type="password"
                   value={formData.confirmPassword || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     onInputChange('confirmPassword', e.target.value)
                   }
                 />
