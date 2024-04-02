@@ -11,6 +11,7 @@ import { Message } from './Message';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { OtpDataType, TotpDataType } from '../types';
 import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
+import { getEmailPhoneLabels, getEmailPhonePlaceholder } from '../utils/labels';
 
 const initOtpData: OtpDataType = {
   is_screen_visible: false,
@@ -232,7 +233,8 @@ export const AuthorizerBasicAuthLogin: FC<{
               className={styles['form-input-label']}
               htmlFor="authorizer-login-email"
             >
-              <span>* </span>Email / Phone Number
+              <span>* </span>
+              {getEmailPhoneLabels(config)}
             </label>
             <input
               name="email_or_phone_number"
@@ -242,10 +244,10 @@ export const AuthorizerBasicAuthLogin: FC<{
                   ? styles['input-error-content']
                   : null
               }`}
-              placeholder="eg. hello@world.com / +919999999999"
+              placeholder={getEmailPhonePlaceholder(config)}
               type="text"
               value={formData.email_or_phone_number || ''}
-              onChange={(e) =>
+              onChange={e =>
                 onInputChange('email_or_phone_number', e.target.value)
               }
             />
@@ -271,7 +273,7 @@ export const AuthorizerBasicAuthLogin: FC<{
               placeholder="********"
               type="password"
               value={formData.password || ''}
-              onChange={(e) => onInputChange('password', e.target.value)}
+              onChange={e => onInputChange('password', e.target.value)}
             />
             {errorData.password && (
               <div className={styles['form-input-error']}>

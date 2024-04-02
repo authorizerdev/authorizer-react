@@ -10,12 +10,23 @@ import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+import { OtpDataType } from '../types';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
+import { getEmailPhoneLabels, getEmailPhonePlaceholder } from '../utils/labels';
 
 interface InputDataType {
+  given_name: string | null;
+  family_name: string | null;
   email_or_phone_number: string | null;
   password: string | null;
   confirmPassword: string | null;
 }
+
+const initOtpData: OtpDataType = {
+  is_screen_visible: false,
+  email: '',
+  phone_number: '',
+};
 
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
@@ -25,13 +36,18 @@ export const AuthorizerSignup: FC<{
 }> = ({ setView, onSignup, urlProps, roles }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
+  const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
   const [successMessage, setSuccessMessage] = useState(``);
   const [formData, setFormData] = useState<InputDataType>({
+    given_name: null,
+    family_name: null,
     email_or_phone_number: null,
     password: null,
     confirmPassword: null,
   });
   const [errorData, setErrorData] = useState<InputDataType>({
+    given_name: null,
+    family_name: null,
     email_or_phone_number: null,
     password: null,
     confirmPassword: null,
@@ -67,6 +83,8 @@ export const AuthorizerSignup: FC<{
       const data: SignupInput = {
         email: email,
         phone_number: phone_number,
+        given_name: formData.given_name || '',
+        family_name: formData.family_name || '',
         password: formData.password || '',
         confirm_password: formData.confirmPassword || '',
       };
@@ -91,7 +109,18 @@ export const AuthorizerSignup: FC<{
         setLoading(false);
         return;
       }
-
+      if (
+        res &&
+        (res?.should_show_email_otp_screen ||
+          res?.should_show_mobile_otp_screen)
+      ) {
+        setOtpData({
+          is_screen_visible: true,
+          email: data.email || ``,
+          phone_number: data.phone_number || ``,
+        });
+        return;
+      }
       if (res) {
         setError(``);
         if (res.access_token) {
@@ -125,6 +154,22 @@ export const AuthorizerSignup: FC<{
   const onErrorClose = () => {
     setError(``);
   };
+
+  useEffect(() => {
+    if ((formData.given_name || '').trim() === '') {
+      setErrorData({ ...errorData, given_name: 'First Name is required' });
+    } else {
+      setErrorData({ ...errorData, given_name: null });
+    }
+  }, [formData.given_name]);
+
+  useEffect(() => {
+    if ((formData.family_name || '').trim() === '') {
+      setErrorData({ ...errorData, family_name: 'Last Name is required' });
+    } else {
+      setErrorData({ ...errorData, family_name: null });
+    }
+  }, [formData.family_name]);
 
   useEffect(() => {
     if (formData.email_or_phone_number === '') {
@@ -182,14 +227,33 @@ export const AuthorizerSignup: FC<{
     }
   }, [formData.password, formData.confirmPassword]);
 
-  if (successMessage) {
-    return <Message type={MessageType.Success} text={successMessage} />;
+  if (otpData.is_screen_visible) {
+    return (
+      <>
+        {successMessage && (
+          <Message type={MessageType.Success} text={successMessage} />
+        )}
+        <AuthorizerVerifyOtp
+          {...{
+            setView,
+            onLogin: onSignup,
+            email: otpData.email || ``,
+            phone_number: otpData.phone_number || ``,
+            is_totp: otpData.is_totp || false,
+          }}
+          urlProps={urlProps}
+        />
+      </>
+    );
   }
 
   return (
     <>
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
+      )}
+      {successMessage && (
+        <Message type={MessageType.Success} text={successMessage} />
       )}
       {(config.is_basic_authentication_enabled ||
         config.is_mobile_basic_authentication_enabled) &&
@@ -199,22 +263,71 @@ export const AuthorizerSignup: FC<{
               <div className={styles['styled-form-group']}>
                 <label
                   className={styles['form-input-label']}
-                  htmlFor="authorizer-sign-up-email"
+                  htmlFor="authorizer-sign-up-given-name"
                 >
-                  <span>* </span>Email / Phone Number
+                  <span>* </span>First Name
                 </label>
                 <input
-                  name="eemail_or_phone_numbermail"
-                  id="authorizer-login-email-or-phone-number"
+                  name="given_name"
+                  id="authorizer-sign-up-given-name"
+                  className={`${styles['form-input-field']} ${
+                    errorData.given_name ? styles['input-error-content'] : null
+                  }`}
+                  placeholder="eg. John"
+                  type="text"
+                  value={formData.given_name || ''}
+                  onChange={e => onInputChange('given_name', e.target.value)}
+                />
+                {errorData.given_name && (
+                  <div className={styles['form-input-error']}>
+                    {errorData.given_name}
+                  </div>
+                )}
+              </div>
+              <div className={styles['styled-form-group']}>
+                <label
+                  className={styles['form-input-label']}
+                  htmlFor="authorizer-sign-up-family-name"
+                >
+                  <span>* </span>Last Name
+                </label>
+                <input
+                  name="family_name"
+                  id="authorizer-sign-up-family-name"
+                  className={`${styles['form-input-field']} ${
+                    errorData.family_name ? styles['input-error-content'] : null
+                  }`}
+                  placeholder="eg. Doe"
+                  type="text"
+                  value={formData.family_name || ''}
+                  onChange={e => onInputChange('family_name', e.target.value)}
+                />
+                {errorData.family_name && (
+                  <div className={styles['form-input-error']}>
+                    {errorData.family_name}
+                  </div>
+                )}
+              </div>
+              <div className={styles['styled-form-group']}>
+                <label
+                  className={styles['form-input-label']}
+                  htmlFor="authorizer-sign-up-email-or-phone-number"
+                >
+                  <span>* </span>
+                  {getEmailPhoneLabels(config)}
+                </label>
+                <input
+                  name="email_or_phone_number"
+                  id="authorizer-sign-up-email-or-phone-number"
                   className={`${styles['form-input-field']} ${
                     errorData.email_or_phone_number
                       ? styles['input-error-content']
                       : null
                   }`}
-                  placeholder="eg. hello@world.com / +919999999999"
+                  placeholder={getEmailPhonePlaceholder(config)}
                   type="text"
                   value={formData.email_or_phone_number || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     onInputChange('email_or_phone_number', e.target.value)
                   }
                 />
@@ -240,7 +353,7 @@ export const AuthorizerSignup: FC<{
                   placeholder="********"
                   type="password"
                   value={formData.password || ''}
-                  onChange={(e) => onInputChange('password', e.target.value)}
+                  onChange={e => onInputChange('password', e.target.value)}
                 />
                 {errorData.password && (
                   <div className={styles['form-input-error']}>
@@ -266,7 +379,7 @@ export const AuthorizerSignup: FC<{
                   placeholder="********"
                   type="password"
                   value={formData.confirmPassword || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     onInputChange('confirmPassword', e.target.value)
                   }
                 />
@@ -291,9 +404,13 @@ export const AuthorizerSignup: FC<{
                 disabled={
                   loading ||
                   disableSignupButton ||
+                  !!errorData.given_name ||
+                  !!errorData.family_name ||
                   !!errorData.email_or_phone_number ||
                   !!errorData.password ||
                   !!errorData.confirmPassword ||
+                  !formData.given_name ||
+                  !formData.family_name ||
                   !formData.email_or_phone_number ||
                   !formData.password ||
                   !formData.confirmPassword

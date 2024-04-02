@@ -10,6 +10,7 @@ import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import { OtpDataType } from '../types';
 import { AuthorizerResetPassword } from './AuthorizerResetPassword';
+import { getEmailPhoneLabels, getEmailPhonePlaceholder } from '../utils/labels';
 
 interface InputDataType {
   email_or_phone_number: string | null;
@@ -145,8 +146,8 @@ export const AuthorizerForgotPassword: FC<{
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
       <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-        Please enter your email address.
-        <br /> We will send you an email to reset your password.
+        Please enter your {getEmailPhoneLabels(config)}.
+        <br /> We will send you an email / otp to reset your password.
       </p>
       <br />
       <form onSubmit={onSubmit} name="authorizer-forgot-password-form">
@@ -155,7 +156,8 @@ export const AuthorizerForgotPassword: FC<{
             className={styles['form-input-label']}
             htmlFor="authorizer-forgot-password-email-or-phone-number"
           >
-            <span>* </span>Email / Phone Number
+            <span>* </span>
+            {getEmailPhoneLabels(config)}
           </label>
           <input
             name="email_or_phone_number"
@@ -165,10 +167,10 @@ export const AuthorizerForgotPassword: FC<{
                 ? styles['input-error-content']
                 : null
             }`}
-            placeholder="eg. hello@world.com / +919999999999"
+            placeholder={getEmailPhonePlaceholder(config)}
             type="text"
             value={formData.email_or_phone_number || ''}
-            onChange={(e) =>
+            onChange={e =>
               onInputChange('email_or_phone_number', e.target.value)
             }
           />

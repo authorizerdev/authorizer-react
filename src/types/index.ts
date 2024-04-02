@@ -1,31 +1,33 @@
 import { AuthToken, User, Authorizer } from '@authorizerdev/authorizer-js';
 import { AuthorizerProviderActionType } from '../constants';
 
+export type AuthorizerConfig = {
+  authorizerURL: string;
+  redirectURL: string;
+  client_id: string;
+  is_google_login_enabled: boolean;
+  is_github_login_enabled: boolean;
+  is_facebook_login_enabled: boolean;
+  is_linkedin_login_enabled: boolean;
+  is_apple_login_enabled: boolean;
+  is_twitter_login_enabled: boolean;
+  is_microsoft_login_enabled: boolean;
+  is_twitch_login_enabled: boolean;
+  is_email_verification_enabled: boolean;
+  is_basic_authentication_enabled: boolean;
+  is_magic_link_login_enabled: boolean;
+  is_sign_up_enabled: boolean;
+  is_strong_password_enabled: boolean;
+  is_multi_factor_auth_enabled: boolean;
+  is_mobile_basic_authentication_enabled: boolean;
+  is_phone_verification_enabled: boolean;
+};
+
 export type AuthorizerState = {
   user: User | null;
   token: AuthToken | null;
   loading: boolean;
-  config: {
-    authorizerURL: string;
-    redirectURL: string;
-    client_id: string;
-    is_google_login_enabled: boolean;
-    is_github_login_enabled: boolean;
-    is_facebook_login_enabled: boolean;
-    is_linkedin_login_enabled: boolean;
-    is_apple_login_enabled: boolean;
-    is_twitter_login_enabled: boolean;
-    is_microsoft_login_enabled: boolean;
-    is_twitch_login_enabled: boolean;
-    is_email_verification_enabled: boolean;
-    is_basic_authentication_enabled: boolean;
-    is_magic_link_login_enabled: boolean;
-    is_sign_up_enabled: boolean;
-    is_strong_password_enabled: boolean;
-    is_multi_factor_auth_enabled: boolean;
-    is_mobile_basic_authentication_enabled: boolean;
-    is_phone_verification_enabled: boolean;
-  };
+  config: AuthorizerConfig;
 };
 
 export type AuthorizerProviderAction = {
