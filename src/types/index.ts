@@ -13,6 +13,7 @@ export type AuthorizerConfig = {
   is_twitter_login_enabled: boolean;
   is_microsoft_login_enabled: boolean;
   is_twitch_login_enabled: boolean;
+  is_roblox_login_enabled: boolean;
   is_email_verification_enabled: boolean;
   is_basic_authentication_enabled: boolean;
   is_magic_link_login_enabled: boolean;
@@ -48,6 +49,7 @@ export type AuthorizerContextPropsType = {
     is_twitter_login_enabled: boolean;
     is_microsoft_login_enabled: boolean;
     is_twitch_login_enabled: boolean;
+    is_roblox_login_enabled: boolean;
     is_email_verification_enabled: boolean;
     is_basic_authentication_enabled: boolean;
     is_magic_link_login_enabled: boolean;

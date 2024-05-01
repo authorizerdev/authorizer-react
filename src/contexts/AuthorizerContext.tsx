@@ -29,6 +29,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     is_twitter_login_enabled: false,
     is_microsoft_login_enabled: false,
     is_twitch_login_enabled: false,
+    is_roblox_login_enabled: false,
     is_email_verification_enabled: false,
     is_basic_authentication_enabled: false,
     is_magic_link_login_enabled: false,
@@ -101,6 +102,7 @@ let initialState: AuthorizerState = {
     is_twitter_login_enabled: false,
     is_microsoft_login_enabled: false,
     is_twitch_login_enabled: false,
+    is_roblox_login_enabled: false,
     is_email_verification_enabled: false,
     is_basic_authentication_enabled: false,
     is_magic_link_login_enabled: false,
@@ -142,8 +144,10 @@ export const AuthorizerProvider: FC<{
   );
 
   const getToken = async () => {
-    const { data: metaRes, errors: metaResErrors } =
-      await authorizerRef.current.getMetaData();
+    const {
+      data: metaRes,
+      errors: metaResErrors,
+    } = await authorizerRef.current.getMetaData();
     try {
       if (metaResErrors && metaResErrors.length) {
         throw new Error(metaResErrors[0].message);
