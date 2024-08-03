@@ -95,6 +95,16 @@ To run tests, use `npm test` or `yarn test`.
 
 Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
 
+### Storybook commands
+
+```bash
+npm run storybook
+```
+
+```bash
+npm run build-storybook
+```
+
 ### Jest
 
 Jest tests are set up to run with `npm test` or `yarn test`.
