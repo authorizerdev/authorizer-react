@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
-import { AuthToken, LoginInput } from '@authorizerdev/authorizer-js';
+import { FC, useEffect, useState } from 'react';
+import { AuthToken, LoginRequest } from '@authorizerdev/authorizer-js';
 import isEmail from 'validator/es/lib/isEmail';
 import isMobilePhone from 'validator/es/lib/isMobilePhone';
 
@@ -78,7 +78,7 @@ export const AuthorizerBasicAuthLogin: FC<{
         setLoading(false);
         return;
       }
-      const data: LoginInput = {
+      const data: LoginRequest = {
         email: email,
         phone_number: phone_number,
         password: formData.password || '',
@@ -137,12 +137,7 @@ export const AuthorizerBasicAuthLogin: FC<{
         setError(``);
         setAuthData({
           user: res.user || null,
-          token: {
-            access_token: res.access_token,
-            expires_in: res.expires_in,
-            refresh_token: res.refresh_token,
-            id_token: res.id_token,
-          },
+          token: res,
           config,
           loading: false,
         });

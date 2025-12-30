@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, ReactNode } from 'react';
+import { MouseEventHandler, ReactNode } from 'react';
 import { ButtonAppearance } from '../constants';
 import styles from '../styles/default.css';
 

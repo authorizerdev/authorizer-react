@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
-import { VerifyOtpInput } from '@authorizerdev/authorizer-js';
+import { FC, useEffect, useState } from 'react';
+import { VerifyOTPRequest } from '@authorizerdev/authorizer-js';
 import styles from '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
@@ -45,7 +45,7 @@ export const AuthorizerVerifyOtp: FC<{
     setSuccessMessage(``);
     try {
       setLoading(true);
-      const data: VerifyOtpInput = {
+      const data: VerifyOTPRequest = {
         email,
         phone_number,
         otp: formData.otp || '',
@@ -64,12 +64,7 @@ export const AuthorizerVerifyOtp: FC<{
         setError(``);
         setAuthData({
           user: res.user || null,
-          token: {
-            access_token: res.access_token,
-            expires_in: res.expires_in,
-            refresh_token: res.refresh_token,
-            id_token: res.id_token,
-          },
+          token: res,
           config,
           loading: false,
         });
@@ -162,7 +157,7 @@ export const AuthorizerVerifyOtp: FC<{
             placeholder="e.g.- AB123C"
             type="password"
             value={formData.otp || ''}
-            onChange={e => onInputChange('otp', e.target.value)}
+            onChange={(e) => onInputChange('otp', e.target.value)}
           />
           {errorData.otp && (
             <div className={styles['form-input-error']}>{errorData.otp}</div>

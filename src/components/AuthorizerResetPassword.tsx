@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import styles from '../styles/default.css';
 
 import { ButtonAppearance, MessageType } from '../constants';

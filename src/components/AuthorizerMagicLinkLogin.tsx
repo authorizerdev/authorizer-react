@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import isEmail from 'validator/es/lib/isEmail';
 
 import styles from '../styles/default.css';
@@ -7,7 +7,7 @@ import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
-import { MagicLinkLoginInput } from '@authorizerdev/authorizer-js';
+import { MagicLinkLoginRequest } from '@authorizerdev/authorizer-js';
 
 interface InputDataType {
   email: string | null;
@@ -38,7 +38,7 @@ export const AuthorizerMagicLinkLogin: FC<{
     try {
       setLoading(true);
 
-      const data: MagicLinkLoginInput = {
+      const data: MagicLinkLoginRequest = {
         email: formData.email || '',
         state: urlProps?.state || '',
         redirect_uri: urlProps?.redirect_uri || '',

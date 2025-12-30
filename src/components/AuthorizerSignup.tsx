@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
-import { AuthToken, SignupInput } from '@authorizerdev/authorizer-js';
+import { FC, useEffect, useState } from 'react';
+import { AuthToken, SignUpRequest } from '@authorizerdev/authorizer-js';
 import isEmail from 'validator/es/lib/isEmail';
 import isMobilePhone from 'validator/es/lib/isMobilePhone';
 
@@ -94,7 +94,7 @@ export const AuthorizerSignup: FC<{
         setLoading(false);
         return;
       }
-      const data: SignupInput = {
+      const data: SignUpRequest = {
         email,
         phone_number,
         given_name: formData.given_name || '',
@@ -141,12 +141,7 @@ export const AuthorizerSignup: FC<{
           setError(``);
           setAuthData({
             user: res.user || null,
-            token: {
-              access_token: res.access_token,
-              expires_in: res.expires_in,
-              refresh_token: res.refresh_token,
-              id_token: res.id_token,
-            },
+            token: res,
             config,
             loading: false,
           });
@@ -299,7 +294,7 @@ export const AuthorizerSignup: FC<{
           placeholder={fieldOverride?.placeholder ?? placeholder}
           type={type}
           value={formData[key] || ''}
-          onChange={e => onInputChange(key, e.target.value)}
+          onChange={(e) => onInputChange(key, e.target.value)}
         />
         {errorData[key] && (
           <div className={styles['form-input-error']}>{errorData[key]}</div>

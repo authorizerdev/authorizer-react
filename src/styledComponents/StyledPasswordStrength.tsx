@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { passwordStrengthIndicatorOpacity } from '../constants';
 import styles from '../styles/default.css';
 
