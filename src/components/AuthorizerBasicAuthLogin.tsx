@@ -3,7 +3,7 @@ import { AuthToken, LoginRequest } from '@authorizerdev/authorizer-js';
 import isEmail from 'validator/es/lib/isEmail';
 import isMobilePhone from 'validator/es/lib/isMobilePhone';
 
-import styles from '../styles/default.css';
+import '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
@@ -223,9 +223,9 @@ export const AuthorizerBasicAuthLogin: FC<{
       )}
       <>
         <form onSubmit={onSubmit} name="authorizer-login-form">
-          <div className={styles['styled-form-group']}>
+          <div className="styled-form-group">
             <label
-              className={styles['form-input-label']}
+              className="form-input-label"
               htmlFor="authorizer-login-email"
             >
               <span>* </span>
@@ -234,10 +234,8 @@ export const AuthorizerBasicAuthLogin: FC<{
             <input
               name="email_or_phone_number"
               id="authorizer-login-email-or-phone-number"
-              className={`${styles['form-input-field']} ${
-                errorData.email_or_phone_number
-                  ? styles['input-error-content']
-                  : null
+              className={`form-input-field ${
+                errorData.email_or_phone_number ? 'input-error-content' : ''
               }`}
               placeholder={getEmailPhonePlaceholder(config)}
               type="text"
@@ -247,14 +245,14 @@ export const AuthorizerBasicAuthLogin: FC<{
               }
             />
             {errorData.email_or_phone_number && (
-              <div className={styles['form-input-error']}>
+              <div className="form-input-error">
                 {errorData.email_or_phone_number}
               </div>
             )}
           </div>
-          <div className={styles['styled-form-group']}>
+          <div className="styled-form-group">
             <label
-              className={styles['form-input-label']}
+              className="form-input-label"
               htmlFor="authorizer-login-password"
             >
               <span>* </span>Password
@@ -262,8 +260,8 @@ export const AuthorizerBasicAuthLogin: FC<{
             <input
               name="password"
               id="authorizer-login-password"
-              className={`${styles['form-input-field']} ${
-                errorData.password ? styles['input-error-content'] : null
+              className={`form-input-field ${
+                errorData.password ? 'input-error-content' : ''
               }`}
               placeholder="********"
               type="password"
@@ -271,9 +269,7 @@ export const AuthorizerBasicAuthLogin: FC<{
               onChange={e => onInputChange('password', e.target.value)}
             />
             {errorData.password && (
-              <div className={styles['form-input-error']}>
-                {errorData.password}
-              </div>
+              <div className="form-input-error">{errorData.password}</div>
             )}
           </div>
           <br />

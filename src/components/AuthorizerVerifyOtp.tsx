@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { VerifyOTPRequest } from '@authorizerdev/authorizer-js';
-import styles from '../styles/default.css';
+import '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -141,18 +141,15 @@ export const AuthorizerVerifyOtp: FC<{
       </p>
       <br />
       <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
-        <div className={styles['styled-form-group']}>
-          <label
-            className={styles['form-input-label']}
-            htmlFor="authorizer-verify-otp"
-          >
+        <div className="styled-form-group">
+          <label className="form-input-label" htmlFor="authorizer-verify-otp">
             <span>* </span>OTP (One Time Password)
           </label>
           <input
             name="otp"
             id="authorizer-verify-otp"
-            className={`${styles['form-input-field']} ${
-              errorData.otp ? styles['input-error-content'] : null
+            className={`form-input-field ${
+              errorData.otp ? 'input-error-content' : ''
             }`}
             placeholder="e.g.- AB123C"
             type="password"
@@ -160,7 +157,7 @@ export const AuthorizerVerifyOtp: FC<{
             onChange={(e) => onInputChange('otp', e.target.value)}
           />
           {errorData.otp && (
-            <div className={styles['form-input-error']}>{errorData.otp}</div>
+            <div className="form-input-error">{errorData.otp}</div>
           )}
           {is_totp && (
             <Message

@@ -1,4 +1,6 @@
 import { defineConfig } from 'tsup';
+import { copyFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 export default defineConfig({
   entry: ['src/index.tsx'],
@@ -19,8 +21,17 @@ export default defineConfig({
       js: format === 'cjs' ? '.cjs' : '.mjs',
     };
   },
-  // CSS files will be bundled as text
+  // Don't bundle CSS - export it separately
   loader: {
-    '.css': 'text',
+    '.css': 'empty',
+  },
+  onSuccess: async () => {
+    // Copy CSS file to dist after build
+    const cssSource = join(process.cwd(), 'src/styles/default.css');
+    const cssDest = join(process.cwd(), 'dist/styles.css');
+    if (existsSync(cssSource)) {
+      copyFileSync(cssSource, cssDest);
+      console.log('✓ Copied styles.css to dist');
+    }
   },
 });
