@@ -20,12 +20,12 @@ make release-rc VERSION=2.0.0-rc.1
 # - Update package.json
 # - Build the library
 
-# Then commit and publish:
-git add .
-git commit -m "chore: release 2.0.0-rc.1"
-git tag v2.0.0-rc.1
-git push origin main && git push origin v2.0.0-rc.1
-make publish-rc  # Will also ask for confirmation
+# Then publish (includes git commit, tag, push, and npm publish):
+make publish-rc  # Will ask for confirmation, then:
+                 # - Commit changes (if any)
+                 # - Create and push git tag
+                 # - Push to origin
+                 # - Publish to npm
 ```
 
 ## Quick Release (Stable)
@@ -44,13 +44,12 @@ make release-major   # 2.0.0 -> 3.0.0
 # - Update package.json automatically
 # - Build the library
 
-# Then commit and publish:
-VERSION=$(npm pkg get version | tr -d '"')
-git add .
-git commit -m "chore: release $VERSION"
-git tag v$VERSION
-git push origin main && git push origin v$VERSION
-make publish  # Will also ask for confirmation
+# Then publish (includes git commit, tag, push, and npm publish):
+make publish  # Will ask for confirmation, then:
+              # - Commit changes (if any)
+              # - Create and push git tag
+              # - Push to origin
+              # - Publish to npm
 ```
 
 ## Release Checklist

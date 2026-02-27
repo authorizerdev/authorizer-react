@@ -48,7 +48,6 @@ export const AuthorizerMagicLinkLogin: FC<{
         data.roles = roles;
       }
       const { data: res, errors } = await authorizerRef.magicLinkLogin(data);
-      setLoading(false);
       if (errors && errors.length) {
         setError(formatErrorMessage(errors[0]?.message));
         return;
@@ -69,8 +68,9 @@ export const AuthorizerMagicLinkLogin: FC<{
         }, 3000);
       }
     } catch (err) {
-      setLoading(false);
       setError(formatErrorMessage((err as Error)?.message));
+    } finally {
+      setLoading(false);
     }
   };
 

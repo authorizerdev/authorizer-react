@@ -59,8 +59,8 @@ export const AuthorizerBasicAuthLogin: FC<{
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
     try {
+      setLoading(true);
       let email: string = '';
       let phone_number: string = '';
       if (formData.email_or_phone_number) {
@@ -75,7 +75,6 @@ export const AuthorizerBasicAuthLogin: FC<{
           ...errorData,
           email_or_phone_number: 'Invalid email or phone number',
         });
-        setLoading(false);
         return;
       }
       const data: LoginRequest = {
@@ -97,7 +96,6 @@ export const AuthorizerBasicAuthLogin: FC<{
       const { data: res, errors } = await authorizerRef.login(data);
       if (errors && errors.length) {
         setError(errors[0].message);
-        setLoading(false);
         return;
       }
       // if totp is enabled for the first time show totp screen with scanner
@@ -147,8 +145,9 @@ export const AuthorizerBasicAuthLogin: FC<{
         onLogin(res);
       }
     } catch (err) {
-      setLoading(false);
       setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
   };
 

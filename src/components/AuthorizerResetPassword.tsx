@@ -48,8 +48,8 @@ export const AuthorizerResetPassword: FC<Props> = ({
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
     try {
+      setLoading(true);
       const { data: res, errors } = await authorizerRef.resetPassword({
         token,
         otp: formData.otp || '',
@@ -57,7 +57,6 @@ export const AuthorizerResetPassword: FC<Props> = ({
         password: formData.password || '',
         confirm_password: formData.confirmPassword || '',
       });
-      setLoading(false);
       if (errors && errors.length) {
         setError(formatErrorMessage(errors[0]?.message));
         return;
@@ -70,8 +69,9 @@ export const AuthorizerResetPassword: FC<Props> = ({
           redirect_uri || config.redirectURL || window.location.origin;
       }
     } catch (err) {
-      setLoading(false);
       setError(formatErrorMessage((err as Error).message));
+    } finally {
+      setLoading(false);
     }
   };
 

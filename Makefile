@@ -15,13 +15,13 @@ help:
 	@echo ""
 	@echo "Release (RC):"
 	@echo "  make release-rc [VERSION=X.X.X-rc.X]  - Create RC release (interactive)"
-	@echo "  make publish-rc                       - Publish RC to npm (with confirmation)"
+	@echo "  make publish-rc                       - Publish RC (git commit/tag/push + npm)"
 	@echo ""
 	@echo "Release (Stable):"
 	@echo "  make release-patch                   - Bump patch version (1.0.0 -> 1.0.1, interactive)"
 	@echo "  make release-minor                   - Bump minor version (1.0.0 -> 1.1.0, interactive)"
 	@echo "  make release-major                   - Bump major version (1.0.0 -> 2.0.0, interactive)"
-	@echo "  make publish                         - Publish stable to npm (with confirmation)"
+	@echo "  make publish                         - Publish stable (git commit/tag/push + npm)"
 	@echo ""
 	@echo "Note: All release commands are interactive and will:"
 	@echo "  - Show current and new version"
@@ -104,12 +104,8 @@ release-rc:
 	echo "  ✓ Version updated to $$VERSION"; \
 	echo "  ✓ Library built successfully"; \
 	echo ""; \
-	echo "Next steps (manual):"; \
-	echo "  1. Review changes: git status && git diff"; \
-	echo "  2. Commit: git add . && git commit -m 'chore: release $$VERSION'"; \
-	echo "  3. Tag: git tag v$$VERSION"; \
-	echo "  4. Push: git push origin main && git push origin v$$VERSION"; \
-	echo "  5. Publish: make publish-rc"
+	echo "Next step:"; \
+	echo "  make publish-rc  # Will handle git commit, tag, push, and npm publish"
 
 release-patch:
 	@CURRENT=$$(npm pkg get version | tr -d '"'); \
@@ -196,13 +192,38 @@ publish-rc:
 	echo "📦 Version: $$VERSION"; \
 	echo "📦 Tag: rc"; \
 	echo ""; \
-	echo "⚠️  This will publish to npm registry"; \
+	echo "⚠️  This will:"; \
+	echo "   1. Commit changes (if any)"; \
+	echo "   2. Create git tag v$$VERSION"; \
+	echo "   3. Push to origin"; \
+	echo "   4. Publish to npm registry"; \
+	echo ""; \
 	read -p "Continue? (y/N): " confirm; \
 	if [ "$$confirm" != "y" ] && [ "$$confirm" != "Y" ]; then \
 		echo "❌ Publish cancelled"; \
 		exit 1; \
 	fi; \
 	echo ""; \
+	echo "🔍 Checking git status..."; \
+	if [ -n "$$(git status --porcelain)" ]; then \
+		echo "📝 Staging changes..."; \
+		git add .; \
+		echo "💾 Committing changes..."; \
+		git commit -m "chore: release $$VERSION" || echo "⚠️  Commit failed or nothing to commit"; \
+	else \
+		echo "✓ No uncommitted changes"; \
+	fi; \
+	if ! git rev-parse "v$$VERSION" >/dev/null 2>&1; then \
+		echo "🏷️  Creating git tag v$$VERSION..."; \
+		git tag v$$VERSION; \
+	else \
+		echo "⚠️  Tag v$$VERSION already exists"; \
+	fi; \
+	echo "📤 Pushing to origin..."; \
+	git push origin main 2>/dev/null || git push origin master 2>/dev/null || echo "⚠️  Push failed or already up to date"; \
+	git push origin v$$VERSION 2>/dev/null || echo "⚠️  Tag push failed or already exists"; \
+	echo ""; \
+	echo "📦 Publishing to npm..."; \
 	npm publish --tag rc --access public; \
 	echo ""; \
 	echo "✅ Published @authorizerdev/authorizer-react@$$VERSION to npm with 'rc' tag!"
@@ -219,13 +240,38 @@ publish:
 	echo "📦 Version: $$VERSION"; \
 	echo "📦 Tag: latest"; \
 	echo ""; \
-	echo "⚠️  This will publish to npm registry as latest"; \
+	echo "⚠️  This will:"; \
+	echo "   1. Commit changes (if any)"; \
+	echo "   2. Create git tag v$$VERSION"; \
+	echo "   3. Push to origin"; \
+	echo "   4. Publish to npm registry as latest"; \
+	echo ""; \
 	read -p "Continue? (y/N): " confirm; \
 	if [ "$$confirm" != "y" ] && [ "$$confirm" != "Y" ]; then \
 		echo "❌ Publish cancelled"; \
 		exit 1; \
 	fi; \
 	echo ""; \
+	echo "🔍 Checking git status..."; \
+	if [ -n "$$(git status --porcelain)" ]; then \
+		echo "📝 Staging changes..."; \
+		git add .; \
+		echo "💾 Committing changes..."; \
+		git commit -m "chore: release $$VERSION" || echo "⚠️  Commit failed or nothing to commit"; \
+	else \
+		echo "✓ No uncommitted changes"; \
+	fi; \
+	if ! git rev-parse "v$$VERSION" >/dev/null 2>&1; then \
+		echo "🏷️  Creating git tag v$$VERSION..."; \
+		git tag v$$VERSION; \
+	else \
+		echo "⚠️  Tag v$$VERSION already exists"; \
+	fi; \
+	echo "📤 Pushing to origin..."; \
+	git push origin main 2>/dev/null || git push origin master 2>/dev/null || echo "⚠️  Push failed or already up to date"; \
+	git push origin v$$VERSION 2>/dev/null || echo "⚠️  Tag push failed or already exists"; \
+	echo ""; \
+	echo "📦 Publishing to npm..."; \
 	npm publish --access public; \
 	echo ""; \
 	echo "✅ Published @authorizerdev/authorizer-react@$$VERSION to npm!"

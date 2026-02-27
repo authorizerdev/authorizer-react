@@ -62,7 +62,6 @@ export const AuthorizerForgotPassword: FC<{
           ...errorData,
           email_or_phone_number: 'Invalid email or phone number',
         });
-        setLoading(false);
         return;
       }
       const { data: res, errors } = await authorizerRef.forgotPassword({
@@ -74,7 +73,6 @@ export const AuthorizerForgotPassword: FC<{
           config.redirectURL ||
           window.location.origin,
       });
-      setLoading(false);
       if (errors && errors.length) {
         setError(formatErrorMessage(errors[0]?.message));
         return;
@@ -96,8 +94,9 @@ export const AuthorizerForgotPassword: FC<{
         onForgotPassword(res);
       }
     } catch (err) {
-      setLoading(false);
       setError(formatErrorMessage((err as Error)?.message));
+    } finally {
+      setLoading(false);
     }
   };
 

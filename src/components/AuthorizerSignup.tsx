@@ -145,18 +145,17 @@ export const AuthorizerSignup: FC<{
             config,
             loading: false,
           });
-        } else {
-          setLoading(false);
-          setSuccessMessage(res.message || ``);
         }
+        setSuccessMessage(res.message || ``);
 
         if (onSignup) {
           onSignup(res);
         }
       }
     } catch (err) {
-      setLoading(false);
       setError(formatErrorMessage((err as Error).message));
+    } finally {
+      setLoading(false);
     }
   };
 

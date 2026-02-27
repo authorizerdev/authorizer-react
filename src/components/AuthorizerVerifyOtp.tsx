@@ -55,7 +55,6 @@ export const AuthorizerVerifyOtp: FC<{
       }
       data.is_totp = !!is_totp;
       const { data: res, errors } = await authorizerRef.verifyOtp(data);
-      setLoading(false);
       if (errors && errors.length) {
         setError(errors[0]?.message || ``);
         return;
@@ -74,8 +73,9 @@ export const AuthorizerVerifyOtp: FC<{
         onLogin(res);
       }
     } catch (err) {
-      setLoading(false);
       setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,7 +111,7 @@ export const AuthorizerVerifyOtp: FC<{
         onLogin(res);
       }
     } catch (err) {
-      setLoading(false);
+      setSendingOtp(false);
       setError((err as Error).message);
     }
   };
