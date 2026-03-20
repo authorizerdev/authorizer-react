@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-rc.3",
+  "version": "2.0.0",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -85,13 +85,13 @@
     "react-dom": "^18.3.1",
     "react-is": "^18.3.1",
     "size-limit": "^11.1.0",
-    "storybook": "8.4.0",
+    "storybook": "^8.6.18",
     "tslib": "^2.8.1",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@authorizerdev/authorizer-js": "3.0.0-rc.1",
+    "@authorizerdev/authorizer-js": "3.0.0",
     "@storybook/preset-scss": "^1.0.3",
     "validator": "^13.11.0"
   }
