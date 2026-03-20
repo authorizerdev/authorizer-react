@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { AuthToken } from '@authorizerdev/authorizer-js';
 
 import { AuthorizerBasicAuthLogin } from './AuthorizerBasicAuthLogin';

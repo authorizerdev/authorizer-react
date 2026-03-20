@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
-import styles from '../styles/default.css';
+import { FC, useEffect, useState } from 'react';
+import '../styles/default.css';
 
 import { ButtonAppearance, MessageType } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -48,8 +48,8 @@ export const AuthorizerResetPassword: FC<Props> = ({
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
     try {
+      setLoading(true);
       const { data: res, errors } = await authorizerRef.resetPassword({
         token,
         otp: formData.otp || '',
@@ -57,7 +57,6 @@ export const AuthorizerResetPassword: FC<Props> = ({
         password: formData.password || '',
         confirm_password: formData.confirmPassword || '',
       });
-      setLoading(false);
       if (errors && errors.length) {
         setError(formatErrorMessage(errors[0]?.message));
         return;
@@ -70,8 +69,9 @@ export const AuthorizerResetPassword: FC<Props> = ({
           redirect_uri || config.redirectURL || window.location.origin;
       }
     } catch (err) {
-      setLoading(false);
       setError(formatErrorMessage((err as Error).message));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,9 +123,9 @@ export const AuthorizerResetPassword: FC<Props> = ({
       )}
       <form onSubmit={onSubmit} name="authorizer-reset-password-form">
         {showOTPInput && (
-          <div className={styles['styled-form-group']}>
+          <div className="styled-form-group">
             <label
-              className={styles['form-input-label']}
+              className="form-input-label"
               htmlFor="authorizer-verify-otp"
             >
               <span>* </span>OTP (One Time Password)
@@ -133,8 +133,8 @@ export const AuthorizerResetPassword: FC<Props> = ({
             <input
               name="otp"
               id="authorizer-verify-otp"
-              className={`${styles['form-input-field']} ${
-                errorData.otp ? styles['input-error-content'] : null
+              className={`form-input-field ${
+                errorData.otp ? 'input-error-content' : ''
               }`}
               placeholder="e.g.- AB123C"
               type="password"
@@ -142,13 +142,13 @@ export const AuthorizerResetPassword: FC<Props> = ({
               onChange={(e) => onInputChange('otp', e.target.value)}
             />
             {errorData.otp && (
-              <div className={styles['form-input-error']}>{errorData.otp}</div>
+              <div className="form-input-error">{errorData.otp}</div>
             )}
           </div>
         )}
-        <div className={styles['styled-form-group']}>
+        <div className="styled-form-group">
           <label
-            className={styles['form-input-label']}
+            className="form-input-label"
             htmlFor="authorizer-reset-password"
           >
             <span>* </span>Password
@@ -156,8 +156,8 @@ export const AuthorizerResetPassword: FC<Props> = ({
           <input
             name="password"
             id="authorizer-reset-password"
-            className={`${styles['form-input-field']} ${
-              errorData.password ? styles['input-error-content'] : null
+            className={`form-input-field ${
+              errorData.password ? 'input-error-content' : ''
             }`}
             placeholder="********"
             type="password"
@@ -165,14 +165,14 @@ export const AuthorizerResetPassword: FC<Props> = ({
             onChange={(e) => onInputChange('password', e.target.value)}
           />
           {errorData.password && (
-            <div className={styles['form-input-error']}>
+            <div className="form-input-error">
               {errorData.password}
             </div>
           )}
         </div>
-        <div className={styles['styled-form-group']}>
+        <div className="styled-form-group">
           <label
-            className={styles['form-input-label']}
+            className="form-input-label"
             htmlFor="authorizer-reset-confirm-password"
           >
             <span>* </span>Confirm Password
@@ -180,8 +180,8 @@ export const AuthorizerResetPassword: FC<Props> = ({
           <input
             name="confirmPassword"
             id="authorizer-reset-confirm-password"
-            className={`${styles['form-input-field']} ${
-              errorData.confirmPassword ? styles['input-error-content'] : null
+            className={`form-input-field ${
+              errorData.confirmPassword ? 'input-error-content' : ''
             }`}
             placeholder="********"
             type="password"
@@ -189,7 +189,7 @@ export const AuthorizerResetPassword: FC<Props> = ({
             onChange={(e) => onInputChange('confirmPassword', e.target.value)}
           />
           {errorData.confirmPassword && (
-            <div className={styles['form-input-error']}>
+            <div className="form-input-error">
               {errorData.confirmPassword}
             </div>
           )}

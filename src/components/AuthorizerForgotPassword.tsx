@@ -1,8 +1,8 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import isEmail from 'validator/es/lib/isEmail';
 import isMobilePhone from 'validator/es/lib/isMobilePhone';
 
-import styles from '../styles/default.css';
+import '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
@@ -62,7 +62,6 @@ export const AuthorizerForgotPassword: FC<{
           ...errorData,
           email_or_phone_number: 'Invalid email or phone number',
         });
-        setLoading(false);
         return;
       }
       const { data: res, errors } = await authorizerRef.forgotPassword({
@@ -74,7 +73,6 @@ export const AuthorizerForgotPassword: FC<{
           config.redirectURL ||
           window.location.origin,
       });
-      setLoading(false);
       if (errors && errors.length) {
         setError(formatErrorMessage(errors[0]?.message));
         return;
@@ -96,8 +94,9 @@ export const AuthorizerForgotPassword: FC<{
         onForgotPassword(res);
       }
     } catch (err) {
-      setLoading(false);
       setError(formatErrorMessage((err as Error)?.message));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -151,9 +150,9 @@ export const AuthorizerForgotPassword: FC<{
       </p>
       <br />
       <form onSubmit={onSubmit} name="authorizer-forgot-password-form">
-        <div className={styles['styled-form-group']}>
+        <div className="styled-form-group">
           <label
-            className={styles['form-input-label']}
+            className="form-input-label"
             htmlFor="authorizer-forgot-password-email-or-phone-number"
           >
             <span>* </span>
@@ -162,10 +161,10 @@ export const AuthorizerForgotPassword: FC<{
           <input
             name="email_or_phone_number"
             id="authorizer-forgot-password-email-or-phone-number"
-            className={`${styles['form-input-field']} ${
+            className={`form-input-field ${
               errorData.email_or_phone_number
-                ? styles['input-error-content']
-                : null
+                ? 'input-error-content'
+                : ''
             }`}
             placeholder={getEmailPhonePlaceholder(config)}
             type="text"
@@ -175,7 +174,7 @@ export const AuthorizerForgotPassword: FC<{
             }
           />
           {errorData.email_or_phone_number && (
-            <div className={styles['form-input-error']}>
+            <div className="form-input-error">
               {errorData.email_or_phone_number}
             </div>
           )}

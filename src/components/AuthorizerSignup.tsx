@@ -1,9 +1,9 @@
-import React, { FC, useEffect, useState } from 'react';
-import { AuthToken, SignupInput } from '@authorizerdev/authorizer-js';
+import { FC, useEffect, useState } from 'react';
+import { AuthToken, SignUpRequest } from '@authorizerdev/authorizer-js';
 import isEmail from 'validator/es/lib/isEmail';
 import isMobilePhone from 'validator/es/lib/isMobilePhone';
 
-import styles from '../styles/default.css';
+import '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
@@ -94,7 +94,7 @@ export const AuthorizerSignup: FC<{
         setLoading(false);
         return;
       }
-      const data: SignupInput = {
+      const data: SignUpRequest = {
         email,
         phone_number,
         given_name: formData.given_name || '',
@@ -141,27 +141,21 @@ export const AuthorizerSignup: FC<{
           setError(``);
           setAuthData({
             user: res.user || null,
-            token: {
-              access_token: res.access_token,
-              expires_in: res.expires_in,
-              refresh_token: res.refresh_token,
-              id_token: res.id_token,
-            },
+            token: res,
             config,
             loading: false,
           });
-        } else {
-          setLoading(false);
-          setSuccessMessage(res.message || ``);
         }
+        setSuccessMessage(res.message || ``);
 
         if (onSignup) {
           onSignup(res);
         }
       }
     } catch (err) {
-      setLoading(false);
       setError(formatErrorMessage((err as Error).message));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -282,9 +276,9 @@ export const AuthorizerSignup: FC<{
       return null;
     }
     return (
-      <div className={styles['styled-form-group']}>
+      <div className="styled-form-group">
         <label
-          className={styles['form-input-label']}
+          className="form-input-label"
           htmlFor={`authorizer-sign-up-${key}`}
         >
           {!fieldOverride?.notRequired && <span>* </span>}
@@ -293,16 +287,16 @@ export const AuthorizerSignup: FC<{
         <input
           name={key}
           id={`authorizer-sign-up-${key}`}
-          className={`${styles['form-input-field']} ${
-            errorData[key] ? styles['input-error-content'] : null
+          className={`form-input-field ${
+            errorData[key] ? 'input-error-content' : ''
           }`}
           placeholder={fieldOverride?.placeholder ?? placeholder}
           type={type}
           value={formData[key] || ''}
-          onChange={e => onInputChange(key, e.target.value)}
+          onChange={(e) => onInputChange(key, e.target.value)}
         />
         {errorData[key] && (
-          <div className={styles['form-input-error']}>{errorData[key]}</div>
+          <div className="form-input-error">{errorData[key]}</div>
         )}
       </div>
     );
