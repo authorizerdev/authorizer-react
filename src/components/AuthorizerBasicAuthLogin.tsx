@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { AuthToken, LoginRequest } from '@authorizerdev/authorizer-js';
-import isEmail from 'validator/es/lib/isEmail';
-import isMobilePhone from 'validator/es/lib/isMobilePhone';
+import isEmail from 'validator/es/lib/isEmail.js';
+import isMobilePhone from 'validator/es/lib/isMobilePhone.js';
 
 import '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';

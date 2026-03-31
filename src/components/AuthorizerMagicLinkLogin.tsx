@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import isEmail from 'validator/es/lib/isEmail';
+import isEmail from 'validator/es/lib/isEmail.js';
 
 import '../styles/default.css';
 import { ButtonAppearance, MessageType } from '../constants';
