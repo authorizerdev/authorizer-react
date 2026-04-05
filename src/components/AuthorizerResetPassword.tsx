@@ -9,6 +9,20 @@ import { Message } from './Message';
 import { getSearchParams } from '../utils/url';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
+function isValidRedirectUri(uri: string, allowedRedirect?: string): boolean {
+  try {
+    const url = new URL(uri, window.location.origin);
+    if (url.origin === window.location.origin) return true;
+    if (allowedRedirect) {
+      const allowed = new URL(allowedRedirect);
+      if (url.origin === allowed.origin) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 type Props = {
   showOTPInput?: boolean;
   onReset?: (res: any) => void;
@@ -65,8 +79,11 @@ export const AuthorizerResetPassword: FC<Props> = ({
       if (onReset) {
         onReset(res);
       } else {
-        window.location.href =
-          redirect_uri || config.redirectURL || window.location.origin;
+        const fallback = config.redirectURL || window.location.origin;
+        const target = redirect_uri && isValidRedirectUri(redirect_uri, config.redirectURL)
+          ? redirect_uri
+          : fallback;
+        window.location.href = target;
       }
     } catch (err) {
       setError(formatErrorMessage((err as Error).message));
