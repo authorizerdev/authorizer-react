@@ -3,7 +3,7 @@ import {
   createContext,
   useReducer,
   useContext,
-  useRef,
+  useMemo,
   useEffect,
   ReactNode,
 } from 'react';
@@ -134,24 +134,33 @@ export const AuthorizerProvider: FC<{
 
   let intervalRef: any = null;
 
-  const authorizerRef = useRef(
-    new Authorizer({
-      authorizerURL: state.config.authorizerURL,
-      redirectURL: hasWindow()
-        ? state.config.redirectURL || window.location.origin
-        : state.config.redirectURL || '/',
-      clientID: state.config.client_id,
-    })
+  const redirectURLForSdk = hasWindow()
+    ? state.config.redirectURL || window.location.origin
+    : state.config.redirectURL || '/';
+
+  const authorizer = useMemo(
+    () =>
+      new Authorizer({
+        authorizerURL: state.config.authorizerURL,
+        redirectURL: redirectURLForSdk,
+        clientID: state.config.client_id,
+      }),
+    [
+      state.config.authorizerURL,
+      state.config.redirectURL,
+      state.config.client_id,
+      redirectURLForSdk,
+    ]
   );
 
   const getToken = async () => {
     const { data: metaRes, errors: metaResErrors } =
-      await authorizerRef.current.getMetaData();
+      await authorizer.getMetaData();
     try {
       if (metaResErrors && metaResErrors.length) {
         throw new Error(metaResErrors[0].message);
       }
-      const { data: res, errors } = await authorizerRef.current.getSession();
+      const { data: res, errors } = await authorizer.getSession();
       if (errors && errors.length) {
         throw new Error(errors[0].message);
       }
@@ -285,7 +294,7 @@ export const AuthorizerProvider: FC<{
         loading: true,
       },
     });
-    await authorizerRef.current.logout();
+    await authorizer.logout();
     const loggedOutState = {
       user: null,
       token: null,
@@ -306,7 +315,7 @@ export const AuthorizerProvider: FC<{
         setLoading,
         setToken: handleTokenChange,
         setAuthData: setAuthData,
-        authorizerRef: authorizerRef.current,
+        authorizerRef: authorizer,
         logout,
       }}
     >
