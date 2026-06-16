@@ -9,6 +9,9 @@ import {
 } from 'react';
 import { Authorizer, User, AuthToken } from '@authorizerdev/authorizer-js';
 
+/** Wire protocol for public API calls. Matches the Protocol type in authorizer-js >= 3.1.0. */
+type Protocol = 'graphql' | 'rest';
+
 import {
   AuthorizerContextPropsType,
   AuthorizerState,
@@ -121,6 +124,7 @@ export const AuthorizerProvider: FC<{
     authorizerURL: string;
     redirectURL: string;
     clientID?: string;
+    protocol?: Protocol;
   };
   onStateChangeCallback?: (stateData: AuthorizerState) => Promise<void>;
 }> = ({ config: defaultConfig, onStateChangeCallback, children }) => {
@@ -144,12 +148,15 @@ export const AuthorizerProvider: FC<{
         authorizerURL: state.config.authorizerURL,
         redirectURL: redirectURLForSdk,
         clientID: state.config.client_id,
+        // protocol is passed through to the SDK when @authorizerdev/authorizer-js >= 3.1.0.
+        ...(defaultConfig.protocol ? { protocol: defaultConfig.protocol as never } : {}),
       }),
     [
       state.config.authorizerURL,
       state.config.redirectURL,
       state.config.client_id,
       redirectURLForSdk,
+      defaultConfig.protocol,
     ]
   );
 

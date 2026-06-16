@@ -1,5 +1,5 @@
 {
-  "version": "2.0.7",
+  "version": "2.1.0",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -23,7 +23,7 @@
   "scripts": {
     "start": "tsup --watch",
     "build": "tsup",
-    "test": "echo \"No tests specified\" && exit 0",
+    "test": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx --fix",
     "type-check": "tsc --noEmit",
     "prepare": "tsup",
