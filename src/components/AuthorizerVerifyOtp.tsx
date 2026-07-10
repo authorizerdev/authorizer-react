@@ -161,6 +161,7 @@ export const AuthorizerVerifyOtp: FC<{
             }`}
             placeholder="e.g.- AB123C"
             type="password"
+            autoComplete="one-time-code"
             value={formData.otp || ''}
             onChange={(e) => onInputChange('otp', e.target.value)}
             disabled={isLockedOut}
@@ -189,13 +190,14 @@ export const AuthorizerVerifyOtp: FC<{
       </form>
       {setView && (
         <StyledFooter>
-          {sendingOtp ? (
-            <div style={{ marginBottom: '10px' }}>Sending ...</div>
-          ) : (
-            <StyledLink onClick={resendOtp} marginBottom="10px">
-              Resend OTP
-            </StyledLink>
-          )}
+          {!is_totp &&
+            (sendingOtp ? (
+              <div style={{ marginBottom: '10px' }}>Sending ...</div>
+            ) : (
+              <StyledLink onClick={resendOtp} marginBottom="10px">
+                Resend OTP
+              </StyledLink>
+            ))}
           {config.is_sign_up_enabled && (
             <div>
               Don't have an account?{' '}
