@@ -23,6 +23,7 @@ export const AuthorizerVerifyOtp: FC<{
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
+  const [isLockedOut, setIsLockedOut] = useState(false);
   const [formData, setFormData] = useState<InputDataType>({
     otp: null,
   });
@@ -56,6 +57,9 @@ export const AuthorizerVerifyOtp: FC<{
       data.is_totp = !!is_totp;
       const { data: res, errors } = await authorizerRef.verifyOtp(data);
       if (errors && errors.length) {
+        if (errors[0]?.code === 'TOO_MANY_REQUESTS') {
+          setIsLockedOut(true);
+        }
         setError(errors[0]?.message || ``);
         return;
       }
@@ -134,7 +138,11 @@ export const AuthorizerVerifyOtp: FC<{
         />
       )}
       {error && (
-        <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
+        <Message
+          type={MessageType.Error}
+          text={error}
+          onClose={isLockedOut ? undefined : onErrorClose}
+        />
       )}
       <p style={{ textAlign: 'center', margin: '10px 0px' }}>
         Please enter the OTP sent to your email or phone number or authenticator
@@ -155,6 +163,7 @@ export const AuthorizerVerifyOtp: FC<{
             type="password"
             value={formData.otp || ''}
             onChange={(e) => onInputChange('otp', e.target.value)}
+            disabled={isLockedOut}
           />
           {errorData.otp && (
             <div className="form-input-error">{errorData.otp}</div>
@@ -172,7 +181,7 @@ export const AuthorizerVerifyOtp: FC<{
         <br />
         <StyledButton
           type="submit"
-          disabled={loading || !formData.otp || !!errorData.otp}
+          disabled={loading || !formData.otp || !!errorData.otp || isLockedOut}
           appearance={ButtonAppearance.Primary}
         >
           {loading ? `Processing ...` : `Submit`}
