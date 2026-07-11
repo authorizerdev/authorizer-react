@@ -24,6 +24,29 @@ export const AuthorizerPasskeyLogin: FC<{
     return null;
   }
 
+  // Only show the "OR" separator if AuthorizerRoot is actually going to
+  // render something below it - otherwise the passkey button ends up
+  // followed by a trailing separator with nothing underneath. Mirrors the
+  // exact set of conditions AuthorizerRoot uses to decide whether
+  // AuthorizerSocialLogin, AuthorizerBasicAuthLogin, or
+  // AuthorizerMagicLinkLogin render anything on the login view.
+  const hasSocialLogin =
+    config.is_google_login_enabled ||
+    config.is_github_login_enabled ||
+    config.is_facebook_login_enabled ||
+    config.is_linkedin_login_enabled ||
+    config.is_apple_login_enabled ||
+    config.is_twitter_login_enabled ||
+    config.is_microsoft_login_enabled ||
+    config.is_twitch_login_enabled ||
+    config.is_roblox_login_enabled;
+  const hasBasicAuthLogin =
+    (config.is_basic_authentication_enabled ||
+      config.is_mobile_basic_authentication_enabled) &&
+    !config.is_magic_link_login_enabled;
+  const hasAnotherLoginMethod =
+    hasSocialLogin || hasBasicAuthLogin || config.is_magic_link_login_enabled;
+
   const onClick = async () => {
     setError(``);
     try {
@@ -65,7 +88,7 @@ export const AuthorizerPasskeyLogin: FC<{
       >
         {loading ? `Waiting for passkey ...` : `Sign in with a passkey`}
       </StyledButton>
-      <StyledSeparator>OR</StyledSeparator>
+      {hasAnotherLoginMethod && <StyledSeparator>OR</StyledSeparator>}
     </>
   );
 };
