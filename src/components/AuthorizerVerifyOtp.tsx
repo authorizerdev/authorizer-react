@@ -59,6 +59,16 @@ export const AuthorizerVerifyOtp: FC<{
       if (errors && errors.length) {
         if (errors[0]?.code === 'TOO_MANY_REQUESTS') {
           setIsLockedOut(true);
+          // Fall back to a fixed message if the server ever sends an empty
+          // one: the form is about to go fully disabled (input + submit),
+          // so this is the user's only explanation for why - an empty
+          // string here would mean no message renders at all (Message
+          // returns null for blank text) and the form goes silently dead.
+          setError(
+            errors[0]?.message ||
+              `Too many attempts. Please wait a while before trying again.`,
+          );
+          return;
         }
         setError(errors[0]?.message || ``);
         return;
