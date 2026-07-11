@@ -1,6 +1,7 @@
-import React, { FC, useEffect, useState } from 'react';
-import { VerifyOtpInput } from '@authorizerdev/authorizer-js';
-import styles from '../styles/default.css';
+import { FC, useEffect, useState } from 'react';
+import { VerifyOTPRequest } from '@authorizerdev/authorizer-js';
+import '../styles/default.css';
+
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
@@ -56,8 +57,9 @@ export const AuthorizerVerifyOtp: FC<{
     setSuccessMessage(``);
     try {
       setLoading(true);
-      const data: VerifyOtpInput = {
+      const data: VerifyOTPRequest = {
         email,
+        phone_number,
         otp: formData.otp || '',
       };
       if (urlProps?.state) {
@@ -65,7 +67,6 @@ export const AuthorizerVerifyOtp: FC<{
       }
       data.is_totp = !!is_totp;
       const { data: res, errors } = await authorizerRef.verifyOtp(data);
-      setLoading(false);
       if (errors && errors.length) {
         setError(errors[0]?.message || ``);
         return;
@@ -94,12 +95,7 @@ export const AuthorizerVerifyOtp: FC<{
         setError(``);
         setAuthData({
           user: res.user || null,
-          token: {
-            access_token: res.access_token,
-            expires_in: res.expires_in,
-            refresh_token: res.refresh_token,
-            id_token: res.id_token,
-          },
+          token: res,
           config,
           loading: false,
         });
@@ -109,8 +105,9 @@ export const AuthorizerVerifyOtp: FC<{
         onLogin(res);
       }
     } catch (err) {
-      setLoading(false);
       setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -129,6 +126,7 @@ export const AuthorizerVerifyOtp: FC<{
 
       const { data: res, errors } = await authorizerRef.resendOtp({
         email,
+        phone_number,
       });
       setSendingOtp(false);
       if (errors && errors.length) {
@@ -145,7 +143,7 @@ export const AuthorizerVerifyOtp: FC<{
         onLogin(res);
       }
     } catch (err) {
-      setLoading(false);
+      setSendingOtp(false);
       setError((err as Error).message);
     }
   };
@@ -193,18 +191,15 @@ export const AuthorizerVerifyOtp: FC<{
       </p>
       <br />
       <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
-        <div className={styles['styled-form-group']}>
-          <label
-            className={styles['form-input-label']}
-            htmlFor="authorizer-verify-otp"
-          >
+        <div className="styled-form-group">
+          <label className="form-input-label" htmlFor="authorizer-verify-otp">
             <span>* </span>OTP (One Time Password)
           </label>
           <input
             name="otp"
             id="authorizer-verify-otp"
-            className={`${styles['form-input-field']} ${
-              errorData.otp ? styles['input-error-content'] : null
+            className={`form-input-field ${
+              errorData.otp ? 'input-error-content' : ''
             }`}
             placeholder="e.g.- AB123C"
             type="password"
@@ -212,7 +207,7 @@ export const AuthorizerVerifyOtp: FC<{
             onChange={(e) => onInputChange('otp', e.target.value)}
           />
           {errorData.otp && (
-            <div className={styles['form-input-error']}>{errorData.otp}</div>
+            <div className="form-input-error">{errorData.otp}</div>
           )}
           {is_totp && (
             <Message

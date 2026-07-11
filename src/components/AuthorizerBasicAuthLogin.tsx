@@ -1,9 +1,9 @@
-import React, { FC, useEffect, useState } from 'react';
-import { AuthToken, LoginInput } from '@authorizerdev/authorizer-js';
-import isEmail from 'validator/es/lib/isEmail';
-import isMobilePhone from 'validator/es/lib/isMobilePhone';
+import { FC, useEffect, useState } from 'react';
+import { AuthToken, LoginRequest } from '@authorizerdev/authorizer-js';
+import validator from 'validator';
+const { isEmail, isMobilePhone } = validator;
 
-import styles from '../styles/default.css';
+import '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
@@ -11,6 +11,7 @@ import { Message } from './Message';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { OtpDataType, TotpDataType } from '../types';
 import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
+import { getEmailPhoneLabels, getEmailPhonePlaceholder } from '../utils/labels';
 
 const initOtpData: OtpDataType = {
   is_screen_visible: false,
@@ -58,8 +59,8 @@ export const AuthorizerBasicAuthLogin: FC<{
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
     try {
+      setLoading(true);
       let email: string = '';
       let phone_number: string = '';
       if (formData.email_or_phone_number) {
@@ -74,10 +75,9 @@ export const AuthorizerBasicAuthLogin: FC<{
           ...errorData,
           email_or_phone_number: 'Invalid email or phone number',
         });
-        setLoading(false);
         return;
       }
-      const data: LoginInput = {
+      const data: LoginRequest = {
         email: email,
         phone_number: phone_number,
         password: formData.password || '',
@@ -96,7 +96,6 @@ export const AuthorizerBasicAuthLogin: FC<{
       const { data: res, errors } = await authorizerRef.login(data);
       if (errors && errors.length) {
         setError(errors[0].message);
-        setLoading(false);
         return;
       }
       // if totp is enabled for the first time show totp screen with scanner
@@ -136,12 +135,7 @@ export const AuthorizerBasicAuthLogin: FC<{
         setError(``);
         setAuthData({
           user: res.user || null,
-          token: {
-            access_token: res.access_token,
-            expires_in: res.expires_in,
-            refresh_token: res.refresh_token,
-            id_token: res.id_token,
-          },
+          token: res,
           config,
           loading: false,
         });
@@ -151,8 +145,9 @@ export const AuthorizerBasicAuthLogin: FC<{
         onLogin(res);
       }
     } catch (err) {
-      setLoading(false);
       setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -227,37 +222,36 @@ export const AuthorizerBasicAuthLogin: FC<{
       )}
       <>
         <form onSubmit={onSubmit} name="authorizer-login-form">
-          <div className={styles['styled-form-group']}>
+          <div className="styled-form-group">
             <label
-              className={styles['form-input-label']}
+              className="form-input-label"
               htmlFor="authorizer-login-email"
             >
-              <span>* </span>Email / Phone Number
+              <span>* </span>
+              {getEmailPhoneLabels(config)}
             </label>
             <input
               name="email_or_phone_number"
               id="authorizer-login-email-or-phone-number"
-              className={`${styles['form-input-field']} ${
-                errorData.email_or_phone_number
-                  ? styles['input-error-content']
-                  : null
+              className={`form-input-field ${
+                errorData.email_or_phone_number ? 'input-error-content' : ''
               }`}
-              placeholder="eg. hello@world.com / +919999999999"
+              placeholder={getEmailPhonePlaceholder(config)}
               type="text"
               value={formData.email_or_phone_number || ''}
-              onChange={(e) =>
+              onChange={e =>
                 onInputChange('email_or_phone_number', e.target.value)
               }
             />
             {errorData.email_or_phone_number && (
-              <div className={styles['form-input-error']}>
+              <div className="form-input-error">
                 {errorData.email_or_phone_number}
               </div>
             )}
           </div>
-          <div className={styles['styled-form-group']}>
+          <div className="styled-form-group">
             <label
-              className={styles['form-input-label']}
+              className="form-input-label"
               htmlFor="authorizer-login-password"
             >
               <span>* </span>Password
@@ -265,18 +259,16 @@ export const AuthorizerBasicAuthLogin: FC<{
             <input
               name="password"
               id="authorizer-login-password"
-              className={`${styles['form-input-field']} ${
-                errorData.password ? styles['input-error-content'] : null
+              className={`form-input-field ${
+                errorData.password ? 'input-error-content' : ''
               }`}
               placeholder="********"
               type="password"
               value={formData.password || ''}
-              onChange={(e) => onInputChange('password', e.target.value)}
+              onChange={e => onInputChange('password', e.target.value)}
             />
             {errorData.password && (
-              <div className={styles['form-input-error']}>
-                {errorData.password}
-              </div>
+              <div className="form-input-error">{errorData.password}</div>
             )}
           </div>
           <br />

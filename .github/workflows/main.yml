@@ -1,34 +1,27 @@
 name: CI
-on: [push]
+on: [push, pull_request]
+
 jobs:
   build:
-    name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: ['14.x']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        node: ['18.x', '20.x']
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node ${{ matrix.node }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install deps and build (with cache)
-        uses: bahmutov/npm-install@v1
-        with:
-          useLockfile: false
-
-      # - name: Lint
-      #   run: yarn lint
-
-      # - name: Test
-      #   run: yarn test --ci --coverage --maxWorkers=2
+      - name: Install deps
+        run: npm install
 
       - name: Build
-        run: yarn build
+        run: npm run build
+
+      - name: Type-check
+        run: npm run type-check

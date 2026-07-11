@@ -1,4 +1,4 @@
-import React from 'react';
+import { FC } from 'react';
 import { Github } from '../icons/github';
 import { Google } from '../icons/google';
 import { Facebook } from '../icons/facebook';
@@ -11,8 +11,9 @@ import { Apple } from '../icons/apple';
 import { Twitter } from '../icons/twitter';
 import { Microsoft } from '../icons/microsoft';
 import { Twitch } from '../icons/twitch';
+import { Roblox } from '../icons/roblox';
 
-export const AuthorizerSocialLogin: React.FC<{
+export const AuthorizerSocialLogin: FC<{
   urlProps?: Record<string, any>;
   roles?: string[];
 }> = ({ urlProps, roles }) => {
@@ -25,7 +26,8 @@ export const AuthorizerSocialLogin: React.FC<{
     config.is_apple_login_enabled ||
     config.is_twitter_login_enabled ||
     config.is_microsoft_login_enabled ||
-    config.is_twitch_login_enabled;
+    config.is_twitch_login_enabled ||
+    config.is_roblox_login_enabled;
 
   const data: {
     scope?: string;
@@ -157,6 +159,20 @@ export const AuthorizerSocialLogin: React.FC<{
           >
             <Twitch />
             Continue with Twitch
+          </StyledButton>
+          <br />
+        </>
+      )}
+      {config.is_roblox_login_enabled && (
+        <>
+          <StyledButton
+            appearance={ButtonAppearance.Default}
+            onClick={() => {
+              window.location.href = `${config.authorizerURL}/oauth_login/roblox?${queryParams}`;
+            }}
+          >
+            <Roblox />
+            Continue with Roblox
           </StyledButton>
           <br />
         </>

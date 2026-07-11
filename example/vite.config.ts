@@ -9,7 +9,11 @@ export default defineConfig({
     alias: [
       {
         find: 'authorizer-react',
-        replacement: path.resolve(__dirname, '../dist/authorizer-react.esm.js'),
+        replacement: path.resolve(__dirname, '../dist/index.mjs'),
+      },
+      {
+        find: 'authorizer-react/dist/styles.css',
+        replacement: path.resolve(__dirname, '../dist/styles.css'),
       },
     ],
   },

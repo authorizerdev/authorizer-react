@@ -1,12 +1,13 @@
-import React, {
+import {
   FC,
   createContext,
   useReducer,
   useContext,
-  useRef,
+  useMemo,
   useEffect,
+  ReactNode,
 } from 'react';
-import { Authorizer, User, AuthToken } from '@authorizerdev/authorizer-js';
+import { Authorizer, User, AuthToken, Protocol } from '@authorizerdev/authorizer-js';
 
 import {
   AuthorizerContextPropsType,
@@ -29,6 +30,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     is_twitter_login_enabled: false,
     is_microsoft_login_enabled: false,
     is_twitch_login_enabled: false,
+    is_roblox_login_enabled: false,
     is_email_verification_enabled: false,
     is_basic_authentication_enabled: false,
     is_magic_link_login_enabled: false,
@@ -101,6 +103,7 @@ let initialState: AuthorizerState = {
     is_twitter_login_enabled: false,
     is_microsoft_login_enabled: false,
     is_twitch_login_enabled: false,
+    is_roblox_login_enabled: false,
     is_email_verification_enabled: false,
     is_basic_authentication_enabled: false,
     is_magic_link_login_enabled: false,
@@ -113,11 +116,12 @@ let initialState: AuthorizerState = {
 };
 
 export const AuthorizerProvider: FC<{
-  children: React.ReactNode;
+  children: ReactNode;
   config: {
     authorizerURL: string;
     redirectURL: string;
     clientID?: string;
+    protocol?: Protocol;
   };
   onStateChangeCallback?: (stateData: AuthorizerState) => Promise<void>;
 }> = ({ config: defaultConfig, onStateChangeCallback, children }) => {
@@ -131,39 +135,44 @@ export const AuthorizerProvider: FC<{
 
   let intervalRef: any = null;
 
-  const authorizerRef = useRef(
-    new Authorizer({
-      authorizerURL: state.config.authorizerURL,
-      redirectURL: hasWindow()
-        ? state.config.redirectURL || window.location.origin
-        : state.config.redirectURL || '/',
-      clientID: state.config.client_id,
-    })
+  const redirectURLForSdk = hasWindow()
+    ? state.config.redirectURL || window.location.origin
+    : state.config.redirectURL || '/';
+
+  const authorizer = useMemo(
+    () =>
+      new Authorizer({
+        authorizerURL: state.config.authorizerURL,
+        redirectURL: redirectURLForSdk,
+        clientID: state.config.client_id,
+        ...(defaultConfig.protocol ? { protocol: defaultConfig.protocol } : {}),
+      }),
+    [
+      state.config.authorizerURL,
+      state.config.redirectURL,
+      state.config.client_id,
+      redirectURLForSdk,
+      defaultConfig.protocol,
+    ]
   );
 
   const getToken = async () => {
     const { data: metaRes, errors: metaResErrors } =
-      await authorizerRef.current.getMetaData();
+      await authorizer.getMetaData();
     try {
       if (metaResErrors && metaResErrors.length) {
         throw new Error(metaResErrors[0].message);
       }
-      const { data: res, errors } = await authorizerRef.current.getSession();
+      const { data: res, errors } = await authorizer.getSession();
       if (errors && errors.length) {
         throw new Error(errors[0].message);
       }
       if (res && res.access_token && res.user) {
-        const token = {
-          access_token: res.access_token,
-          expires_in: res.expires_in,
-          id_token: res.id_token,
-          refresh_token: res.refresh_token || '',
-        };
         dispatch({
           type: AuthorizerProviderActionType.SET_AUTH_DATA,
           payload: {
             ...state,
-            token,
+            token: res,
             user: res.user,
             config: {
               ...state.config,
@@ -181,9 +190,11 @@ export const AuthorizerProvider: FC<{
         //   }, millisecond);
         // }
         if (intervalRef) clearInterval(intervalRef);
-        intervalRef = setInterval(() => {
-          getToken();
-        }, res.expires_in * 1000);
+        if (res.expires_in) {
+          intervalRef = setInterval(() => {
+            getToken();
+          }, res.expires_in * 1000);
+        }
       } else {
         dispatch({
           type: AuthorizerProviderActionType.SET_AUTH_DATA,
@@ -239,7 +250,7 @@ export const AuthorizerProvider: FC<{
       },
     });
 
-    if (token?.access_token) {
+    if (token?.access_token && token.expires_in) {
       if (intervalRef) clearInterval(intervalRef);
       intervalRef = setInterval(() => {
         getToken();
@@ -253,7 +264,7 @@ export const AuthorizerProvider: FC<{
       payload: data,
     });
 
-    if (data.token?.access_token) {
+    if (data.token?.access_token && data.token.expires_in) {
       if (intervalRef) clearInterval(intervalRef);
       intervalRef = setInterval(() => {
         getToken();
@@ -286,7 +297,7 @@ export const AuthorizerProvider: FC<{
         loading: true,
       },
     });
-    await authorizerRef.current.logout();
+    await authorizer.logout();
     const loggedOutState = {
       user: null,
       token: null,
@@ -307,7 +318,7 @@ export const AuthorizerProvider: FC<{
         setLoading,
         setToken: handleTokenChange,
         setAuthData: setAuthData,
-        authorizerRef: authorizerRef.current,
+        authorizerRef: authorizer,
         logout,
       }}
     >

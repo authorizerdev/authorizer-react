@@ -1,37 +1,68 @@
-import React, { FC, useEffect, useState } from 'react';
-import { AuthToken, SignupInput } from '@authorizerdev/authorizer-js';
-import isEmail from 'validator/es/lib/isEmail';
-import isMobilePhone from 'validator/es/lib/isMobilePhone';
+import { FC, useEffect, useState } from 'react';
+import { AuthToken, SignUpRequest } from '@authorizerdev/authorizer-js';
+import validator from 'validator';
+const { isEmail, isMobilePhone } = validator;
 
-import styles from '../styles/default.css';
+import '../styles/default.css';
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+import { OtpDataType } from '../types';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
+import { getEmailPhoneLabels, getEmailPhonePlaceholder } from '../utils/labels';
 
-interface InputDataType {
-  email_or_phone_number: string | null;
-  password: string | null;
-  confirmPassword: string | null;
-}
+type Field =
+  | 'given_name'
+  | 'family_name'
+  | 'email_or_phone_number'
+  | 'password'
+  | 'confirmPassword';
+
+type FieldOverride = {
+  label: string;
+  placeholder: string;
+  hide?: boolean;
+  notRequired?: boolean;
+};
+
+type InputDataType = {
+  [K in Field]: string | null;
+};
+
+export type FormFieldsOverrides = {
+  [K in Field]?: FieldOverride;
+};
+
+const initOtpData: OtpDataType = {
+  is_screen_visible: false,
+  email: '',
+  phone_number: '',
+};
 
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
   onSignup?: (data: AuthToken) => void;
   urlProps?: Record<string, any>;
   roles?: string[];
-}> = ({ setView, onSignup, urlProps, roles }) => {
+  fieldOverrides?: FormFieldsOverrides;
+}> = ({ setView, onSignup, urlProps, roles, fieldOverrides }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
+  const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
   const [successMessage, setSuccessMessage] = useState(``);
   const [formData, setFormData] = useState<InputDataType>({
+    given_name: null,
+    family_name: null,
     email_or_phone_number: null,
     password: null,
     confirmPassword: null,
   });
   const [errorData, setErrorData] = useState<InputDataType>({
+    given_name: null,
+    family_name: null,
     email_or_phone_number: null,
     password: null,
     confirmPassword: null,
@@ -39,9 +70,8 @@ export const AuthorizerSignup: FC<{
   const { authorizerRef, config, setAuthData } = useAuthorizer();
   const [disableSignupButton, setDisableSignupButton] = useState(false);
 
-  const onInputChange = async (field: string, value: string) => {
+  const onInputChange = async (field: string, value: string) =>
     setFormData({ ...formData, [field]: value });
-  };
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
@@ -64,9 +94,11 @@ export const AuthorizerSignup: FC<{
         setLoading(false);
         return;
       }
-      const data: SignupInput = {
-        email: email,
-        phone_number: phone_number,
+      const data: SignUpRequest = {
+        email,
+        phone_number,
+        given_name: formData.given_name || '',
+        family_name: formData.family_name || '',
         password: formData.password || '',
         confirm_password: formData.confirmPassword || '',
       };
@@ -91,40 +123,71 @@ export const AuthorizerSignup: FC<{
         setLoading(false);
         return;
       }
-
+      if (
+        res &&
+        (res?.should_show_email_otp_screen ||
+          res?.should_show_mobile_otp_screen)
+      ) {
+        setOtpData({
+          is_screen_visible: true,
+          email: data.email || ``,
+          phone_number: data.phone_number || ``,
+        });
+        return;
+      }
       if (res) {
         setError(``);
         if (res.access_token) {
           setError(``);
           setAuthData({
             user: res.user || null,
-            token: {
-              access_token: res.access_token,
-              expires_in: res.expires_in,
-              refresh_token: res.refresh_token,
-              id_token: res.id_token,
-            },
+            token: res,
             config,
             loading: false,
           });
-        } else {
-          setLoading(false);
-          setSuccessMessage(res.message || ``);
         }
+        setSuccessMessage(res.message || ``);
 
         if (onSignup) {
           onSignup(res);
         }
       }
     } catch (err) {
-      setLoading(false);
       setError(formatErrorMessage((err as Error).message));
+    } finally {
+      setLoading(false);
     }
   };
 
-  const onErrorClose = () => {
-    setError(``);
-  };
+  const onErrorClose = () => setError(``);
+
+  useEffect(() => {
+    if (
+      fieldOverrides?.given_name?.notRequired ||
+      fieldOverrides?.given_name?.hide
+    ) {
+      return;
+    }
+    if ((formData.given_name || '').trim() === '') {
+      setErrorData({ ...errorData, given_name: 'First Name is required' });
+    } else {
+      setErrorData({ ...errorData, given_name: null });
+    }
+  }, [formData.given_name]);
+
+  useEffect(() => {
+    if (
+      fieldOverrides?.family_name?.notRequired ||
+      fieldOverrides?.family_name?.hide
+    ) {
+      return;
+    }
+    if ((formData.family_name || '').trim() === '') {
+      setErrorData({ ...errorData, family_name: 'Last Name is required' });
+    } else {
+      setErrorData({ ...errorData, family_name: null });
+    }
+  }, [formData.family_name]);
 
   useEffect(() => {
     if (formData.email_or_phone_number === '') {
@@ -182,100 +245,102 @@ export const AuthorizerSignup: FC<{
     }
   }, [formData.password, formData.confirmPassword]);
 
-  if (successMessage) {
-    return <Message type={MessageType.Success} text={successMessage} />;
+  if (otpData.is_screen_visible) {
+    return (
+      <>
+        {successMessage && (
+          <Message type={MessageType.Success} text={successMessage} />
+        )}
+        <AuthorizerVerifyOtp
+          {...{
+            setView,
+            onLogin: onSignup,
+            email: otpData.email || ``,
+            phone_number: otpData.phone_number || ``,
+            is_totp: otpData.is_totp || false,
+          }}
+          urlProps={urlProps}
+        />
+      </>
+    );
   }
+
+  const renderField = (
+    key: Field,
+    label: string,
+    placeholder: string,
+    type?: 'text' | 'password'
+  ) => {
+    const fieldOverride = fieldOverrides?.[key];
+    if (fieldOverride?.hide) {
+      return null;
+    }
+    return (
+      <div className="styled-form-group">
+        <label
+          className="form-input-label"
+          htmlFor={`authorizer-sign-up-${key}`}
+        >
+          {!fieldOverride?.notRequired && <span>* </span>}
+          {fieldOverride?.label ?? label}
+        </label>
+        <input
+          name={key}
+          id={`authorizer-sign-up-${key}`}
+          className={`form-input-field ${
+            errorData[key] ? 'input-error-content' : ''
+          }`}
+          placeholder={fieldOverride?.placeholder ?? placeholder}
+          type={type}
+          value={formData[key] || ''}
+          onChange={(e) => onInputChange(key, e.target.value)}
+        />
+        {errorData[key] && (
+          <div className="form-input-error">{errorData[key]}</div>
+        )}
+      </div>
+    );
+  };
+
+  const shouldFieldBlockSubmit = (key: Field) => {
+    if (
+      (formData[key] ||
+        fieldOverrides?.[key]?.notRequired ||
+        fieldOverrides?.[key]?.hide) &&
+      !errorData[key]
+    ) {
+      return false;
+    }
+    return true;
+  };
 
   return (
     <>
       {error && (
         <Message type={MessageType.Error} text={error} onClose={onErrorClose} />
       )}
+      {successMessage && (
+        <Message type={MessageType.Success} text={successMessage} />
+      )}
       {(config.is_basic_authentication_enabled ||
         config.is_mobile_basic_authentication_enabled) &&
         !config.is_magic_link_login_enabled && (
           <>
             <form onSubmit={onSubmit} name="authorizer-sign-up-form">
-              <div className={styles['styled-form-group']}>
-                <label
-                  className={styles['form-input-label']}
-                  htmlFor="authorizer-sign-up-email"
-                >
-                  <span>* </span>Email / Phone Number
-                </label>
-                <input
-                  name="eemail_or_phone_numbermail"
-                  id="authorizer-login-email-or-phone-number"
-                  className={`${styles['form-input-field']} ${
-                    errorData.email_or_phone_number
-                      ? styles['input-error-content']
-                      : null
-                  }`}
-                  placeholder="eg. hello@world.com / +919999999999"
-                  type="text"
-                  value={formData.email_or_phone_number || ''}
-                  onChange={(e) =>
-                    onInputChange('email_or_phone_number', e.target.value)
-                  }
-                />
-                {errorData.email_or_phone_number && (
-                  <div className={styles['form-input-error']}>
-                    {errorData.email_or_phone_number}
-                  </div>
-                )}
-              </div>
-              <div className={styles['styled-form-group']}>
-                <label
-                  className={styles['form-input-label']}
-                  htmlFor="authorizer-sign-up-password"
-                >
-                  <span>* </span>Password
-                </label>
-                <input
-                  name="password"
-                  id="authorizer-sign-up-password"
-                  className={`${styles['form-input-field']} ${
-                    errorData.password ? styles['input-error-content'] : null
-                  }`}
-                  placeholder="********"
-                  type="password"
-                  value={formData.password || ''}
-                  onChange={(e) => onInputChange('password', e.target.value)}
-                />
-                {errorData.password && (
-                  <div className={styles['form-input-error']}>
-                    {errorData.password}
-                  </div>
-                )}
-              </div>
-              <div className={styles['styled-form-group']}>
-                <label
-                  className={styles['form-input-label']}
-                  htmlFor="authorizer-sign-up-confirm-password"
-                >
-                  <span>* </span>Confirm Password
-                </label>
-                <input
-                  name="confirmPassword"
-                  id="authorizer-sign-up-confirm-password"
-                  className={`${styles['form-input-field']} ${
-                    errorData.confirmPassword
-                      ? styles['input-error-content']
-                      : null
-                  }`}
-                  placeholder="********"
-                  type="password"
-                  value={formData.confirmPassword || ''}
-                  onChange={(e) =>
-                    onInputChange('confirmPassword', e.target.value)
-                  }
-                />
-                {errorData.confirmPassword && (
-                  <div className={styles['form-input-error']}>
-                    {errorData.confirmPassword}
-                  </div>
-                )}
-              </div>
+              {renderField('given_name', 'First Name', 'eg. John', 'text')}
+              {renderField('family_name', 'Last Name', 'eg. Doe', 'text')}
+              {renderField(
+                'email_or_phone_number',
+                getEmailPhoneLabels(config),
+                getEmailPhonePlaceholder(config)
+              )}
+              {renderField('password', 'Password', '********', 'password')}
+              {renderField(
+                'confirmPassword',
+                'Confirm Password',
+                '********',
+                'password'
+              )}
               {config.is_strong_password_enabled && (
                 <>
                   <PasswordStrengthIndicator
@@ -291,6 +356,8 @@ export const AuthorizerSignup: FC<{
                 disabled={
                   loading ||
                   disableSignupButton ||
+                  shouldFieldBlockSubmit('given_name') ||
+                  shouldFieldBlockSubmit('family_name') ||
                   !!errorData.email_or_phone_number ||
                   !!errorData.password ||
                   !!errorData.confirmPassword ||

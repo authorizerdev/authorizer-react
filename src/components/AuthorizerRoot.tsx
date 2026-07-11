@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { AuthToken } from '@authorizerdev/authorizer-js';
 
 import { AuthorizerBasicAuthLogin } from './AuthorizerBasicAuthLogin';
@@ -6,6 +6,7 @@ import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledWrapper } from '../styledComponents';
 import { Views } from '../constants';
 import { AuthorizerSignup } from './AuthorizerSignup';
+import type {  FormFieldsOverrides } from './AuthorizerSignup';
 import { AuthorizerForgotPassword } from './AuthorizerForgotPassword';
 import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
 import { AuthorizerMagicLinkLogin } from './AuthorizerMagicLinkLogin';
@@ -19,6 +20,7 @@ export const AuthorizerRoot: FC<{
   onForgotPassword?: (data: any) => void;
   onPasswordReset?: () => void;
   roles?: string[];
+	signupFieldsOverrides?: FormFieldsOverrides
 }> = ({
   onLogin,
   onSignup,
@@ -26,6 +28,7 @@ export const AuthorizerRoot: FC<{
   onForgotPassword,
   onPasswordReset,
   roles,
+	signupFieldsOverrides
 }) => {
   const [view, setView] = useState(Views.Login);
   const { config } = useAuthorizer();
@@ -34,7 +37,10 @@ export const AuthorizerRoot: FC<{
   );
   const state = searchParams.get('state') || createRandomString();
   const scope = searchParams.get('scope')
-    ? searchParams.get('scope')?.toString().split(' ')
+    ? searchParams
+        .get('scope')
+        ?.toString()
+        .split(' ')
     : ['openid', 'profile', 'email'];
 
   const urlProps: Record<string, any> = {
@@ -51,7 +57,6 @@ export const AuthorizerRoot: FC<{
   }
 
   urlProps.redirect_uri = urlProps.redirectURL;
-
   return (
     <StyledWrapper>
       <AuthorizerSocialLogin urlProps={urlProps} roles={roles} />
@@ -77,6 +82,7 @@ export const AuthorizerRoot: FC<{
             onSignup={onSignup}
             urlProps={urlProps}
             roles={roles}
+						fieldOverrides={signupFieldsOverrides}
           />
         )}
 
