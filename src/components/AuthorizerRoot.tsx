@@ -9,6 +9,7 @@ import { AuthorizerSignup } from './AuthorizerSignup';
 import type {  FormFieldsOverrides } from './AuthorizerSignup';
 import { AuthorizerForgotPassword } from './AuthorizerForgotPassword';
 import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
+import { AuthorizerPasskeyLogin } from './AuthorizerPasskeyLogin';
 import { AuthorizerMagicLinkLogin } from './AuthorizerMagicLinkLogin';
 import { createRandomString } from '../utils/common';
 import { hasWindow } from '../utils/window';
@@ -60,6 +61,7 @@ export const AuthorizerRoot: FC<{
   return (
     <StyledWrapper>
       <AuthorizerSocialLogin urlProps={urlProps} roles={roles} />
+      {view === Views.Login && <AuthorizerPasskeyLogin onLogin={onLogin} />}
       {view === Views.Login &&
         (config.is_basic_authentication_enabled ||
           config.is_mobile_basic_authentication_enabled) &&

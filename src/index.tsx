@@ -14,6 +14,7 @@ import { AuthorizerResetPassword } from './components/AuthorizerResetPassword';
 import { AuthorizerVerifyOtp } from './components/AuthorizerVerifyOtp';
 import { AuthorizerRoot as Authorizer } from './components/AuthorizerRoot';
 import { AuthorizerTOTPScanner } from './components/AuthorizerTOTPScanner';
+import { AuthorizerPasskeyLogin } from './components/AuthorizerPasskeyLogin';
 
 export {
   useAuthorizer,
@@ -27,4 +28,5 @@ export {
   AuthorizerResetPassword,
   AuthorizerVerifyOtp,
   AuthorizerTOTPScanner,
+  AuthorizerPasskeyLogin,
 };
