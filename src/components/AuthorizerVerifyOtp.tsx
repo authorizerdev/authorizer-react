@@ -6,10 +6,21 @@ import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { Message } from './Message';
+import { TotpDataType } from '../types';
+import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
 
 interface InputDataType {
   otp: string | null;
 }
+
+const initTotpData: TotpDataType = {
+  is_screen_visible: false,
+  email: '',
+  phone_number: '',
+  authenticator_scanner_image: '',
+  authenticator_secret: '',
+  authenticator_recovery_codes: [],
+};
 
 export const AuthorizerVerifyOtp: FC<{
   setView?: (v: Views) => void;
@@ -22,6 +33,7 @@ export const AuthorizerVerifyOtp: FC<{
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
+  const [totpData, setTotpData] = useState<TotpDataType>({ ...initTotpData });
   const [sendingOtp, setSendingOtp] = useState(false);
   const [isLockedOut, setIsLockedOut] = useState(false);
   const [formData, setFormData] = useState<InputDataType>({
@@ -73,6 +85,26 @@ export const AuthorizerVerifyOtp: FC<{
         setError(errors[0]?.message || ``);
         return;
       }
+
+      // If TOTP validated using recovery code then show totp screen with scanner
+      if (
+        res &&
+        res.should_show_totp_screen &&
+        res.authenticator_scanner_image &&
+        res.authenticator_secret &&
+        res.authenticator_recovery_codes
+      ) {
+        setTotpData({
+          is_screen_visible: true,
+          email: data.email || ``,
+          phone_number: data.phone_number || ``,
+          authenticator_scanner_image: res.authenticator_scanner_image,
+          authenticator_secret: res.authenticator_secret,
+          authenticator_recovery_codes: res.authenticator_recovery_codes,
+        });
+        return;
+      }
+
       if (res) {
         setError(``);
         setAuthData({
@@ -137,6 +169,24 @@ export const AuthorizerVerifyOtp: FC<{
       setErrorData({ ...errorData, otp: null });
     }
   }, [formData.otp]);
+
+  if (totpData.is_screen_visible) {
+    return (
+      <AuthorizerTOTPScanner
+        {...{
+          setView,
+          onLogin,
+          email: totpData.email || ``,
+          phone_number: totpData.phone_number || ``,
+          authenticator_scanner_image: totpData.authenticator_scanner_image,
+          authenticator_secret: totpData.authenticator_secret,
+          authenticator_recovery_codes:
+            totpData.authenticator_recovery_codes || [],
+        }}
+        urlProps={urlProps}
+      />
+    );
+  }
 
   return (
     <>
