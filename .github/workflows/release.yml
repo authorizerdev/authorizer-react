@@ -26,11 +26,17 @@ jobs:
               run: make build
 
             - name: Publish to npm
+              # Publish directly here. The Makefile publish-rc/publish targets
+              # are interactive (confirm prompt) and re-do the commit/tag/push —
+              # correct for a human running the whole release locally, but they
+              # hang/cancel in CI, which fires AFTER the tag already exists.
               run: |
-                  if [[ "${{ github.ref }}" =~ -rc\.[0-9]+$ ]]; then
-                    make publish-rc
+                  if [[ "${GITHUB_REF_NAME}" == *-rc.* ]]; then
+                    npm publish --tag rc --access public
+                  elif [[ "${GITHUB_REF_NAME}" == *-beta.* ]]; then
+                    npm publish --tag beta --access public
                   else
-                    make publish
+                    npm publish --access public
                   fi
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
