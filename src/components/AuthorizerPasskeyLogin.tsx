@@ -47,13 +47,24 @@ export const AuthorizerPasskeyLogin: FC<{
   const hasAnotherLoginMethod =
     hasSocialLogin || hasBasicAuthLogin || config.is_magic_link_login_enabled;
 
+  // A cancelled ceremony or an account with no passkey surfaces as
+  // NotAllowedError/AbortError (the browser deliberately does not distinguish
+  // "cancelled" from "no credential" to avoid leaking account state). Neither is
+  // a real failure - the user simply falls back to password/social login - so we
+  // dismiss silently instead of showing a scary error banner. The button is
+  // always visible when the browser supports WebAuthn, so this path is common.
+  const isUserDismissed = (e?: { code?: string }): boolean =>
+    e?.code === `NotAllowedError` || e?.code === `AbortError`;
+
   const onClick = async () => {
     setError(``);
     try {
       setLoading(true);
       const { data: res, errors } = await authorizerRef.loginWithPasskey();
       if (errors && errors.length) {
-        setError(errors[0]?.message || ``);
+        if (!isUserDismissed(errors[0])) {
+          setError(errors[0]?.message || ``);
+        }
         return;
       }
       if (res) {
@@ -68,7 +79,9 @@ export const AuthorizerPasskeyLogin: FC<{
         onLogin(res);
       }
     } catch (err) {
-      setError((err as Error).message);
+      if (!isUserDismissed(err as { code?: string })) {
+        setError((err as Error).message);
+      }
     } finally {
       setLoading(false);
     }
