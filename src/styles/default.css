@@ -138,3 +138,169 @@
 *:after {
   box-sizing: inherit;
 }
+
+/* ---------- MFA setup ---------- */
+.mfa-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin: 10px 0;
+  padding: 0;
+  list-style: none;
+}
+.mfa-method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--authorizer-gray-color);
+  border-radius: var(--authorizer-radius-card);
+  background-color: var(--authorizer-white-color);
+}
+.mfa-method-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--authorizer-radius-card);
+  background-color: var(--authorizer-slate-color);
+  color: var(--authorizer-primary-color);
+}
+.mfa-method-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.mfa-method-title {
+  margin: 0;
+  font-weight: 600;
+}
+.mfa-method-desc {
+  margin: 2px 0 0;
+  font-size: var(--authorizer-fonts-small-text);
+  color: var(--authorizer-text-color);
+  opacity: 0.75;
+}
+.mfa-method-action {
+  flex: 0 0 auto;
+}
+.mfa-method-action button {
+  width: auto;
+  padding: 8px 16px !important;
+  white-space: nowrap;
+}
+.mfa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: var(--authorizer-fonts-tiny-text);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: var(--authorizer-success-color);
+  color: var(--authorizer-white-color);
+}
+
+/* ---------- TOTP scanner ---------- */
+.mfa-steps {
+  margin: 10px 0;
+  padding-left: 18px;
+}
+.mfa-steps li {
+  margin: 4px 0;
+}
+.mfa-qr {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  border: 1px solid var(--authorizer-gray-color);
+  border-radius: var(--authorizer-radius-card);
+  background-color: var(--authorizer-white-color);
+}
+.mfa-qr img {
+  display: block;
+  width: 180px;
+  height: 180px;
+}
+.mfa-secret-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin: 10px 0;
+}
+.mfa-secret-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--authorizer-gray-color);
+  border-radius: var(--authorizer-radius-input);
+  background-color: var(--authorizer-slate-color);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--authorizer-fonts-medium-text);
+  letter-spacing: 0.06em;
+  word-break: break-all;
+}
+.mfa-icon-button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--authorizer-gray-color);
+  border-radius: var(--authorizer-radius-button);
+  background-color: var(--authorizer-white-color);
+  color: var(--authorizer-text-color);
+  font-size: var(--authorizer-fonts-small-text);
+  cursor: pointer;
+}
+.mfa-icon-button:hover {
+  border-color: var(--authorizer-primary-color);
+  color: var(--authorizer-primary-color);
+}
+.mfa-icon-button:focus-visible {
+  outline: 2px solid var(--authorizer-primary-color);
+  outline-offset: 2px;
+}
+
+/* ---------- recovery codes ---------- */
+.mfa-warning {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  border-radius: var(--authorizer-radius-card);
+  background-color: #fef3c7;
+  color: #92400e;
+  font-size: var(--authorizer-fonts-small-text);
+}
+.mfa-recovery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px dashed var(--authorizer-gray-color);
+  border-radius: var(--authorizer-radius-card);
+  background-color: var(--authorizer-slate-color);
+}
+.mfa-recovery-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--authorizer-fonts-medium-text);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.mfa-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.mfa-status {
+  margin: 6px 0;
+  font-size: var(--authorizer-fonts-small-text);
+  color: var(--authorizer-success-color);
+}
