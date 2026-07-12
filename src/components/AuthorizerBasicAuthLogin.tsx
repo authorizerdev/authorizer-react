@@ -182,6 +182,40 @@ export const AuthorizerBasicAuthLogin: FC<{
     }
   }, [formData.password]);
 
+  // Passkey autofill (WebAuthn conditional mediation): when the browser and the
+  // user's device support it, discoverable passkeys are offered inline in the
+  // email/username field's autofill dropdown. Best-effort and silent - the
+  // explicit "Sign in with a passkey" button remains the primary path, and any
+  // unsupported/cancelled/aborted ceremony is ignored. Started once on mount
+  // and aborted on unmount.
+  useEffect(() => {
+    let active = true;
+    authorizerRef
+      .loginWithPasskeyAutofill()
+      .then(({ data, errors }) => {
+        if (!active || (errors && errors.length) || !data) {
+          return;
+        }
+        setAuthData({
+          user: data.user || null,
+          token: data,
+          config,
+          loading: false,
+        });
+        if (onLogin) {
+          onLogin(data);
+        }
+      })
+      .catch(() => {
+        // Autofill is best-effort; ignore unsupported/cancelled ceremonies.
+      });
+    return () => {
+      active = false;
+      authorizerRef.cancelPasskeyAutofill();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (totpData.is_screen_visible) {
     return (
       <AuthorizerTOTPScanner
@@ -238,6 +272,10 @@ export const AuthorizerBasicAuthLogin: FC<{
               }`}
               placeholder={getEmailPhonePlaceholder(config)}
               type="text"
+              // Enables WebAuthn passkey autofill: browsers offer discoverable
+              // passkeys inline in this field's autofill dropdown. Paired with
+              // the loginWithPasskeyAutofill() ceremony started on mount below.
+              autoComplete="username webauthn"
               value={formData.email_or_phone_number || ''}
               onChange={e =>
                 onInputChange('email_or_phone_number', e.target.value)
