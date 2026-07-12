@@ -15,6 +15,12 @@ import { AuthorizerVerifyOtp } from './components/AuthorizerVerifyOtp';
 import { AuthorizerRoot as Authorizer } from './components/AuthorizerRoot';
 import { AuthorizerTOTPScanner } from './components/AuthorizerTOTPScanner';
 import { AuthorizerPasskeyLogin } from './components/AuthorizerPasskeyLogin';
+import { AuthorizerPasskeyRegister } from './components/AuthorizerPasskeyRegister';
+import {
+  AuthorizerMFASetup,
+  type AvailableMfaMethods,
+  type MfaMethod,
+} from './components/AuthorizerMFASetup';
 
 export {
   useAuthorizer,
@@ -29,4 +35,8 @@ export {
   AuthorizerVerifyOtp,
   AuthorizerTOTPScanner,
   AuthorizerPasskeyLogin,
+  AuthorizerPasskeyRegister,
+  AuthorizerMFASetup,
 };
+
+export type { AvailableMfaMethods, MfaMethod };
