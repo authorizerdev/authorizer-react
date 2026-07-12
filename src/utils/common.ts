@@ -27,6 +27,31 @@ export const createRandomString = () => {
   return random;
 };
 
+export const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // fall through to the legacy path below
+  }
+  // Legacy fallback for non-secure contexts / older browsers.
+  if (!hasWindow()) {
+    return false;
+  }
+  const el = document.createElement('textarea');
+  el.value = text;
+  el.setAttribute('readonly', '');
+  el.style.position = 'absolute';
+  el.style.left = '-9999px';
+  document.body.appendChild(el);
+  el.select();
+  const ok = document.execCommand('copy');
+  document.body.removeChild(el);
+  return ok;
+};
+
 export const createQueryParams = (params: any) => {
   return Object.keys(params)
     .filter((k) => typeof params[k] !== 'undefined')
