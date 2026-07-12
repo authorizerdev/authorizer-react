@@ -13,6 +13,28 @@ import { Message } from './Message';
 // WebAuthn JSON ceremony APIs the SDK relies on - there is no server-side
 // config flag for passkeys (unlike social login), it's purely a browser
 // capability.
+// PasskeyIcon is an inline key glyph (no icon-library dependency) that inherits
+// the button's text color via currentColor.
+const PasskeyIcon: FC = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <circle cx="8.5" cy="8.5" r="5.5" />
+    <path d="M12.4 12.4 20 20" />
+    <path d="M16.5 16.5 18.7 14.3" />
+    <path d="M19 19 21 17" />
+  </svg>
+);
+
 export const AuthorizerPasskeyLogin: FC<{
   onLogin?: (data: AuthToken | void) => void;
 }> = ({ onLogin }) => {
@@ -99,7 +121,17 @@ export const AuthorizerPasskeyLogin: FC<{
         disabled={loading}
         appearance={ButtonAppearance.Default}
       >
-        {loading ? `Waiting for passkey ...` : `Sign in with a passkey`}
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+          }}
+        >
+          <PasskeyIcon />
+          {loading ? `Waiting for passkey ...` : `Sign in with a passkey`}
+        </span>
       </StyledButton>
       {hasAnotherLoginMethod && <StyledSeparator>OR</StyledSeparator>}
     </>
