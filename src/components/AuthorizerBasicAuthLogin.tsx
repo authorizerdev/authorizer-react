@@ -98,37 +98,39 @@ export const AuthorizerBasicAuthLogin: FC<{
         setError(errors[0].message);
         return;
       }
-      // if totp is enabled for the first time show totp screen with scanner
-      if (
-        res &&
-        res.should_show_totp_screen &&
-        res.authenticator_scanner_image &&
-        res.authenticator_secret &&
-        res.authenticator_recovery_codes
-      ) {
-        setTotpData({
-          is_screen_visible: true,
-          email: data.email || ``,
-          phone_number: data.phone_number || ``,
-          authenticator_scanner_image: res.authenticator_scanner_image,
-          authenticator_secret: res.authenticator_secret,
-          authenticator_recovery_codes: res.authenticator_recovery_codes,
-        });
-        return;
-      }
-      if (
-        res &&
-        (res?.should_show_email_otp_screen ||
-          res?.should_show_mobile_otp_screen ||
-          res?.should_show_totp_screen)
-      ) {
-        setOtpData({
-          is_screen_visible: true,
-          email: data.email || ``,
-          phone_number: data.phone_number || ``,
-          is_totp: res?.should_show_totp_screen || false,
-        });
-        return;
+      // res.access_token is only absent when MFA is enforced/blocking (see
+      // resolveMFAGate in the backend) — in every other case, including the
+      // optional-setup-offer case, the user is already logged in.
+      if (res && !res.access_token) {
+        if (
+          res.should_show_totp_screen &&
+          res.authenticator_scanner_image &&
+          res.authenticator_secret &&
+          res.authenticator_recovery_codes
+        ) {
+          setTotpData({
+            is_screen_visible: true,
+            email: data.email || ``,
+            phone_number: data.phone_number || ``,
+            authenticator_scanner_image: res.authenticator_scanner_image,
+            authenticator_secret: res.authenticator_secret,
+            authenticator_recovery_codes: res.authenticator_recovery_codes,
+          });
+          return;
+        }
+        if (
+          res.should_show_email_otp_screen ||
+          res.should_show_mobile_otp_screen ||
+          res.should_show_totp_screen
+        ) {
+          setOtpData({
+            is_screen_visible: true,
+            email: data.email || ``,
+            phone_number: data.phone_number || ``,
+            is_totp: res.should_show_totp_screen || false,
+          });
+          return;
+        }
       }
 
       if (res) {
