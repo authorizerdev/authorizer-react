@@ -65,11 +65,16 @@ export const AuthorizerMFASetup: FC<{
   // Fired when a method is chosen that this component can't complete on its
   // own (email/SMS OTP, or TOTP without an enrolment payload).
   onSetupMethod?: (method: MfaMethod) => void;
+  // Fired when the user explicitly declines to set up MFA right now. Absent
+  // when MFA is organization-enforced — the host app must not render this
+  // component with onSkip set in that case (check config before rendering).
+  onSkip?: () => void;
   heading?: string;
 }> = ({
   availableMfaMethods,
   totpEnrollment,
   onSetupMethod,
+  onSkip,
   heading = 'Add a second step to sign in',
 }) => {
   const [selected, setSelected] = useState<MfaMethod | null>(null);
@@ -212,6 +217,16 @@ export const AuthorizerMFASetup: FC<{
             </li>
           ))}
         </ul>
+      )}
+      {onSkip && (
+        <button
+          type="button"
+          className="mfa-icon-button"
+          onClick={onSkip}
+          style={{ border: 'none', background: 'none', padding: '8px 0' }}
+        >
+          Skip for now
+        </button>
       )}
     </>
   );

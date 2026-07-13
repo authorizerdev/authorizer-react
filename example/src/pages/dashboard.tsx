@@ -1,8 +1,30 @@
 import * as React from 'react';
-import { useAuthorizer } from 'authorizer-react';
+import { AuthorizerMFASetup, useAuthorizer } from 'authorizer-react';
 
 const Dashboard: React.FC = () => {
-  const { user, loading, logout } = useAuthorizer();
+  const { user, loading, logout, authorizerRef } = useAuthorizer();
+  const [mfaOffer, setMfaOffer] = React.useState<any>(() => {
+    const raw = sessionStorage.getItem('mfaSetupOffer');
+    return raw ? JSON.parse(raw) : null;
+  });
+
+  const dismissMfaOffer = () => {
+    sessionStorage.removeItem('mfaSetupOffer');
+    setMfaOffer(null);
+  };
+
+  if (mfaOffer) {
+    return (
+      <AuthorizerMFASetup
+        availableMfaMethods={{ totp: true }}
+        totpEnrollment={mfaOffer}
+        onSkip={async () => {
+          await authorizerRef.skipMfaSetup();
+          dismissMfaOffer();
+        }}
+      />
+    );
+  }
 
   return (
     <div>
