@@ -40,6 +40,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     is_mobile_basic_authentication_enabled: false,
     is_phone_verification_enabled: false,
   },
+  configLoadError: null,
   user: null,
   token: null,
   loading: false,
@@ -91,6 +92,7 @@ let initialState: AuthorizerState = {
   user: null,
   token: null,
   loading: true,
+  configLoadError: null,
   config: {
     authorizerURL: '',
     redirectURL: '/',
@@ -159,6 +161,13 @@ export const AuthorizerProvider: FC<{
   const getToken = async () => {
     const { data: metaRes, errors: metaResErrors } =
       await authorizer.getMetaData();
+    const configLoadError =
+      metaResErrors && metaResErrors.length ? metaResErrors[0].message : null;
+    if (configLoadError) {
+      console.error(
+        `authorizer-react: failed to load config from ${state.config.authorizerURL}/graphql - ${configLoadError}. Login methods that depend on this config (basic auth, signup, social login, magic link) will not render until it succeeds.`
+      );
+    }
     try {
       if (metaResErrors && metaResErrors.length) {
         throw new Error(metaResErrors[0].message);
@@ -178,6 +187,7 @@ export const AuthorizerProvider: FC<{
               ...state.config,
               ...metaRes,
             },
+            configLoadError,
             loading: false,
           },
         });
@@ -206,6 +216,7 @@ export const AuthorizerProvider: FC<{
               ...state.config,
               ...metaRes,
             },
+            configLoadError,
             loading: false,
           },
         });
@@ -221,6 +232,7 @@ export const AuthorizerProvider: FC<{
             ...state.config,
             ...metaRes,
           },
+          configLoadError,
           loading: false,
         },
       });
@@ -303,6 +315,7 @@ export const AuthorizerProvider: FC<{
       token: null,
       loading: false,
       config: state.config,
+      configLoadError: state.configLoadError,
     };
     dispatch({
       type: AuthorizerProviderActionType.SET_AUTH_DATA,

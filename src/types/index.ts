@@ -29,6 +29,7 @@ export type AuthorizerState = {
   token: AuthToken | null;
   loading: boolean;
   config: AuthorizerConfig;
+  configLoadError?: string | null;
 };
 
 export type AuthorizerProviderAction = {
@@ -62,6 +63,7 @@ export type AuthorizerContextPropsType = {
   user: null | User;
   token: null | AuthToken;
   loading: boolean;
+  configLoadError?: string | null;
   logout: () => Promise<void>;
   setLoading: (data: boolean) => void;
   setUser: (data: null | User) => void;

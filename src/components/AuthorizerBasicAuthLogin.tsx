@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { AuthToken, LoginRequest } from '@authorizerdev/authorizer-js';
 import validator from 'validator';
 const { isEmail, isMobilePhone } = validator;
@@ -157,28 +157,29 @@ export const AuthorizerBasicAuthLogin: FC<{
 
   useEffect(() => {
     if (formData.email_or_phone_number === '') {
-      setErrorData({
-        ...errorData,
+      setErrorData(prev => ({
+        ...prev,
         email_or_phone_number: 'Email OR Phone Number is required',
-      });
+      }));
     } else if (
+      formData.email_or_phone_number !== null &&
       !isEmail(formData.email_or_phone_number || '') &&
       !isMobilePhone(formData.email_or_phone_number || '')
     ) {
-      setErrorData({
-        ...errorData,
+      setErrorData(prev => ({
+        ...prev,
         email_or_phone_number: 'Invalid Email OR Phone Number',
-      });
+      }));
     } else {
-      setErrorData({ ...errorData, email_or_phone_number: null });
+      setErrorData(prev => ({ ...prev, email_or_phone_number: null }));
     }
   }, [formData.email_or_phone_number]);
 
   useEffect(() => {
     if (formData.password === '') {
-      setErrorData({ ...errorData, password: 'Password is required' });
+      setErrorData(prev => ({ ...prev, password: 'Password is required' }));
     } else {
-      setErrorData({ ...errorData, password: null });
+      setErrorData(prev => ({ ...prev, password: null }));
     }
   }, [formData.password]);
 
@@ -186,14 +187,23 @@ export const AuthorizerBasicAuthLogin: FC<{
   // user's device support it, discoverable passkeys are offered inline in the
   // email/username field's autofill dropdown. Best-effort and silent - the
   // explicit "Sign in with a passkey" button remains the primary path, and any
-  // unsupported/cancelled/aborted ceremony is ignored. Started once on mount
-  // and aborted on unmount.
-  useEffect(() => {
-    let active = true;
+  // unsupported/cancelled/aborted ceremony is ignored.
+  // Started on the email/phone field's first focus rather than on mount: some
+  // browser/platform authenticator combinations (e.g. Chrome + macOS Touch ID)
+  // don't wait for the field to actually be focused before surfacing a native
+  // passkey prompt, which showed up as an unprompted popup on every page load.
+  // Deferring to focus keeps the ceremony tied to a real user interaction.
+  const passkeyAutofillActive = useRef(false);
+
+  const startPasskeyAutofill = () => {
+    if (passkeyAutofillActive.current) {
+      return;
+    }
+    passkeyAutofillActive.current = true;
     authorizerRef
       .loginWithPasskeyAutofill()
       .then(({ data, errors }) => {
-        if (!active || (errors && errors.length) || !data) {
+        if (!passkeyAutofillActive.current || (errors && errors.length) || !data) {
           return;
         }
         setAuthData({
@@ -209,8 +219,11 @@ export const AuthorizerBasicAuthLogin: FC<{
       .catch(() => {
         // Autofill is best-effort; ignore unsupported/cancelled ceremonies.
       });
+  };
+
+  useEffect(() => {
     return () => {
-      active = false;
+      passkeyAutofillActive.current = false;
       authorizerRef.cancelPasskeyAutofill();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -274,12 +287,13 @@ export const AuthorizerBasicAuthLogin: FC<{
               type="text"
               // Enables WebAuthn passkey autofill: browsers offer discoverable
               // passkeys inline in this field's autofill dropdown. Paired with
-              // the loginWithPasskeyAutofill() ceremony started on mount below.
+              // the loginWithPasskeyAutofill() ceremony started on focus below.
               autoComplete="username webauthn"
               value={formData.email_or_phone_number || ''}
               onChange={e =>
                 onInputChange('email_or_phone_number', e.target.value)
               }
+              onFocus={startPasskeyAutofill}
             />
             {errorData.email_or_phone_number && (
               <div className="form-input-error">

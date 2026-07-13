@@ -168,10 +168,13 @@ export const AuthorizerSignup: FC<{
     ) {
       return;
     }
-    if ((formData.given_name || '').trim() === '') {
-      setErrorData({ ...errorData, given_name: 'First Name is required' });
+    if (
+      formData.given_name !== null &&
+      (formData.given_name || '').trim() === ''
+    ) {
+      setErrorData(prev => ({ ...prev, given_name: 'First Name is required' }));
     } else {
-      setErrorData({ ...errorData, given_name: null });
+      setErrorData(prev => ({ ...prev, given_name: null }));
     }
   }, [formData.given_name]);
 
@@ -182,65 +185,69 @@ export const AuthorizerSignup: FC<{
     ) {
       return;
     }
-    if ((formData.family_name || '').trim() === '') {
-      setErrorData({ ...errorData, family_name: 'Last Name is required' });
+    if (
+      formData.family_name !== null &&
+      (formData.family_name || '').trim() === ''
+    ) {
+      setErrorData(prev => ({ ...prev, family_name: 'Last Name is required' }));
     } else {
-      setErrorData({ ...errorData, family_name: null });
+      setErrorData(prev => ({ ...prev, family_name: null }));
     }
   }, [formData.family_name]);
 
   useEffect(() => {
     if (formData.email_or_phone_number === '') {
-      setErrorData({
-        ...errorData,
+      setErrorData(prev => ({
+        ...prev,
         email_or_phone_number: 'Email OR Phone Number is required',
-      });
+      }));
     } else if (
+      formData.email_or_phone_number !== null &&
       !isEmail(formData.email_or_phone_number || '') &&
       !isMobilePhone(formData.email_or_phone_number || '')
     ) {
-      setErrorData({
-        ...errorData,
+      setErrorData(prev => ({
+        ...prev,
         email_or_phone_number: 'Invalid Email OR Phone Number',
-      });
+      }));
     } else {
-      setErrorData({ ...errorData, email_or_phone_number: null });
+      setErrorData(prev => ({ ...prev, email_or_phone_number: null }));
     }
   }, [formData.email_or_phone_number]);
 
   useEffect(() => {
     if (formData.password === '') {
-      setErrorData({ ...errorData, password: 'Password is required' });
+      setErrorData(prev => ({ ...prev, password: 'Password is required' }));
     } else {
-      setErrorData({ ...errorData, password: null });
+      setErrorData(prev => ({ ...prev, password: null }));
     }
   }, [formData.password]);
 
   useEffect(() => {
     if (formData.confirmPassword === '') {
-      setErrorData({
-        ...errorData,
+      setErrorData(prev => ({
+        ...prev,
         confirmPassword: 'Confirm password is required',
-      });
+      }));
     } else {
-      setErrorData({ ...errorData, confirmPassword: null });
+      setErrorData(prev => ({ ...prev, confirmPassword: null }));
     }
   }, [formData.confirmPassword]);
 
   useEffect(() => {
     if (formData.password && formData.confirmPassword) {
       if (formData.confirmPassword !== formData.password) {
-        setErrorData({
-          ...errorData,
+        setErrorData(prev => ({
+          ...prev,
           password: `Password and confirm passwords don't match`,
           confirmPassword: `Password and confirm passwords don't match`,
-        });
+        }));
       } else {
-        setErrorData({
-          ...errorData,
+        setErrorData(prev => ({
+          ...prev,
           password: null,
           confirmPassword: null,
-        });
+        }));
       }
     }
   }, [formData.password, formData.confirmPassword]);
