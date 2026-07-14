@@ -91,7 +91,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@authorizerdev/authorizer-js": "file:../../../../authorizer-js/.worktrees/feat/optional-mfa-setup",
+    "@authorizerdev/authorizer-js": "file:../../../../authorizer-js/.worktrees/feat/passkey-mfa",
     "@storybook/preset-scss": "^1.0.3",
     "validator": "^13.11.0"
   }
