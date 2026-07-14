@@ -339,7 +339,7 @@ export const AuthorizerVerifyOtp: FC<{
       {setView && (
         <StyledFooter>
           {!is_totp &&
-            !offerWebauthnVerify &&
+            !(offerWebauthnVerify && passkeySupported) &&
             (sendingOtp ? (
               <div style={{ marginBottom: '10px' }}>Sending ...</div>
             ) : (
