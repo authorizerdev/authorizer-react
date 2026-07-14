@@ -5,7 +5,11 @@ const Dashboard: React.FC = () => {
   const { user, loading, logout, authorizerRef } = useAuthorizer();
   const [mfaOffer, setMfaOffer] = React.useState<any>(() => {
     const raw = sessionStorage.getItem('mfaSetupOffer');
-    return raw ? JSON.parse(raw) : null;
+    try {
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
   });
 
   const dismissMfaOffer = () => {
