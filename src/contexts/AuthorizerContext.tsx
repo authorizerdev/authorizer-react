@@ -39,6 +39,7 @@ const AuthorizerContext = createContext<AuthorizerContextPropsType>({
     is_multi_factor_auth_enabled: false,
     is_mobile_basic_authentication_enabled: false,
     is_phone_verification_enabled: false,
+    is_mfa_enforced: false,
   },
   configLoadError: null,
   user: null,
@@ -114,6 +115,7 @@ let initialState: AuthorizerState = {
     is_multi_factor_auth_enabled: false,
     is_mobile_basic_authentication_enabled: false,
     is_phone_verification_enabled: false,
+    is_mfa_enforced: false,
   },
 };
 

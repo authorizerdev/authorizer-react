@@ -22,6 +22,7 @@ export type AuthorizerConfig = {
   is_multi_factor_auth_enabled: boolean;
   is_mobile_basic_authentication_enabled: boolean;
   is_phone_verification_enabled: boolean;
+  is_mfa_enforced: boolean;
 };
 
 export type AuthorizerState = {
@@ -59,6 +60,7 @@ export type AuthorizerContextPropsType = {
     is_multi_factor_auth_enabled: boolean;
     is_mobile_basic_authentication_enabled: boolean;
     is_phone_verification_enabled: boolean;
+    is_mfa_enforced: boolean;
   };
   user: null | User;
   token: null | AuthToken;

@@ -47,7 +47,13 @@ export const AuthorizerPasskeyLogin: FC<{
   const [loading, setLoading] = useState(false);
   const { setAuthData, config, authorizerRef } = useAuthorizer();
 
-  if (!isWebauthnSupported()) {
+  // When the org enforces MFA, passkey must never be offered as a
+  // standalone primary-login path - it would let a user skip the org's
+  // two-factor requirement entirely. The server refuses this independently
+  // (webauthn_login_verify checks EnforceMFA itself), but the button
+  // shouldn't invite the attempt in the first place: authenticator methods
+  // belong after a first factor has identified the user, not before.
+  if (!isWebauthnSupported() || config.is_mfa_enforced) {
     return null;
   }
 
@@ -92,6 +98,16 @@ export const AuthorizerPasskeyLogin: FC<{
         if (!isUserDismissed(errors[0])) {
           setError(errors[0]?.message || ``);
         }
+        return;
+      }
+      if (res && !res.access_token) {
+        // Reachable only if this button somehow rendered despite the
+        // is_mfa_enforced guard above (e.g. a brief pre-config-load
+        // window) - the server is the real boundary and just refused to
+        // issue a token. Don't treat this as a successful login.
+        setError(
+          `Additional verification is required. Please sign in with your email and password instead.`
+        );
         return;
       }
       if (res) {
