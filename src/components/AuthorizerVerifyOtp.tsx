@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { VerifyOTPRequest } from '@authorizerdev/authorizer-js';
+import { VerifyOTPRequest, isWebauthnSupported } from '@authorizerdev/authorizer-js';
 import '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
@@ -8,6 +8,7 @@ import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { Message } from './Message';
 import { TotpDataType } from '../types';
 import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
+import { IconPasskey } from '../icons/mfa';
 
 interface InputDataType {
   otp: string | null;
@@ -29,7 +30,8 @@ export const AuthorizerVerifyOtp: FC<{
   phone_number?: string;
   urlProps?: Record<string, any>;
   is_totp?: boolean;
-}> = ({ setView, onLogin, email, phone_number, urlProps, is_totp }) => {
+  offerWebauthnVerify?: boolean;
+}> = ({ setView, onLogin, email, phone_number, urlProps, is_totp, offerWebauthnVerify }) => {
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
@@ -48,6 +50,48 @@ export const AuthorizerVerifyOtp: FC<{
       setError(`Email or Phone Number is required`);
     }
   }, []);
+
+  const [webauthnError, setWebauthnError] = useState(``);
+  const [webauthnLoading, setWebauthnLoading] = useState(false);
+  const passkeySupported = isWebauthnSupported();
+
+  // A cancelled ceremony surfaces as NotAllowedError/AbortError (same
+  // browser behavior AuthorizerPasskeyLogin already handles) - dismiss
+  // silently and let the user fall back to the code form when one exists.
+  const isUserDismissed = (e?: { code?: string }): boolean =>
+    e?.code === `NotAllowedError` || e?.code === `AbortError`;
+
+  const onVerifyWithPasskey = async () => {
+    setWebauthnError(``);
+    try {
+      setWebauthnLoading(true);
+      const { data: res, errors } = await authorizerRef.loginWithPasskey(email);
+      if (errors && errors.length) {
+        if (!isUserDismissed(errors[0])) {
+          setWebauthnError(errors[0]?.message || ``);
+        }
+        return;
+      }
+      if (res) {
+        setError(``);
+        setAuthData({
+          user: res.user || null,
+          token: res,
+          config,
+          loading: false,
+        });
+      }
+      if (onLogin) {
+        onLogin(res);
+      }
+    } catch (err) {
+      if (!isUserDismissed(err as { code?: string })) {
+        setWebauthnError((err as Error).message);
+      }
+    } finally {
+      setWebauthnLoading(false);
+    }
+  };
 
   const onInputChange = async (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -188,6 +232,8 @@ export const AuthorizerVerifyOtp: FC<{
     );
   }
 
+  const showCodeForm = !(offerWebauthnVerify && !is_totp);
+
   return (
     <>
       {successMessage && (
@@ -204,53 +250,96 @@ export const AuthorizerVerifyOtp: FC<{
           onClose={isLockedOut ? undefined : onErrorClose}
         />
       )}
-      <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-        Please enter the OTP sent to your email or phone number or authenticator
-      </p>
-      <br />
-      <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
-        <div className="styled-form-group">
-          <label className="form-input-label" htmlFor="authorizer-verify-otp">
-            <span>* </span>OTP (One Time Password)
-          </label>
-          <input
-            name="otp"
-            id="authorizer-verify-otp"
-            className={`form-input-field ${
-              errorData.otp ? 'input-error-content' : ''
-            }`}
-            placeholder="e.g.- AB123C"
-            type="password"
-            autoComplete="one-time-code"
-            value={formData.otp || ''}
-            onChange={(e) => onInputChange('otp', e.target.value)}
-            disabled={isLockedOut}
-          />
-          {errorData.otp && (
-            <div className="form-input-error">{errorData.otp}</div>
-          )}
-          {is_totp && (
-            <Message
-              type={MessageType.Info}
-              text={`If you have lost access to your device, please enter recovery code that were shared while enabling Multifactor Authentication.`}
-              extraStyles={{
-                color: 'var(--authorizer-text-color)',
+      {webauthnError && (
+        <Message
+          type={MessageType.Error}
+          text={webauthnError}
+          onClose={() => setWebauthnError(``)}
+        />
+      )}
+      {offerWebauthnVerify && passkeySupported && (
+        <>
+          <p style={{ textAlign: 'center', margin: '10px 0px' }}>
+            Verify with your passkey
+          </p>
+          <StyledButton
+            type="button"
+            appearance={ButtonAppearance.Default}
+            disabled={webauthnLoading}
+            onClick={onVerifyWithPasskey}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
-            />
+            >
+              <IconPasskey />
+              {webauthnLoading ? `Waiting for passkey ...` : `Verify with a passkey`}
+            </span>
+          </StyledButton>
+          <br />
+        </>
+      )}
+      {showCodeForm && (
+        <>
+          {offerWebauthnVerify && passkeySupported && (
+            <p style={{ textAlign: 'center', margin: '10px 0px' }}>
+              Or enter a code instead
+            </p>
           )}
-        </div>
-        <br />
-        <StyledButton
-          type="submit"
-          disabled={loading || !formData.otp || !!errorData.otp || isLockedOut}
-          appearance={ButtonAppearance.Primary}
-        >
-          {loading ? `Processing ...` : `Submit`}
-        </StyledButton>
-      </form>
+          <p style={{ textAlign: 'center', margin: '10px 0px' }}>
+            Please enter the OTP sent to your email or phone number or authenticator
+          </p>
+          <br />
+          <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
+            <div className="styled-form-group">
+              <label className="form-input-label" htmlFor="authorizer-verify-otp">
+                <span>* </span>OTP (One Time Password)
+              </label>
+              <input
+                name="otp"
+                id="authorizer-verify-otp"
+                className={`form-input-field ${
+                  errorData.otp ? 'input-error-content' : ''
+                }`}
+                placeholder="e.g.- AB123C"
+                type="password"
+                autoComplete="one-time-code"
+                value={formData.otp || ''}
+                onChange={(e) => onInputChange('otp', e.target.value)}
+                disabled={isLockedOut}
+              />
+              {errorData.otp && (
+                <div className="form-input-error">{errorData.otp}</div>
+              )}
+              {is_totp && (
+                <Message
+                  type={MessageType.Info}
+                  text={`If you have lost access to your device, please enter recovery code that were shared while enabling Multifactor Authentication.`}
+                  extraStyles={{
+                    color: 'var(--authorizer-text-color)',
+                  }}
+                />
+              )}
+            </div>
+            <br />
+            <StyledButton
+              type="submit"
+              disabled={loading || !formData.otp || !!errorData.otp || isLockedOut}
+              appearance={ButtonAppearance.Primary}
+            >
+              {loading ? `Processing ...` : `Submit`}
+            </StyledButton>
+          </form>
+        </>
+      )}
       {setView && (
         <StyledFooter>
           {!is_totp &&
+            !offerWebauthnVerify &&
             (sendingOtp ? (
               <div style={{ marginBottom: '10px' }}>Sending ...</div>
             ) : (
