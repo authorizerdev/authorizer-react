@@ -77,6 +77,7 @@ export type OtpDataType = {
   email?: string;
   phone_number?: string;
   is_totp?: boolean;
+  offer_webauthn_verify?: boolean;
 };
 
 export type TotpDataType = {

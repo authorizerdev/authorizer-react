@@ -121,13 +121,15 @@ export const AuthorizerBasicAuthLogin: FC<{
         if (
           res.should_show_email_otp_screen ||
           res.should_show_mobile_otp_screen ||
-          res.should_show_totp_screen
+          res.should_show_totp_screen ||
+          res.should_offer_webauthn_mfa_verify
         ) {
           setOtpData({
             is_screen_visible: true,
             email: data.email || ``,
             phone_number: data.phone_number || ``,
             is_totp: res.should_show_totp_screen || false,
+            offer_webauthn_verify: res.should_offer_webauthn_mfa_verify || false,
           });
           return;
         }
@@ -258,6 +260,7 @@ export const AuthorizerBasicAuthLogin: FC<{
           email: otpData.email || ``,
           phone_number: otpData.phone_number || ``,
           is_totp: otpData.is_totp || false,
+          offerWebauthnVerify: otpData.offer_webauthn_verify || false,
         }}
         urlProps={urlProps}
       />
