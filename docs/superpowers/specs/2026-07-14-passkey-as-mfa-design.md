@@ -23,7 +23,7 @@ No "purpose" field on `WebauthnCredential`. Any registered passkey — whether t
 
 **Changes:**
 
-1. Guard: change `if isMFAEnabled && isTOTPLoginEnabled {` to also enter when WebAuthn MFA is available: `if isMFAEnabled && (isTOTPLoginEnabled || isWebauthnEnabled) {`. `isWebauthnEnabled` mirrors the existing config flag the `meta` query already exposes as `is_webauthn_enabled` — reuse it, do not invent a second flag. This lets a server configured with *only* WebAuthn MFA (no TOTP) still reach the gate.
+1. Guard: **unchanged** — stays `if isMFAEnabled && isTOTPLoginEnabled {`. `is_webauthn_enabled` in the GraphQL schema is hardcoded `true` (no operator toggle — see `schema.graphqls:44`'s comment), so it can't be used as a second `||` arm the way `isTOTPLoginEnabled` is: doing so would make this branch (and `mfaGateBlockEnroll`'s unconditional TOTP-secret generation, see below) fire even on servers where TOTP is deliberately disabled. Passkey-as-MFA in this plan is therefore scoped to *servers that already have TOTP MFA enabled* — it adds passkey as an alternative verify method within that existing umbrella, not a standalone way to turn MFA on. See "Deferred" for the TOTP-independent case.
 2. `authenticatorVerified` computation: currently `authErr == nil && authenticator != nil && authenticator.VerifiedAt != nil` (TOTP only). Change to:
    ```go
    totpVerified := authErr == nil && authenticator != nil && authenticator.VerifiedAt != nil
@@ -59,7 +59,7 @@ No "purpose" field on `WebauthnCredential`. Any registered passkey — whether t
    should_offer_webauthn_mfa_verify: Boolean
    ```
 
-**Testing:** extend the existing TOTP branch's integration test coverage with cases for: WebAuthn-only user (no TOTP) reaching `mfaGateBlockVerify` and getting only `should_offer_webauthn_mfa_verify`; a dual-enrolled user getting both flags; a server with only WebAuthn MFA configured (no TOTP) still entering the branch.
+**Testing:** extend the existing TOTP branch's integration test coverage with cases for: a user who enrolled only a passkey (no verified TOTP) reaching `mfaGateBlockVerify` and getting only `should_offer_webauthn_mfa_verify`; a dual-enrolled user getting both flags; confirm a server with `isTOTPLoginEnabled=false` still skips this whole branch unchanged (guard untouched).
 
 ## SDK (`authorizer-js` repo)
 
