@@ -232,7 +232,7 @@ export const AuthorizerVerifyOtp: FC<{
     );
   }
 
-  const showCodeForm = !(offerWebauthnVerify && !is_totp);
+  const showCodeForm = !(offerWebauthnVerify && passkeySupported && !is_totp);
 
   return (
     <>
