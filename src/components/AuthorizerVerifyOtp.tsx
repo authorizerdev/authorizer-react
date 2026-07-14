@@ -233,6 +233,9 @@ export const AuthorizerVerifyOtp: FC<{
   }
 
   const showCodeForm = !(offerWebauthnVerify && passkeySupported && !is_totp);
+  // Passkey is the user's only MFA factor but this browser can't do WebAuthn:
+  // no TOTP, no OTP was ever dispatched, so the code form below is a dead end.
+  const passkeyOnlyUnsupported = !!offerWebauthnVerify && !passkeySupported && !is_totp;
 
   return (
     <>
@@ -282,6 +285,15 @@ export const AuthorizerVerifyOtp: FC<{
           </StyledButton>
           <br />
         </>
+      )}
+      {passkeyOnlyUnsupported && (
+        <Message
+          type={MessageType.Info}
+          text={`This browser doesn't support passkeys. Please try again on a device or browser that does.`}
+          extraStyles={{
+            color: 'var(--authorizer-text-color)',
+          }}
+        />
       )}
       {showCodeForm && (
         <>
