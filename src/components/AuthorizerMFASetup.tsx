@@ -13,6 +13,9 @@ import { StyledButton } from '../styledComponents';
 import { Message } from './Message';
 import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
 import { AuthorizerPasskeyRegister } from './AuthorizerPasskeyRegister';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
+import { useAuthorizer } from '../contexts/AuthorizerContext';
+import { TotpEnrollment } from '../utils/mfaTriage';
 
 const BackLink: FC<{ onClick: () => void }> = ({ onClick }) => (
   <button
@@ -45,11 +48,7 @@ export type AvailableMfaMethods = {
   smsOtp?: boolean;
 };
 
-type TotpEnrollment = {
-  authenticator_scanner_image: string;
-  authenticator_secret: string;
-  authenticator_recovery_codes: string[];
-};
+type AuthTokenLike = { access_token?: string | null; [key: string]: any };
 
 // AuthorizerMFASetup is the hub where a signed-in user opts into the MFA
 // methods the server supports. TOTP and passkey have complete in-component
@@ -66,14 +65,35 @@ export const AuthorizerMFASetup: FC<{
   // own (email/SMS OTP, or TOTP without an enrolment payload).
   onSetupMethod?: (method: MfaMethod) => void;
   heading?: string;
+  // When present, this is the login-time (withheld-token) offer screen, not
+  // the settings-screen "add a second factor" hub: a Skip action appears,
+  // and completing a method calls onComplete with the token issued by
+  // skip_mfa_setup / verify_otp / the OTP setup+verify cycle instead of the
+  // settings-screen's "just close/refresh" behavior.
+  loginContext?: {
+    email?: string;
+    phone_number?: string;
+    state?: string;
+    onComplete: (response: AuthTokenLike) => void;
+  };
 }> = ({
   availableMfaMethods,
   totpEnrollment,
   onSetupMethod,
   heading = 'Add a second step to sign in',
+  loginContext,
 }) => {
   const [selected, setSelected] = useState<MfaMethod | null>(null);
   const [notice, setNotice] = useState('');
+  const [skipping, setSkipping] = useState(false);
+  const [skipError, setSkipError] = useState('');
+  const [sendingOtpSetup, setSendingOtpSetup] = useState(false);
+  const [otpSetupError, setOtpSetupError] = useState('');
+  const [otpMethodPending, setOtpMethodPending] = useState<
+    'email_otp' | 'sms_otp' | null
+  >(null);
+
+  const { authorizerRef } = useAuthorizer();
 
   const passkeySupported = isWebauthnSupported();
 
@@ -95,7 +115,7 @@ export const AuthorizerMFASetup: FC<{
     },
     {
       key: 'passkey',
-      available: !!availableMfaMethods.passkey,
+      available: !!availableMfaMethods.passkey && !loginContext,
       icon: <IconPasskey />,
       title: 'Passkey',
       description: 'Sign in with your fingerprint, face, or device PIN.',
@@ -121,7 +141,7 @@ export const AuthorizerMFASetup: FC<{
 
   const visibleMethods = methods.filter((m) => m.available);
 
-  const handleSetup = (method: MfaMethod) => {
+  const handleSetup = async (method: MfaMethod) => {
     setNotice('');
     if (method === 'totp') {
       if (totpEnrollment) {
@@ -135,13 +155,63 @@ export const AuthorizerMFASetup: FC<{
       setSelected('passkey');
       return;
     }
-    // email_otp / sms_otp are enabled on the server; hand off to the host.
-    onSetupMethod?.(method);
-    setNotice(
-      method === 'email_otp'
-        ? 'Email one-time codes will be sent the next time you sign in.'
-        : 'SMS one-time codes will be sent the next time you sign in.'
-    );
+    // email_otp / sms_otp: if the host supplied onSetupMethod, defer to it
+    // (escape hatch for custom behavior). Otherwise use the real SDK calls
+    // directly - this is the default, host-free path this task adds.
+    if (onSetupMethod) {
+      onSetupMethod(method);
+      setNotice(
+        method === 'email_otp'
+          ? 'Email one-time codes will be sent the next time you sign in.'
+          : 'SMS one-time codes will be sent the next time you sign in.'
+      );
+      return;
+    }
+    setOtpSetupError('');
+    setSendingOtpSetup(true);
+    try {
+      const params = {
+        email: loginContext?.email,
+        phone_number: loginContext?.phone_number,
+      };
+      const { errors } =
+        method === 'email_otp'
+          ? await authorizerRef.emailOtpMfaSetup(params)
+          : await authorizerRef.smsOtpMfaSetup(params);
+      if (errors && errors.length) {
+        setOtpSetupError(errors[0]?.message || 'Failed to send code');
+        return;
+      }
+      setOtpMethodPending(method);
+    } catch (err) {
+      setOtpSetupError((err as Error).message);
+    } finally {
+      setSendingOtpSetup(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    if (!loginContext) return;
+    setSkipError('');
+    setSkipping(true);
+    try {
+      const { data, errors } = await authorizerRef.skipMfaSetup({
+        email: loginContext.email,
+        phone_number: loginContext.phone_number,
+        state: loginContext.state,
+      });
+      if (errors && errors.length) {
+        setSkipError(errors[0]?.message || 'Failed to skip MFA setup');
+        return;
+      }
+      if (data) {
+        loginContext.onComplete(data);
+      }
+    } catch (err) {
+      setSkipError((err as Error).message);
+    } finally {
+      setSkipping(false);
+    }
   };
 
   const backToList = () => setSelected(null);
@@ -152,8 +222,36 @@ export const AuthorizerMFASetup: FC<{
         <BackLink onClick={backToList} />
         <AuthorizerTOTPScanner
           {...totpEnrollment}
+          email={loginContext?.email}
+          phone_number={loginContext?.phone_number}
           setView={() => setSelected(null)}
-          onLogin={() => setSelected(null)}
+          onLogin={(data) => {
+            if (loginContext && data && (data as AuthTokenLike).access_token) {
+              loginContext.onComplete(data as AuthTokenLike);
+              return;
+            }
+            setSelected(null);
+          }}
+        />
+      </>
+    );
+  }
+
+  if (otpMethodPending) {
+    return (
+      <>
+        <BackLink onClick={() => setOtpMethodPending(null)} />
+        <AuthorizerVerifyOtp
+          email={loginContext?.email}
+          phone_number={loginContext?.phone_number}
+          is_totp={false}
+          onLogin={(data) => {
+            if (loginContext && data && (data as AuthTokenLike).access_token) {
+              loginContext.onComplete(data as AuthTokenLike);
+              return;
+            }
+            setOtpMethodPending(null);
+          }}
         />
       </>
     );
@@ -179,6 +277,13 @@ export const AuthorizerMFASetup: FC<{
           onClose={() => setNotice('')}
         />
       )}
+      {otpSetupError && (
+        <Message
+          type={MessageType.Error}
+          text={otpSetupError}
+          onClose={() => setOtpSetupError('')}
+        />
+      )}
       {visibleMethods.length === 0 ? (
         <Message
           type={MessageType.Info}
@@ -202,7 +307,7 @@ export const AuthorizerMFASetup: FC<{
                 <StyledButton
                   type="button"
                   appearance={ButtonAppearance.Default}
-                  disabled={m.disabled}
+                  disabled={m.disabled || sendingOtpSetup}
                   onClick={() => handleSetup(m.key)}
                   style={{ width: 'auto' }}
                 >
@@ -212,6 +317,25 @@ export const AuthorizerMFASetup: FC<{
             </li>
           ))}
         </ul>
+      )}
+      {skipError && (
+        <Message
+          type={MessageType.Error}
+          text={skipError}
+          onClose={() => setSkipError('')}
+        />
+      )}
+      {loginContext && (
+        <div style={{ marginTop: '16px', textAlign: 'center' }}>
+          <StyledButton
+            type="button"
+            appearance={ButtonAppearance.Default}
+            disabled={skipping}
+            onClick={handleSkip}
+          >
+            {skipping ? 'Skipping ...' : 'Skip for now'}
+          </StyledButton>
+        </div>
       )}
     </>
   );
