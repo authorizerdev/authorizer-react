@@ -9,9 +9,11 @@ import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { Message } from './Message';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
-import { OtpDataType, TotpDataType } from '../types';
-import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
+import { OtpDataType } from '../types';
+import { AuthorizerMFASetup } from './AuthorizerMFASetup';
+import { AuthorizerMfaLocked } from './AuthorizerMfaLocked';
 import { getEmailPhoneLabels, getEmailPhonePlaceholder } from '../utils/labels';
+import { resolveAuthStep, TotpEnrollment } from '../utils/mfaTriage';
 
 const initOtpData: OtpDataType = {
   is_screen_visible: false,
@@ -19,13 +21,23 @@ const initOtpData: OtpDataType = {
   phone_number: '',
 };
 
-const initTotpData: TotpDataType = {
+type MfaOfferData = {
+  is_screen_visible: boolean;
+  email: string;
+  phone_number: string;
+  totpEnrollment: TotpEnrollment | null;
+  emailOtp: boolean;
+  smsOtp: boolean;
+  state?: string;
+};
+
+const initMfaOfferData: MfaOfferData = {
   is_screen_visible: false,
   email: '',
   phone_number: '',
-  authenticator_scanner_image: '',
-  authenticator_secret: '',
-  authenticator_recovery_codes: [],
+  totpEnrollment: null,
+  emailOtp: false,
+  smsOtp: false,
 };
 
 interface InputDataType {
@@ -42,7 +54,10 @@ export const AuthorizerBasicAuthLogin: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
-  const [totpData, setTotpData] = useState<TotpDataType>({ ...initTotpData });
+  const [mfaOfferData, setMfaOfferData] = useState<MfaOfferData>({
+    ...initMfaOfferData,
+  });
+  const [locked, setLocked] = useState(false);
   const [formData, setFormData] = useState<InputDataType>({
     email_or_phone_number: null,
     password: null,
@@ -94,55 +109,65 @@ export const AuthorizerBasicAuthLogin: FC<{
       }
 
       const { data: res, errors } = await authorizerRef.login(data);
-      if (errors && errors.length) {
-        setError(errors[0].message);
+      const step = resolveAuthStep(res, errors || []);
+      if (step.kind === 'error') {
+        setError(step.message);
         return;
       }
-      // if totp is enabled for the first time show totp screen with scanner
-      if (
-        res &&
-        res.should_show_totp_screen &&
-        res.authenticator_scanner_image &&
-        res.authenticator_secret &&
-        res.authenticator_recovery_codes
-      ) {
-        setTotpData({
+      if (step.kind === 'locked') {
+        setLocked(true);
+        return;
+      }
+      if (step.kind === 'offer') {
+        setMfaOfferData({
           is_screen_visible: true,
           email: data.email || ``,
           phone_number: data.phone_number || ``,
-          authenticator_scanner_image: res.authenticator_scanner_image,
-          authenticator_secret: res.authenticator_secret,
-          authenticator_recovery_codes: res.authenticator_recovery_codes,
+          totpEnrollment: step.totpEnrollment,
+          emailOtp: step.emailOtp,
+          smsOtp: step.smsOtp,
+          state: urlProps?.state,
         });
         return;
       }
-      if (
-        res &&
-        (res?.should_show_email_otp_screen ||
-          res?.should_show_mobile_otp_screen ||
-          res?.should_show_totp_screen)
-      ) {
-        setOtpData({
-          is_screen_visible: true,
-          email: data.email || ``,
-          phone_number: data.phone_number || ``,
-          is_totp: res?.should_show_totp_screen || false,
-        });
+      if (step.kind === 'verify') {
+        if (step.totp) {
+          setOtpData({
+            is_screen_visible: true,
+            email: data.email || ``,
+            phone_number: data.phone_number || ``,
+            is_totp: true,
+          });
+          return;
+        }
+        if (step.email || step.mobile) {
+          setOtpData({
+            is_screen_visible: true,
+            email: data.email || ``,
+            phone_number: data.phone_number || ``,
+            is_totp: false,
+          });
+          return;
+        }
+        // WebAuthn-verify-only case (should_offer_webauthn_mfa_verify with no
+        // TOTP/email/mobile fallback offered) - this component has no passkey-
+        // verify ceremony of its own; report the situation via the existing
+        // error banner rather than silently doing nothing.
+        setError(
+          'This account requires passkey verification. Use "Sign in with a passkey" instead.',
+        );
         return;
       }
-
-      if (res) {
-        setError(``);
-        setAuthData({
-          user: res.user || null,
-          token: res,
-          config,
-          loading: false,
-        });
-      }
-
+      // step.kind === 'complete'
+      setError(``);
+      setAuthData({
+        user: step.response.user || null,
+        token: step.response,
+        config,
+        loading: false,
+      });
       if (onLogin) {
-        onLogin(res);
+        onLogin(step.response);
       }
     } catch (err) {
       setError((err as Error).message);
@@ -229,20 +254,37 @@ export const AuthorizerBasicAuthLogin: FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (totpData.is_screen_visible) {
+  if (locked) {
+    return <AuthorizerMfaLocked />;
+  }
+
+  if (mfaOfferData.is_screen_visible) {
     return (
-      <AuthorizerTOTPScanner
-        {...{
-          setView,
-          onLogin,
-          email: totpData.email || ``,
-          phone_number: totpData.phone_number || ``,
-          authenticator_scanner_image: totpData.authenticator_scanner_image,
-          authenticator_secret: totpData.authenticator_secret,
-          authenticator_recovery_codes:
-            totpData.authenticator_recovery_codes || [],
+      <AuthorizerMFASetup
+        availableMfaMethods={{
+          totp: !!mfaOfferData.totpEnrollment || config.is_totp_mfa_enabled,
+          passkey: false,
+          emailOtp: mfaOfferData.emailOtp,
+          smsOtp: mfaOfferData.smsOtp,
         }}
-        urlProps={urlProps}
+        totpEnrollment={mfaOfferData.totpEnrollment || undefined}
+        heading="Set up multi-factor authentication"
+        loginContext={{
+          email: mfaOfferData.email,
+          phone_number: mfaOfferData.phone_number,
+          state: mfaOfferData.state,
+          onComplete: (data) => {
+            setAuthData({
+              user: (data as any).user || null,
+              token: data as any,
+              config,
+              loading: false,
+            });
+            if (onLogin) {
+              onLogin(data as any);
+            }
+          },
+        }}
       />
     );
   }

@@ -12,7 +12,10 @@ import { Message } from './Message';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 import { OtpDataType } from '../types';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
+import { AuthorizerMFASetup } from './AuthorizerMFASetup';
+import { AuthorizerMfaLocked } from './AuthorizerMfaLocked';
 import { getEmailPhoneLabels, getEmailPhonePlaceholder } from '../utils/labels';
+import { resolveAuthStep, TotpEnrollment } from '../utils/mfaTriage';
 
 type Field =
   | 'given_name'
@@ -42,6 +45,25 @@ const initOtpData: OtpDataType = {
   phone_number: '',
 };
 
+type MfaOfferData = {
+  is_screen_visible: boolean;
+  email: string;
+  phone_number: string;
+  totpEnrollment: TotpEnrollment | null;
+  emailOtp: boolean;
+  smsOtp: boolean;
+  state?: string;
+};
+
+const initMfaOfferData: MfaOfferData = {
+  is_screen_visible: false,
+  email: '',
+  phone_number: '',
+  totpEnrollment: null,
+  emailOtp: false,
+  smsOtp: false,
+};
+
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
   onSignup?: (data: AuthToken) => void;
@@ -52,6 +74,10 @@ export const AuthorizerSignup: FC<{
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
+  const [mfaOfferData, setMfaOfferData] = useState<MfaOfferData>({
+    ...initMfaOfferData,
+  });
+  const [locked, setLocked] = useState(false);
   const [successMessage, setSuccessMessage] = useState(``);
   const [formData, setFormData] = useState<InputDataType>({
     given_name: null,
@@ -118,39 +144,76 @@ export const AuthorizerSignup: FC<{
         data.roles = roles;
       }
       const { data: res, errors } = await authorizerRef.signup(data);
-      if (errors && errors.length) {
-        setError(formatErrorMessage(errors[0]?.message));
-        setLoading(false);
+      const step = resolveAuthStep(res, errors || []);
+      if (step.kind === 'error') {
+        // resolveAuthStep's fallback for "no access_token and no known MFA
+        // signal" also covers signup's own legitimate non-error outcome -
+        // email verification pending, where the server intentionally
+        // withholds a token and returns an informational res.message
+        // instead of a GraphQL error. Only treat this as a real failure
+        // when the SDK actually returned an error.
+        if (!(errors && errors.length) && res) {
+          setError(``);
+          setSuccessMessage(res.message || ``);
+          if (onSignup) {
+            onSignup(res);
+          }
+          return;
+        }
+        setError(formatErrorMessage(step.message));
         return;
       }
-      if (
-        res &&
-        (res?.should_show_email_otp_screen ||
-          res?.should_show_mobile_otp_screen)
-      ) {
-        setOtpData({
+      if (step.kind === 'locked') {
+        setLocked(true);
+        return;
+      }
+      if (step.kind === 'offer') {
+        setMfaOfferData({
           is_screen_visible: true,
           email: data.email || ``,
           phone_number: data.phone_number || ``,
+          totpEnrollment: step.totpEnrollment,
+          emailOtp: step.emailOtp,
+          smsOtp: step.smsOtp,
+          state: urlProps?.state,
         });
         return;
       }
-      if (res) {
-        setError(``);
-        if (res.access_token) {
-          setError(``);
-          setAuthData({
-            user: res.user || null,
-            token: res,
-            config,
-            loading: false,
+      if (step.kind === 'verify') {
+        if (step.totp) {
+          setOtpData({
+            is_screen_visible: true,
+            email: data.email || ``,
+            phone_number: data.phone_number || ``,
+            is_totp: true,
           });
+          return;
         }
-        setSuccessMessage(res.message || ``);
-
-        if (onSignup) {
-          onSignup(res);
+        if (step.email || step.mobile) {
+          setOtpData({
+            is_screen_visible: true,
+            email: data.email || ``,
+            phone_number: data.phone_number || ``,
+            is_totp: false,
+          });
+          return;
         }
+        setError(
+          'This account requires passkey verification. Use "Sign in with a passkey" instead.',
+        );
+        return;
+      }
+      // step.kind === 'complete'
+      setError(``);
+      setAuthData({
+        user: step.response.user || null,
+        token: step.response,
+        config,
+        loading: false,
+      });
+      setSuccessMessage(step.response.message || ``);
+      if (onSignup) {
+        onSignup(step.response);
       }
     } catch (err) {
       setError(formatErrorMessage((err as Error).message));
@@ -251,6 +314,41 @@ export const AuthorizerSignup: FC<{
       }
     }
   }, [formData.password, formData.confirmPassword]);
+
+  if (locked) {
+    return <AuthorizerMfaLocked />;
+  }
+
+  if (mfaOfferData.is_screen_visible) {
+    return (
+      <AuthorizerMFASetup
+        availableMfaMethods={{
+          totp: !!mfaOfferData.totpEnrollment || config.is_totp_mfa_enabled,
+          passkey: false,
+          emailOtp: mfaOfferData.emailOtp,
+          smsOtp: mfaOfferData.smsOtp,
+        }}
+        totpEnrollment={mfaOfferData.totpEnrollment || undefined}
+        heading="Set up multi-factor authentication"
+        loginContext={{
+          email: mfaOfferData.email,
+          phone_number: mfaOfferData.phone_number,
+          state: mfaOfferData.state,
+          onComplete: (data) => {
+            setAuthData({
+              user: (data as any).user || null,
+              token: data as any,
+              config,
+              loading: false,
+            });
+            if (onSignup) {
+              onSignup(data as any);
+            }
+          },
+        }}
+      />
+    );
+  }
 
   if (otpData.is_screen_visible) {
     return (

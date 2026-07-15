@@ -6,6 +6,9 @@ import { ButtonAppearance, MessageType } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledSeparator } from '../styledComponents';
 import { Message } from './Message';
+import { AuthorizerMFASetup } from './AuthorizerMFASetup';
+import { AuthorizerMfaLocked } from './AuthorizerMfaLocked';
+import { resolveAuthStep, AuthStep } from '../utils/mfaTriage';
 
 // AuthorizerPasskeyLogin offers a full passwordless, usernameless "Sign in
 // with a passkey" option (discoverable-credential login) alongside the other
@@ -45,6 +48,7 @@ export const AuthorizerPasskeyLogin: FC<{
 }> = ({ onLogin }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
+  const [mfaStep, setMfaStep] = useState<AuthStep | null>(null);
   const { setAuthData, config, authorizerRef } = useAuthorizer();
 
   if (!isWebauthnSupported()) {
@@ -94,16 +98,23 @@ export const AuthorizerPasskeyLogin: FC<{
         }
         return;
       }
-      if (res) {
-        setAuthData({
-          user: res.user || null,
-          token: res,
-          config,
-          loading: false,
-        });
+      const step = resolveAuthStep(res, errors || []);
+      if (step.kind === 'error') {
+        setError(step.message);
+        return;
       }
+      if (step.kind === 'locked' || step.kind === 'offer' || step.kind === 'verify') {
+        setMfaStep(step);
+        return;
+      }
+      setAuthData({
+        user: step.response.user || null,
+        token: step.response,
+        config,
+        loading: false,
+      });
       if (onLogin) {
-        onLogin(res);
+        onLogin(step.response);
       }
     } catch (err) {
       if (!isUserDismissed(err as { code?: string })) {
@@ -115,6 +126,52 @@ export const AuthorizerPasskeyLogin: FC<{
   };
 
   const onErrorClose = () => setError(``);
+
+  if (mfaStep?.kind === 'locked') {
+    return <AuthorizerMfaLocked />;
+  }
+  if (mfaStep?.kind === 'offer') {
+    return (
+      <AuthorizerMFASetup
+        availableMfaMethods={{
+          totp: !!mfaStep.totpEnrollment || config.is_totp_mfa_enabled,
+          passkey: false,
+          emailOtp: mfaStep.emailOtp,
+          smsOtp: mfaStep.smsOtp,
+        }}
+        totpEnrollment={mfaStep.totpEnrollment || undefined}
+        heading="Set up multi-factor authentication"
+        loginContext={{
+          onComplete: (data) => {
+            setAuthData({
+              user: (data as any).user || null,
+              token: data as any,
+              config,
+              loading: false,
+            });
+            if (onLogin) {
+              onLogin(data as any);
+            }
+          },
+        }}
+      />
+    );
+  }
+  if (mfaStep?.kind === 'verify') {
+    // A passkey-primary login that still needs a second factor has no
+    // email/phone_number in hand (usernameless login) - the existing
+    // AuthorizerVerifyOtp component requires one of those to identify the
+    // pending user via the MFA session cookie, so TOTP/email/SMS verify
+    // can't be completed from here. This is a real, narrower gap than the
+    // password-login path (which always has an email/phone from the form) -
+    // report it plainly rather than rendering a broken form.
+    return (
+      <Message
+        type={MessageType.Error}
+        text="Additional verification is required. Please sign in with your password instead to continue."
+      />
+    );
+  }
 
   return (
     <>
