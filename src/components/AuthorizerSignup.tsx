@@ -180,27 +180,18 @@ export const AuthorizerSignup: FC<{
         return;
       }
       if (step.kind === 'verify') {
-        if (step.totp) {
-          setOtpData({
-            is_screen_visible: true,
-            email: data.email || ``,
-            phone_number: data.phone_number || ``,
-            is_totp: true,
-          });
-          return;
-        }
-        if (step.email || step.mobile) {
-          setOtpData({
-            is_screen_visible: true,
-            email: data.email || ``,
-            phone_number: data.phone_number || ``,
-            is_totp: false,
-          });
-          return;
-        }
-        setError(
-          'This account requires passkey verification. Use "Sign in with a passkey" instead.',
-        );
+        // resolveAuthStep only returns 'verify' when at least one of
+        // totp/email/mobile/webauthn is true, so a single unconditional
+        // offer covers every case - AuthorizerVerifyOtp decides how to
+        // render it (code form, passkey button, or both side by side).
+        setOtpData({
+          is_screen_visible: true,
+          email: data.email || ``,
+          phone_number: data.phone_number || ``,
+          is_totp: step.totp,
+          offer_webauthn_verify: step.webauthn,
+          has_code_factor: step.totp || step.email || step.mobile,
+        });
         return;
       }
       // step.kind === 'complete'
@@ -363,6 +354,8 @@ export const AuthorizerSignup: FC<{
             email: otpData.email || ``,
             phone_number: otpData.phone_number || ``,
             is_totp: otpData.is_totp || false,
+            offerWebauthnVerify: otpData.offer_webauthn_verify || false,
+            hasCodeFactor: otpData.has_code_factor || false,
           }}
           urlProps={urlProps}
         />

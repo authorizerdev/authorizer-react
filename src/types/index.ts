@@ -87,6 +87,12 @@ export type OtpDataType = {
   email?: string;
   phone_number?: string;
   is_totp?: boolean;
+  offer_webauthn_verify?: boolean;
+  // True when a code-based factor (TOTP, or a verified email/SMS OTP
+  // authenticator) actually exists, distinct from is_totp - a user can have
+  // a verified email/SMS OTP factor (is_totp false) alongside webauthn, and
+  // that code path must stay reachable even when a passkey is also offered.
+  has_code_factor?: boolean;
 };
 
 export type TotpDataType = {

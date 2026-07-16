@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { VerifyOTPRequest } from '@authorizerdev/authorizer-js';
+import { VerifyOTPRequest, isWebauthnSupported } from '@authorizerdev/authorizer-js';
 import '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
@@ -8,6 +8,9 @@ import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { Message } from './Message';
 import { TotpDataType } from '../types';
 import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
+import { AuthorizerMfaLocked } from './AuthorizerMfaLocked';
+import { IconPasskey } from '../icons/mfa';
+import { resolveAuthStep } from '../utils/mfaTriage';
 
 interface InputDataType {
   otp: string | null;
@@ -29,7 +32,18 @@ export const AuthorizerVerifyOtp: FC<{
   phone_number?: string;
   urlProps?: Record<string, any>;
   is_totp?: boolean;
-}> = ({ setView, onLogin, email, phone_number, urlProps, is_totp }) => {
+  offerWebauthnVerify?: boolean;
+  hasCodeFactor?: boolean;
+}> = ({
+  setView,
+  onLogin,
+  email,
+  phone_number,
+  urlProps,
+  is_totp,
+  offerWebauthnVerify,
+  hasCodeFactor,
+}) => {
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
   const [loading, setLoading] = useState(false);
@@ -48,6 +62,76 @@ export const AuthorizerVerifyOtp: FC<{
       setError(`Email or Phone Number is required`);
     }
   }, []);
+
+  const [webauthnError, setWebauthnError] = useState(``);
+  const [webauthnLoading, setWebauthnLoading] = useState(false);
+  const [webauthnLocked, setWebauthnLocked] = useState(false);
+  const passkeySupported = isWebauthnSupported();
+
+  // A cancelled ceremony surfaces as NotAllowedError/AbortError (same
+  // browser behavior AuthorizerPasskeyLogin already handles) - dismiss
+  // silently and let the user fall back to the code form when one exists.
+  const isUserDismissed = (e?: { code?: string }): boolean =>
+    e?.code === `NotAllowedError` || e?.code === `AbortError`;
+
+  const onVerifyWithPasskey = async () => {
+    setWebauthnError(``);
+    try {
+      setWebauthnLoading(true);
+      const { data: res, errors } = await authorizerRef.loginWithPasskey(email);
+      if (errors && errors.length) {
+        if (!isUserDismissed(errors[0])) {
+          setWebauthnError(errors[0]?.message || ``);
+        }
+        return;
+      }
+      // Route through resolveAuthStep rather than treating any truthy `res`
+      // as success - webauthn_login_verify can return the same withheld
+      // (null access_token) shape any other login endpoint can, the exact
+      // bug the MFA redesign fixed at every other call site.
+      const step = resolveAuthStep(res, errors || []);
+      if (step.kind === 'error') {
+        setWebauthnError(step.message);
+        return;
+      }
+      if (step.kind === 'locked') {
+        setWebauthnLocked(true);
+        return;
+      }
+      if (step.kind === 'offer') {
+        // Unexpected here - this screen only renders once a factor is
+        // already verified, so a first-time-offer response would mean the
+        // server's state disagrees with what got us to this screen. Surface
+        // it as an error rather than silently completing or guessing at a
+        // setup UI.
+        setWebauthnError(`Unable to verify with passkey. Please try again.`);
+        return;
+      }
+      if (step.kind === 'verify') {
+        setWebauthnError(
+          `Additional verification is still required after passkey. Please use the code form below instead.`,
+        );
+        return;
+      }
+      // step.kind === 'complete'
+      setError(``);
+      setAuthData({
+        user: step.response.user || null,
+        token: step.response,
+        config,
+        loading: false,
+      });
+      if (onLogin) {
+        onLogin(step.response);
+      }
+    } catch (err) {
+      if (!isUserDismissed(err as { code?: string })) {
+        setWebauthnError((err as Error).message);
+      }
+    } finally {
+      setWebauthnLoading(false);
+    }
+  };
 
   const onInputChange = async (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -188,6 +272,25 @@ export const AuthorizerVerifyOtp: FC<{
     );
   }
 
+  if (webauthnLocked) {
+    return <AuthorizerMfaLocked />;
+  }
+
+  // A code-based factor (TOTP or a verified email/SMS OTP authenticator)
+  // was offered alongside webauthn: show the passkey button first, with the
+  // code form as a fallback below it. The code form is only hidden when no
+  // code factor exists at all - resolveAuthStep guarantees 'verify' never
+  // has all of totp/webauthn/email/mobile false, so !hasCodeFactor already
+  // implies webauthn is the sole option, regardless of passkeySupported
+  // (an unsupported browser still shouldn't render a dead-end code form -
+  // passkeyOnlyUnsupported below covers that case with an explanation).
+  const showCodeForm = !!hasCodeFactor;
+  // Passkey is the user's only MFA factor but this browser can't do WebAuthn:
+  // no code factor exists to fall back to, so the code form below would be
+  // a dead end.
+  const passkeyOnlyUnsupported =
+    !!offerWebauthnVerify && !passkeySupported && !hasCodeFactor;
+
   return (
     <>
       {successMessage && (
@@ -204,53 +307,105 @@ export const AuthorizerVerifyOtp: FC<{
           onClose={isLockedOut ? undefined : onErrorClose}
         />
       )}
-      <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-        Please enter the OTP sent to your email or phone number or authenticator
-      </p>
-      <br />
-      <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
-        <div className="styled-form-group">
-          <label className="form-input-label" htmlFor="authorizer-verify-otp">
-            <span>* </span>OTP (One Time Password)
-          </label>
-          <input
-            name="otp"
-            id="authorizer-verify-otp"
-            className={`form-input-field ${
-              errorData.otp ? 'input-error-content' : ''
-            }`}
-            placeholder="e.g.- AB123C"
-            type="password"
-            autoComplete="one-time-code"
-            value={formData.otp || ''}
-            onChange={(e) => onInputChange('otp', e.target.value)}
-            disabled={isLockedOut}
-          />
-          {errorData.otp && (
-            <div className="form-input-error">{errorData.otp}</div>
-          )}
-          {is_totp && (
-            <Message
-              type={MessageType.Info}
-              text={`If you have lost access to your device, please enter recovery code that were shared while enabling Multifactor Authentication.`}
-              extraStyles={{
-                color: 'var(--authorizer-text-color)',
+      {webauthnError && (
+        <Message
+          type={MessageType.Error}
+          text={webauthnError}
+          onClose={() => setWebauthnError(``)}
+        />
+      )}
+      {offerWebauthnVerify && passkeySupported && (
+        <>
+          <p style={{ textAlign: 'center', margin: '10px 0px' }}>
+            Verify with your passkey
+          </p>
+          <StyledButton
+            type="button"
+            appearance={ButtonAppearance.Default}
+            disabled={webauthnLoading}
+            onClick={onVerifyWithPasskey}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
-            />
+            >
+              <IconPasskey />
+              {webauthnLoading ? `Waiting for passkey ...` : `Verify with a passkey`}
+            </span>
+          </StyledButton>
+          <br />
+        </>
+      )}
+      {passkeyOnlyUnsupported && (
+        <Message
+          type={MessageType.Info}
+          text={`This browser doesn't support passkeys. Please try again on a device or browser that does.`}
+          extraStyles={{
+            color: 'var(--authorizer-text-color)',
+          }}
+        />
+      )}
+      {showCodeForm && (
+        <>
+          {offerWebauthnVerify && passkeySupported && (
+            <p style={{ textAlign: 'center', margin: '10px 0px' }}>
+              Or enter a code instead
+            </p>
           )}
-        </div>
-        <br />
-        <StyledButton
-          type="submit"
-          disabled={loading || !formData.otp || !!errorData.otp || isLockedOut}
-          appearance={ButtonAppearance.Primary}
-        >
-          {loading ? `Processing ...` : `Submit`}
-        </StyledButton>
-      </form>
+          <p style={{ textAlign: 'center', margin: '10px 0px' }}>
+            Please enter the OTP sent to your email or phone number or authenticator
+          </p>
+          <br />
+          <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
+            <div className="styled-form-group">
+              <label className="form-input-label" htmlFor="authorizer-verify-otp">
+                <span>* </span>OTP (One Time Password)
+              </label>
+              <input
+                name="otp"
+                id="authorizer-verify-otp"
+                className={`form-input-field ${
+                  errorData.otp ? 'input-error-content' : ''
+                }`}
+                placeholder="e.g.- AB123C"
+                type="password"
+                autoComplete="one-time-code"
+                value={formData.otp || ''}
+                onChange={(e) => onInputChange('otp', e.target.value)}
+                disabled={isLockedOut}
+              />
+              {errorData.otp && (
+                <div className="form-input-error">{errorData.otp}</div>
+              )}
+              {is_totp && (
+                <Message
+                  type={MessageType.Info}
+                  text={`If you have lost access to your device, please enter recovery code that were shared while enabling Multifactor Authentication.`}
+                  extraStyles={{
+                    color: 'var(--authorizer-text-color)',
+                  }}
+                />
+              )}
+            </div>
+            <br />
+            <StyledButton
+              type="submit"
+              disabled={loading || !formData.otp || !!errorData.otp || isLockedOut}
+              appearance={ButtonAppearance.Primary}
+            >
+              {loading ? `Processing ...` : `Submit`}
+            </StyledButton>
+          </form>
+        </>
+      )}
       {setView && (
         <StyledFooter>
           {!is_totp &&
+            showCodeForm &&
             (sendingOtp ? (
               <div style={{ marginBottom: '10px' }}>Sending ...</div>
             ) : (
