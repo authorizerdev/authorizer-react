@@ -51,7 +51,14 @@ export const AuthorizerPasskeyLogin: FC<{
   const [mfaStep, setMfaStep] = useState<AuthStep | null>(null);
   const { setAuthData, config, authorizerRef } = useAuthorizer();
 
-  if (!isWebauthnSupported()) {
+  // When the org enforces MFA, passkey must never be offered as a
+  // standalone primary-login path - it would let a user skip the org's
+  // two-factor requirement entirely. The server refuses this independently
+  // (webauthn_login_verify checks EnforceMFA itself, surfaced here via
+  // resolveAuthStep's 'verify' branch below), but the button shouldn't
+  // invite the attempt in the first place: authenticator methods belong
+  // after a first factor has identified the user, not before.
+  if (!isWebauthnSupported() || config.is_mfa_enforced) {
     return null;
   }
 
