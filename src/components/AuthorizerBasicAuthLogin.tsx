@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { AuthToken, LoginRequest } from '@authorizerdev/authorizer-js';
 import validator from 'validator';
 const { isEmail, isMobilePhone } = validator;
@@ -208,52 +208,6 @@ export const AuthorizerBasicAuthLogin: FC<{
     }
   }, [formData.password]);
 
-  // Passkey autofill (WebAuthn conditional mediation): when the browser and the
-  // user's device support it, discoverable passkeys are offered inline in the
-  // email/username field's autofill dropdown. Best-effort and silent - the
-  // explicit "Sign in with a passkey" button remains the primary path, and any
-  // unsupported/cancelled/aborted ceremony is ignored.
-  // Started on the email/phone field's first focus rather than on mount: some
-  // browser/platform authenticator combinations (e.g. Chrome + macOS Touch ID)
-  // don't wait for the field to actually be focused before surfacing a native
-  // passkey prompt, which showed up as an unprompted popup on every page load.
-  // Deferring to focus keeps the ceremony tied to a real user interaction.
-  const passkeyAutofillActive = useRef(false);
-
-  const startPasskeyAutofill = () => {
-    if (passkeyAutofillActive.current) {
-      return;
-    }
-    passkeyAutofillActive.current = true;
-    authorizerRef
-      .loginWithPasskeyAutofill()
-      .then(({ data, errors }) => {
-        if (!passkeyAutofillActive.current || (errors && errors.length) || !data) {
-          return;
-        }
-        setAuthData({
-          user: data.user || null,
-          token: data,
-          config,
-          loading: false,
-        });
-        if (onLogin) {
-          onLogin(data);
-        }
-      })
-      .catch(() => {
-        // Autofill is best-effort; ignore unsupported/cancelled ceremonies.
-      });
-  };
-
-  useEffect(() => {
-    return () => {
-      passkeyAutofillActive.current = false;
-      authorizerRef.cancelPasskeyAutofill();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   if (locked) {
     return <AuthorizerMfaLocked />;
   }
@@ -327,15 +281,11 @@ export const AuthorizerBasicAuthLogin: FC<{
               }`}
               placeholder={getEmailPhonePlaceholder(config)}
               type="text"
-              // Enables WebAuthn passkey autofill: browsers offer discoverable
-              // passkeys inline in this field's autofill dropdown. Paired with
-              // the loginWithPasskeyAutofill() ceremony started on focus below.
-              autoComplete="username webauthn"
+              autoComplete="username"
               value={formData.email_or_phone_number || ''}
               onChange={e =>
                 onInputChange('email_or_phone_number', e.target.value)
               }
-              onFocus={startPasskeyAutofill}
             />
             {errorData.email_or_phone_number && (
               <div className="form-input-error">
