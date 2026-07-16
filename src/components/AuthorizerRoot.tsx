@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { AuthToken } from '@authorizerdev/authorizer-js';
+import { AuthToken, parseMfaRedirectParams } from '@authorizerdev/authorizer-js';
 
 import { AuthorizerBasicAuthLogin } from './AuthorizerBasicAuthLogin';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
@@ -11,6 +11,7 @@ import { AuthorizerForgotPassword } from './AuthorizerForgotPassword';
 import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
 import { AuthorizerPasskeyLogin } from './AuthorizerPasskeyLogin';
 import { AuthorizerMagicLinkLogin } from './AuthorizerMagicLinkLogin';
+import { AuthorizerMFASetup } from './AuthorizerMFASetup';
 import { Message } from './Message';
 import { createRandomString } from '../utils/common';
 import { hasWindow } from '../utils/window';
@@ -37,6 +38,9 @@ export const AuthorizerRoot: FC<{
   const searchParams = new URLSearchParams(
     hasWindow() ? window.location.search : ``
   );
+  const mfaRedirect = hasWindow()
+    ? parseMfaRedirectParams(window.location.href)
+    : null;
   const state = searchParams.get('state') || createRandomString();
   const scope = searchParams.get('scope')
     ? searchParams
@@ -67,11 +71,32 @@ export const AuthorizerRoot: FC<{
           text={`Unable to reach the Authorizer server (${configLoadError}). Login methods that depend on it - such as basic auth, signup, and social login - won't appear until it's reachable.`}
         />
       )}
-      {view === Views.Login && (
+      {mfaRedirect && (
+        <AuthorizerMFASetup
+          availableMfaMethods={{
+            totp: mfaRedirect.mfaMethods.includes('totp'),
+            passkey: false,
+            emailOtp: mfaRedirect.mfaMethods.includes('email_otp'),
+            smsOtp: mfaRedirect.mfaMethods.includes('sms_otp'),
+          }}
+          heading="Set up multi-factor authentication"
+          loginContext={{
+            onComplete: (data: any) => {
+              if (onLogin) {
+                onLogin(data);
+              }
+            },
+          }}
+        />
+      )}
+      {!mfaRedirect && view === Views.Login && (
         <AuthorizerSocialLogin urlProps={urlProps} roles={roles} />
       )}
-      {view === Views.Login && <AuthorizerPasskeyLogin onLogin={onLogin} />}
-      {view === Views.Login &&
+      {!mfaRedirect && view === Views.Login && (
+        <AuthorizerPasskeyLogin onLogin={onLogin} />
+      )}
+      {!mfaRedirect &&
+        view === Views.Login &&
         (config.is_basic_authentication_enabled ||
           config.is_mobile_basic_authentication_enabled) &&
         !config.is_magic_link_login_enabled && (
@@ -97,7 +122,7 @@ export const AuthorizerRoot: FC<{
           />
         )}
 
-      {view === Views.Login && config.is_magic_link_login_enabled && (
+      {!mfaRedirect && view === Views.Login && config.is_magic_link_login_enabled && (
         <AuthorizerMagicLinkLogin
           onMagicLinkLogin={onMagicLinkLogin}
           urlProps={urlProps}
