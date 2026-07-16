@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuthorizer } from 'authorizer-react';
 
 const Dashboard: React.FC = () => {
@@ -13,6 +14,10 @@ const Dashboard: React.FC = () => {
         <a href={`mailto:${user?.email}`} style={{ color: '#3B82F6' }}>
           {user?.email}
         </a>
+      </p>
+
+      <p>
+        <Link to="/settings">Manage sign-in methods</Link>
       </p>
 
       <br />

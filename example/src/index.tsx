@@ -22,7 +22,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <BrowserRouter>
           <AuthorizerProvider
             config={{
-              authorizerURL: 'http://localhost:8080',
+              // Proxied to the real backend on :8080 by vite.config.ts -
+              // same-origin is required for WebAuthn/passkey testing (see
+              // that file's comment); every other flow works the same way
+              // regardless.
+              authorizerURL: window.location.origin,
               redirectURL: window.location.origin,
             }}
           >
