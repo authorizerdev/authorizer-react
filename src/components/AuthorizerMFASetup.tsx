@@ -92,6 +92,11 @@ export const AuthorizerMFASetup: FC<{
   const [otpMethodPending, setOtpMethodPending] = useState<
     'email_otp' | 'sms_otp' | null
   >(null);
+  // Fetched via totpMfaSetup when the host didn't already supply a
+  // totpEnrollment prop or an onSetupMethod override - the default,
+  // host-free path, mirroring email/SMS OTP's own direct-SDK-call fallback.
+  const [fetchedTotpEnrollment, setFetchedTotpEnrollment] =
+    useState<TotpEnrollment | null>(null);
 
   const { authorizerRef } = useAuthorizer();
 
@@ -146,8 +151,43 @@ export const AuthorizerMFASetup: FC<{
     if (method === 'totp') {
       if (totpEnrollment) {
         setSelected('totp');
-      } else {
-        onSetupMethod?.('totp');
+        return;
+      }
+      // If the host supplied onSetupMethod, defer to it (escape hatch for
+      // custom behavior) - otherwise fetch a fresh enrollment via the SDK
+      // directly, same default host-free path email/SMS OTP already have.
+      if (onSetupMethod) {
+        onSetupMethod('totp');
+        return;
+      }
+      setOtpSetupError('');
+      setSendingOtpSetup(true);
+      try {
+        const { data, errors } = await authorizerRef.totpMfaSetup({
+          email: loginContext?.email,
+          phone_number: loginContext?.phone_number,
+        });
+        if (errors && errors.length) {
+          setOtpSetupError(
+            errors[0]?.message || 'Failed to start authenticator app setup',
+          );
+          return;
+        }
+        if (data?.authenticator_secret && data?.authenticator_scanner_image) {
+          setFetchedTotpEnrollment({
+            authenticator_scanner_image: data.authenticator_scanner_image,
+            authenticator_secret: data.authenticator_secret,
+            authenticator_recovery_codes:
+              data.authenticator_recovery_codes || [],
+          });
+          setSelected('totp');
+        } else {
+          setOtpSetupError('Failed to start authenticator app setup');
+        }
+      } catch (err) {
+        setOtpSetupError((err as Error).message);
+      } finally {
+        setSendingOtpSetup(false);
       }
       return;
     }
@@ -214,23 +254,28 @@ export const AuthorizerMFASetup: FC<{
     }
   };
 
-  const backToList = () => setSelected(null);
+  const backToList = () => {
+    setSelected(null);
+    setFetchedTotpEnrollment(null);
+  };
 
-  if (selected === 'totp' && totpEnrollment) {
+  const effectiveTotpEnrollment = totpEnrollment || fetchedTotpEnrollment || undefined;
+
+  if (selected === 'totp' && effectiveTotpEnrollment) {
     return (
       <>
         <BackLink onClick={backToList} />
         <AuthorizerTOTPScanner
-          {...totpEnrollment}
+          {...effectiveTotpEnrollment}
           email={loginContext?.email}
           phone_number={loginContext?.phone_number}
-          setView={() => setSelected(null)}
+          setView={backToList}
           onLogin={(data) => {
             if (loginContext && data && (data as AuthTokenLike).access_token) {
               loginContext.onComplete(data as AuthTokenLike);
               return;
             }
-            setSelected(null);
+            backToList();
           }}
         />
       </>
@@ -263,7 +308,7 @@ export const AuthorizerMFASetup: FC<{
       <>
         <BackLink onClick={backToList} />
         <p style={{ margin: '10px 0px', fontWeight: 'bold' }}>Add a passkey</p>
-        <AuthorizerPasskeyRegister onSuccess={backToList} />
+        <AuthorizerPasskeyRegister onSuccess={backToList} showCredentials />
       </>
     );
   }

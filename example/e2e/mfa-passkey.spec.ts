@@ -26,7 +26,13 @@ test('register a passkey in settings, then log in with it as the primary factor'
   await expect(page.getByText('Hey 👋,')).toBeVisible({ timeout: 10_000 });
 
   await page.getByRole('link', { name: 'Manage sign-in methods' }).click();
-  await page.getByRole('button', { name: 'Set up' }).click();
+  // Settings now shows every method the server has enabled (config-driven),
+  // so "Set up" is ambiguous - scope to the Passkey tile specifically.
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Passkey' })
+    .getByRole('button', { name: 'Set up' })
+    .click();
   await page.getByRole('button', { name: 'Add a passkey' }).click();
   // AuthorizerMFASetup wires onSuccess={backToList}, so a successful
   // registration immediately returns to the method list - there's no
