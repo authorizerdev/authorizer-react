@@ -245,6 +245,7 @@ export const AuthorizerMFASetup: FC<{
           email={loginContext?.email}
           phone_number={loginContext?.phone_number}
           is_totp={false}
+          hasCodeFactor
           onLogin={(data) => {
             if (loginContext && data && (data as AuthTokenLike).access_token) {
               loginContext.onComplete(data as AuthTokenLike);

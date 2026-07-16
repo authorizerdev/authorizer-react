@@ -103,6 +103,7 @@ export const AuthorizerTOTPScanner: FC<{
           urlProps,
         }}
         is_totp
+        hasCodeFactor
       />
     );
   }
