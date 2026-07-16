@@ -22,6 +22,11 @@ export type AuthorizerConfig = {
   is_multi_factor_auth_enabled: boolean;
   is_mobile_basic_authentication_enabled: boolean;
   is_phone_verification_enabled: boolean;
+  is_totp_mfa_enabled: boolean;
+  is_email_otp_mfa_enabled: boolean;
+  is_sms_otp_mfa_enabled: boolean;
+  is_webauthn_enabled: boolean;
+  is_mfa_enforced: boolean;
 };
 
 export type AuthorizerState = {
@@ -29,6 +34,7 @@ export type AuthorizerState = {
   token: AuthToken | null;
   loading: boolean;
   config: AuthorizerConfig;
+  configLoadError?: string | null;
 };
 
 export type AuthorizerProviderAction = {
@@ -58,10 +64,16 @@ export type AuthorizerContextPropsType = {
     is_multi_factor_auth_enabled: boolean;
     is_mobile_basic_authentication_enabled: boolean;
     is_phone_verification_enabled: boolean;
+    is_totp_mfa_enabled: boolean;
+    is_email_otp_mfa_enabled: boolean;
+    is_sms_otp_mfa_enabled: boolean;
+    is_webauthn_enabled: boolean;
+    is_mfa_enforced: boolean;
   };
   user: null | User;
   token: null | AuthToken;
   loading: boolean;
+  configLoadError?: string | null;
   logout: () => Promise<void>;
   setLoading: (data: boolean) => void;
   setUser: (data: null | User) => void;

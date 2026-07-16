@@ -25,9 +25,6 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
               authorizerURL: 'http://localhost:8080',
               redirectURL: window.location.origin,
             }}
-            onStateChangeCallback={async ({ user, token }: any) => {
-              console.log(user, token);
-            }}
           >
             <App />
           </AuthorizerProvider>
