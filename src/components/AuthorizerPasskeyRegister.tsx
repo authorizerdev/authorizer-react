@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import {
-  GenericResponse,
+  AuthToken,
   WebauthnCredentialInfo,
   isWebauthnSupported,
 } from '@authorizerdev/authorizer-js';
@@ -21,8 +21,10 @@ import { Message } from './Message';
 // browser can't run the WebAuthn JSON ceremony, since in a settings context
 // the user needs to know why the option is missing.
 export const AuthorizerPasskeyRegister: FC<{
-  // Called after a passkey is successfully registered.
-  onSuccess?: (data: GenericResponse | void) => void;
+  // Called after a passkey is successfully registered. On the mfaSetup path
+  // (below) this carries access_token when registration also completed a
+  // withheld MFA offer - a plain settings-page add never sets it.
+  onSuccess?: (data: AuthToken | void) => void;
   // Optional friendly name for the credential (e.g. "MacBook Touch ID").
   // When omitted a small inline field is shown so the user can name it.
   name?: string;
@@ -30,7 +32,11 @@ export const AuthorizerPasskeyRegister: FC<{
   // Requires an authenticated session; off by default so Storybook and
   // unauthenticated hosts don't trigger a failing request.
   showCredentials?: boolean;
-}> = ({ onSuccess, name, showCredentials = false }) => {
+  // Present only during a token-withheld login-time MFA offer: authenticates
+  // the ceremony via the MFA session cookie instead of a bearer token (there
+  // isn't one yet), and completing it issues the previously-withheld token.
+  mfaSetup?: { email?: string; phoneNumber?: string; state?: string };
+}> = ({ onSuccess, name, showCredentials = false, mfaSetup }) => {
   const { authorizerRef } = useAuthorizer();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -76,7 +82,8 @@ export const AuthorizerPasskeyRegister: FC<{
       setLoading(true);
       const trimmed = credentialName.trim();
       const { data, errors } = await authorizerRef.registerPasskey(
-        trimmed || undefined
+        trimmed || undefined,
+        mfaSetup
       );
       if (errors && errors.length) {
         setError(errors[0]?.message || 'Could not add passkey.');

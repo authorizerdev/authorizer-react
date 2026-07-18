@@ -25,11 +25,11 @@ export type AuthStep =
   | {
       kind: 'offer';
       totpEnrollment: TotpEnrollment | null;
-      // Passkey is intentionally excluded from the offer surface here - see
-      // this plan's Global Constraints: webauthn_registration_options/verify
-      // require a bearer token that doesn't exist in this withheld-token
-      // state, a known backend gap tracked separately, not fixed by this
-      // component.
+      // should_offer_webauthn_mfa_setup: the server-authenticated signal that
+      // passkey enrollment is available here. webauthn_registration_options/
+      // verify authenticate via the MFA session cookie on this path (no
+      // bearer token yet) - see AuthorizerMFASetup's mfaSetup prop.
+      passkey: boolean;
       emailOtp: boolean;
       smsOtp: boolean;
     }
@@ -100,6 +100,7 @@ export function resolveAuthStep(
   }
   if (
     hasTotpEnrollment ||
+    res.should_offer_webauthn_mfa_setup ||
     res.should_offer_email_otp_mfa_setup ||
     res.should_offer_sms_otp_mfa_setup
   ) {
@@ -112,6 +113,7 @@ export function resolveAuthStep(
             authenticator_recovery_codes: res.authenticator_recovery_codes as string[],
           }
         : null,
+      passkey: !!res.should_offer_webauthn_mfa_setup,
       emailOtp: !!res.should_offer_email_otp_mfa_setup,
       smsOtp: !!res.should_offer_sms_otp_mfa_setup,
     };

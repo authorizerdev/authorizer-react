@@ -50,6 +50,7 @@ type MfaOfferData = {
   email: string;
   phone_number: string;
   totpEnrollment: TotpEnrollment | null;
+  passkey: boolean;
   emailOtp: boolean;
   smsOtp: boolean;
   state?: string;
@@ -60,6 +61,7 @@ const initMfaOfferData: MfaOfferData = {
   email: '',
   phone_number: '',
   totpEnrollment: null,
+  passkey: false,
   emailOtp: false,
   smsOtp: false,
 };
@@ -173,6 +175,7 @@ export const AuthorizerSignup: FC<{
           email: data.email || ``,
           phone_number: data.phone_number || ``,
           totpEnrollment: step.totpEnrollment,
+          passkey: step.passkey,
           emailOtp: step.emailOtp,
           smsOtp: step.smsOtp,
           state: urlProps?.state,
@@ -315,7 +318,7 @@ export const AuthorizerSignup: FC<{
       <AuthorizerMFASetup
         availableMfaMethods={{
           totp: !!mfaOfferData.totpEnrollment || config.is_totp_mfa_enabled,
-          passkey: false,
+          passkey: mfaOfferData.passkey,
           emailOtp: mfaOfferData.emailOtp,
           smsOtp: mfaOfferData.smsOtp,
         }}

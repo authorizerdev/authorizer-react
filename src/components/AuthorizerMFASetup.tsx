@@ -120,7 +120,7 @@ export const AuthorizerMFASetup: FC<{
     },
     {
       key: 'passkey',
-      available: !!availableMfaMethods.passkey && !loginContext,
+      available: !!availableMfaMethods.passkey,
       icon: <IconPasskey />,
       title: 'Passkey',
       description: 'Sign in with your fingerprint, face, or device PIN.',
@@ -308,7 +308,27 @@ export const AuthorizerMFASetup: FC<{
       <>
         <BackLink onClick={backToList} />
         <p style={{ margin: '10px 0px', fontWeight: 'bold' }}>Add a passkey</p>
-        <AuthorizerPasskeyRegister onSuccess={backToList} showCredentials />
+        <AuthorizerPasskeyRegister
+          // showCredentials calls webauthn_credentials, which requires a
+          // bearer token - never available yet during a login-time offer.
+          showCredentials={!loginContext}
+          mfaSetup={
+            loginContext
+              ? {
+                  email: loginContext.email,
+                  phoneNumber: loginContext.phone_number,
+                  state: loginContext.state,
+                }
+              : undefined
+          }
+          onSuccess={(data) => {
+            if (loginContext && data && (data as AuthTokenLike).access_token) {
+              loginContext.onComplete(data as AuthTokenLike);
+              return;
+            }
+            backToList();
+          }}
+        />
       </>
     );
   }

@@ -12,6 +12,7 @@ import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
 import { AuthorizerPasskeyLogin } from './AuthorizerPasskeyLogin';
 import { AuthorizerMagicLinkLogin } from './AuthorizerMagicLinkLogin';
 import { AuthorizerMFASetup } from './AuthorizerMFASetup';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { Message } from './Message';
 import { createRandomString } from '../utils/common';
 import { hasWindow } from '../utils/window';
@@ -71,11 +72,31 @@ export const AuthorizerRoot: FC<{
           text={`Unable to reach the Authorizer server (${configLoadError}). Login methods that depend on it - such as basic auth, signup, and social login - won't appear until it's reachable.`}
         />
       )}
-      {mfaRedirect && (
+      {mfaRedirect && mfaRedirect.mfaGate === 'verify' && (
+        // An already-configured factor must be challenged, not offered setup
+        // again - no email/phone_number in hand (OAuth/magic-link return),
+        // but verify_otp resolves the pending user from the MFA session
+        // cookie alone, same as the passkey-primary-login continuation.
+        <AuthorizerVerifyOtp
+          is_totp={mfaRedirect.mfaMethods.includes('totp')}
+          offerWebauthnVerify={mfaRedirect.mfaMethods.includes('webauthn')}
+          hasCodeFactor={
+            mfaRedirect.mfaMethods.includes('totp') ||
+            mfaRedirect.mfaMethods.includes('email_otp') ||
+            mfaRedirect.mfaMethods.includes('sms_otp')
+          }
+          onLogin={(data: any) => {
+            if (onLogin) {
+              onLogin(data);
+            }
+          }}
+        />
+      )}
+      {mfaRedirect && mfaRedirect.mfaGate === 'offer' && (
         <AuthorizerMFASetup
           availableMfaMethods={{
             totp: mfaRedirect.mfaMethods.includes('totp'),
-            passkey: false,
+            passkey: mfaRedirect.mfaMethods.includes('webauthn'),
             emailOtp: mfaRedirect.mfaMethods.includes('email_otp'),
             smsOtp: mfaRedirect.mfaMethods.includes('sms_otp'),
           }}

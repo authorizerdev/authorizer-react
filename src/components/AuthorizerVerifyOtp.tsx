@@ -57,11 +57,11 @@ export const AuthorizerVerifyOtp: FC<{
     otp: null,
   });
   const { authorizerRef, config, setAuthData } = useAuthorizer();
-  useEffect(() => {
-    if (!email && !phone_number) {
-      setError(`Email or Phone Number is required`);
-    }
-  }, []);
+  // No email/phone_number is a legitimate state here, not an error: the
+  // OAuth-return and passkey-primary-login MFA continuations resolve the
+  // pending user from the MFA session cookie alone (see verify_otp.go's
+  // sessionResolved path) - the frontend never learns their email/phone in
+  // those flows.
 
   const [webauthnError, setWebauthnError] = useState(``);
   const [webauthnLoading, setWebauthnLoading] = useState(false);

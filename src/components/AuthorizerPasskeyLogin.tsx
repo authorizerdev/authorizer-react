@@ -8,6 +8,7 @@ import { StyledButton, StyledSeparator } from '../styledComponents';
 import { Message } from './Message';
 import { AuthorizerMFASetup } from './AuthorizerMFASetup';
 import { AuthorizerMfaLocked } from './AuthorizerMfaLocked';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { resolveAuthStep, AuthStep } from '../utils/mfaTriage';
 
 // AuthorizerPasskeyLogin offers a full passwordless, usernameless "Sign in
@@ -142,7 +143,7 @@ export const AuthorizerPasskeyLogin: FC<{
       <AuthorizerMFASetup
         availableMfaMethods={{
           totp: !!mfaStep.totpEnrollment || config.is_totp_mfa_enabled,
-          passkey: false,
+          passkey: mfaStep.passkey,
           emailOtp: mfaStep.emailOtp,
           smsOtp: mfaStep.smsOtp,
         }}
@@ -166,16 +167,26 @@ export const AuthorizerPasskeyLogin: FC<{
   }
   if (mfaStep?.kind === 'verify') {
     // A passkey-primary login that still needs a second factor has no
-    // email/phone_number in hand (usernameless login) - the existing
-    // AuthorizerVerifyOtp component requires one of those to identify the
-    // pending user via the MFA session cookie, so TOTP/email/SMS verify
-    // can't be completed from here. This is a real, narrower gap than the
-    // password-login path (which always has an email/phone from the form) -
-    // report it plainly rather than rendering a broken form.
+    // email/phone_number in hand (usernameless login). AuthorizerVerifyOtp
+    // still works here: verify_otp/resend_otp resolve the pending user from
+    // the MFA session cookie alone when no identifier is supplied (the same
+    // session-only path the OAuth-return continuation uses).
     return (
-      <Message
-        type={MessageType.Error}
-        text="Additional verification is required. Please sign in with your password instead to continue."
+      <AuthorizerVerifyOtp
+        is_totp={mfaStep.totp}
+        offerWebauthnVerify={mfaStep.webauthn}
+        hasCodeFactor={mfaStep.totp || mfaStep.email || mfaStep.mobile}
+        onLogin={(data) => {
+          setAuthData({
+            user: data?.user || null,
+            token: data,
+            config,
+            loading: false,
+          });
+          if (onLogin) {
+            onLogin(data);
+          }
+        }}
       />
     );
   }
