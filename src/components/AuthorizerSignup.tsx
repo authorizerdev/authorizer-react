@@ -9,6 +9,7 @@ import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
+import { PasswordInput } from './PasswordInput';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 import { OtpDataType } from '../types';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
@@ -66,13 +67,21 @@ const initMfaOfferData: MfaOfferData = {
   smsOtp: false,
 };
 
+export type SignupStep = 'form' | 'mfa-setup' | 'otp-verify' | 'locked';
+
 export const AuthorizerSignup: FC<{
   setView?: (v: Views) => void;
   onSignup?: (data: AuthToken) => void;
   urlProps?: Record<string, any>;
   roles?: string[];
   fieldOverrides?: FormFieldsOverrides;
-}> = ({ setView, onSignup, urlProps, roles, fieldOverrides }) => {
+  // Fired whenever this component switches between its own internal
+  // screens. Hosts that render other login options (e.g. "Continue with
+  // Google") alongside the signup form need this to hide them once the
+  // account exists and the user has moved on to MFA setup/verification -
+  // those options no longer make sense on top of those screens.
+  onStepChange?: (step: SignupStep) => void;
+}> = ({ setView, onSignup, urlProps, roles, fieldOverrides, onStepChange }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
@@ -97,6 +106,19 @@ export const AuthorizerSignup: FC<{
   });
   const { authorizerRef, config, setAuthData } = useAuthorizer();
   const [disableSignupButton, setDisableSignupButton] = useState(false);
+
+  useEffect(() => {
+    if (!onStepChange) return;
+    if (locked) {
+      onStepChange('locked');
+    } else if (mfaOfferData.is_screen_visible) {
+      onStepChange('mfa-setup');
+    } else if (otpData.is_screen_visible) {
+      onStepChange('otp-verify');
+    } else {
+      onStepChange('form');
+    }
+  }, [locked, mfaOfferData.is_screen_visible, otpData.is_screen_visible]);
 
   const onInputChange = async (field: string, value: string) =>
     setFormData({ ...formData, [field]: value });
@@ -324,6 +346,7 @@ export const AuthorizerSignup: FC<{
         }}
         totpEnrollment={mfaOfferData.totpEnrollment || undefined}
         heading="Set up multi-factor authentication"
+        onBack={() => setMfaOfferData({ ...initMfaOfferData })}
         loginContext={{
           email: mfaOfferData.email,
           phone_number: mfaOfferData.phone_number,
@@ -359,6 +382,7 @@ export const AuthorizerSignup: FC<{
             is_totp: otpData.is_totp || false,
             offerWebauthnVerify: otpData.offer_webauthn_verify || false,
             hasCodeFactor: otpData.has_code_factor || false,
+            onBack: () => setOtpData({ ...initOtpData }),
           }}
           urlProps={urlProps}
         />
@@ -375,6 +399,20 @@ export const AuthorizerSignup: FC<{
     const fieldOverride = fieldOverrides?.[key];
     if (fieldOverride?.hide) {
       return null;
+    }
+    if (type === 'password') {
+      return (
+        <PasswordInput
+          id={`authorizer-sign-up-${key}`}
+          name={key}
+          label={fieldOverride?.label ?? label}
+          placeholder={fieldOverride?.placeholder ?? placeholder}
+          autoComplete={key === 'password' ? 'new-password' : 'off'}
+          value={formData[key] || ''}
+          onChange={(value) => onInputChange(key, value)}
+          error={errorData[key]}
+        />
+      );
     }
     return (
       <div className="styled-form-group">

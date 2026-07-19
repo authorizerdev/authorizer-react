@@ -6,6 +6,7 @@ import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledWrapper } from '../styledComponents';
 import { formatErrorMessage } from '../utils/format';
 import { Message } from './Message';
+import { PasswordInput } from './PasswordInput';
 import { getSearchParams } from '../utils/url';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
@@ -163,54 +164,24 @@ export const AuthorizerResetPassword: FC<Props> = ({
             )}
           </div>
         )}
-        <div className="styled-form-group">
-          <label
-            className="form-input-label"
-            htmlFor="authorizer-reset-password"
-          >
-            <span>* </span>Password
-          </label>
-          <input
-            name="password"
-            id="authorizer-reset-password"
-            className={`form-input-field ${
-              errorData.password ? 'input-error-content' : ''
-            }`}
-            placeholder="********"
-            type="password"
-            value={formData.password || ''}
-            onChange={(e) => onInputChange('password', e.target.value)}
-          />
-          {errorData.password && (
-            <div className="form-input-error">
-              {errorData.password}
-            </div>
-          )}
-        </div>
-        <div className="styled-form-group">
-          <label
-            className="form-input-label"
-            htmlFor="authorizer-reset-confirm-password"
-          >
-            <span>* </span>Confirm Password
-          </label>
-          <input
-            name="confirmPassword"
-            id="authorizer-reset-confirm-password"
-            className={`form-input-field ${
-              errorData.confirmPassword ? 'input-error-content' : ''
-            }`}
-            placeholder="********"
-            type="password"
-            value={formData.confirmPassword || ''}
-            onChange={(e) => onInputChange('confirmPassword', e.target.value)}
-          />
-          {errorData.confirmPassword && (
-            <div className="form-input-error">
-              {errorData.confirmPassword}
-            </div>
-          )}
-        </div>
+        <PasswordInput
+          id="authorizer-reset-password"
+          name="password"
+          label="Password"
+          autoComplete="new-password"
+          value={formData.password || ''}
+          onChange={(value) => onInputChange('password', value)}
+          error={errorData.password}
+        />
+        <PasswordInput
+          id="authorizer-reset-confirm-password"
+          name="confirmPassword"
+          label="Confirm Password"
+          autoComplete="new-password"
+          value={formData.confirmPassword || ''}
+          onChange={(value) => onInputChange('confirmPassword', value)}
+          error={errorData.confirmPassword}
+        />
         {config.is_strong_password_enabled && (
           <>
             <PasswordStrengthIndicator
