@@ -1,11 +1,15 @@
 import { FC, useEffect, useState } from 'react';
-import { VerifyOTPRequest, isWebauthnSupported } from '@authorizerdev/authorizer-js';
+import {
+  VerifyOTPRequest,
+  isWebauthnSupported,
+} from '@authorizerdev/authorizer-js';
 import '../styles/default.css';
 
 import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { Message } from './Message';
+import { BackLink } from './BackLink';
 import { TotpDataType } from '../types';
 import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
 import { AuthorizerMfaLocked } from './AuthorizerMfaLocked';
@@ -34,6 +38,10 @@ export const AuthorizerVerifyOtp: FC<{
   is_totp?: boolean;
   offerWebauthnVerify?: boolean;
   hasCodeFactor?: boolean;
+  // When present, a "Back" link lets the user leave this challenge (e.g.
+  // return to the login screen) instead of being stuck once a factor is
+  // being verified.
+  onBack?: () => void;
 }> = ({
   setView,
   onLogin,
@@ -43,6 +51,7 @@ export const AuthorizerVerifyOtp: FC<{
   is_totp,
   offerWebauthnVerify,
   hasCodeFactor,
+  onBack,
 }) => {
   const [error, setError] = useState(``);
   const [successMessage, setSuccessMessage] = useState(``);
@@ -57,13 +66,17 @@ export const AuthorizerVerifyOtp: FC<{
     otp: null,
   });
   const { authorizerRef, config, setAuthData } = useAuthorizer();
-  useEffect(() => {
-    if (!email && !phone_number) {
-      setError(`Email or Phone Number is required`);
-    }
-  }, []);
+  // No email/phone_number is a legitimate state here, not an error: the
+  // OAuth-return and passkey-primary-login MFA continuations resolve the
+  // pending user from the MFA session cookie alone (see verify_otp.go's
+  // sessionResolved path) - the frontend never learns their email/phone in
+  // those flows.
 
   const [webauthnError, setWebauthnError] = useState(``);
+  // Distinct from webauthnError: the passkey ceremony itself succeeded, this
+  // just tells the user a second factor is still needed - showing that as a
+  // red error would read as "your passkey failed," which it didn't.
+  const [webauthnNotice, setWebauthnNotice] = useState(``);
   const [webauthnLoading, setWebauthnLoading] = useState(false);
   const [webauthnLocked, setWebauthnLocked] = useState(false);
   const passkeySupported = isWebauthnSupported();
@@ -76,6 +89,7 @@ export const AuthorizerVerifyOtp: FC<{
 
   const onVerifyWithPasskey = async () => {
     setWebauthnError(``);
+    setWebauthnNotice(``);
     try {
       setWebauthnLoading(true);
       const { data: res, errors } = await authorizerRef.loginWithPasskey(email);
@@ -108,8 +122,8 @@ export const AuthorizerVerifyOtp: FC<{
         return;
       }
       if (step.kind === 'verify') {
-        setWebauthnError(
-          `Additional verification is still required after passkey. Please use the code form below instead.`,
+        setWebauthnNotice(
+          `Your passkey was verified. Enter the code below to finish signing in.`
         );
         return;
       }
@@ -162,7 +176,7 @@ export const AuthorizerVerifyOtp: FC<{
           // returns null for blank text) and the form goes silently dead.
           setError(
             errors[0]?.message ||
-              `Too many attempts. Please wait a while before trying again.`,
+              `Too many attempts. Please wait a while before trying again.`
           );
           return;
         }
@@ -293,6 +307,7 @@ export const AuthorizerVerifyOtp: FC<{
 
   return (
     <>
+      {onBack && <BackLink onClick={onBack} />}
       {successMessage && (
         <Message
           type={MessageType.Success}
@@ -314,11 +329,16 @@ export const AuthorizerVerifyOtp: FC<{
           onClose={() => setWebauthnError(``)}
         />
       )}
+      {webauthnNotice && (
+        <Message
+          type={MessageType.Info}
+          text={webauthnNotice}
+          onClose={() => setWebauthnNotice(``)}
+        />
+      )}
       {offerWebauthnVerify && passkeySupported && (
         <>
-          <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-            Verify with your passkey
-          </p>
+          <p style={{ margin: '10px 0px' }}>Verify with your passkey</p>
           <StyledButton
             type="button"
             appearance={ButtonAppearance.Default}
@@ -334,7 +354,9 @@ export const AuthorizerVerifyOtp: FC<{
               }}
             >
               <IconPasskey />
-              {webauthnLoading ? `Waiting for passkey ...` : `Verify with a passkey`}
+              {webauthnLoading
+                ? `Waiting for passkey ...`
+                : `Verify with a passkey`}
             </span>
           </StyledButton>
           <br />
@@ -352,17 +374,19 @@ export const AuthorizerVerifyOtp: FC<{
       {showCodeForm && (
         <>
           {offerWebauthnVerify && passkeySupported && (
-            <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-              Or enter a code instead
-            </p>
+            <p style={{ margin: '10px 0px' }}>Or enter a code instead</p>
           )}
-          <p style={{ textAlign: 'center', margin: '10px 0px' }}>
-            Please enter the OTP sent to your email or phone number or authenticator
+          <p style={{ margin: '10px 0px' }}>
+            Please enter the OTP sent to your email or phone number or
+            authenticator
           </p>
           <br />
           <form onSubmit={onSubmit} name="authorizer-mfa-otp-form">
             <div className="styled-form-group">
-              <label className="form-input-label" htmlFor="authorizer-verify-otp">
+              <label
+                className="form-input-label"
+                htmlFor="authorizer-verify-otp"
+              >
                 <span>* </span>OTP (One Time Password)
               </label>
               <input
@@ -394,7 +418,9 @@ export const AuthorizerVerifyOtp: FC<{
             <br />
             <StyledButton
               type="submit"
-              disabled={loading || !formData.otp || !!errorData.otp || isLockedOut}
+              disabled={
+                loading || !formData.otp || !!errorData.otp || isLockedOut
+              }
               appearance={ButtonAppearance.Primary}
             >
               {loading ? `Processing ...` : `Submit`}

@@ -81,6 +81,31 @@
   color: red;
   border-color: var(--authorizer-danger-color);
 }
+.password-input-wrapper {
+  position: relative;
+}
+.password-input-wrapper .form-input-field {
+  padding-right: 40px;
+}
+.password-toggle-button {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(calc(-50% + 2.5px));
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--authorizer-text-color);
+  opacity: 0.6;
+}
+.password-toggle-button:hover {
+  opacity: 1;
+}
 .styled-link {
   color: var(--authorizer-primary-color);
   cursor: pointer;
@@ -176,6 +201,22 @@
 .mfa-method-title {
   margin: 0;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mfa-method-enabled {
+  border-color: var(--authorizer-success-color);
+}
+.mfa-method-badge {
+  font-size: var(--authorizer-fonts-tiny-text);
+  font-weight: 600;
+  color: var(--authorizer-success-color);
+  border: 1px solid var(--authorizer-success-color);
+  border-radius: var(--authorizer-radius-card);
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 .mfa-method-desc {
   margin: 2px 0 0;
@@ -264,6 +305,10 @@
 .mfa-icon-button:focus-visible {
   outline: 2px solid var(--authorizer-primary-color);
   outline-offset: 2px;
+}
+.mfa-back-link {
+  margin-bottom: 14px;
+  min-height: 36px;
 }
 
 /* ---------- recovery codes ---------- */

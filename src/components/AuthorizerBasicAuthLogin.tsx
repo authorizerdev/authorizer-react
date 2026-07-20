@@ -8,6 +8,7 @@ import { ButtonAppearance, MessageType, Views } from '../constants';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { StyledButton, StyledFooter, StyledLink } from '../styledComponents';
 import { Message } from './Message';
+import { PasswordInput } from './PasswordInput';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { OtpDataType } from '../types';
 import { AuthorizerMFASetup } from './AuthorizerMFASetup';
@@ -26,6 +27,7 @@ type MfaOfferData = {
   email: string;
   phone_number: string;
   totpEnrollment: TotpEnrollment | null;
+  passkey: boolean;
   emailOtp: boolean;
   smsOtp: boolean;
   state?: string;
@@ -36,6 +38,7 @@ const initMfaOfferData: MfaOfferData = {
   email: '',
   phone_number: '',
   totpEnrollment: null,
+  passkey: false,
   emailOtp: false,
   smsOtp: false,
 };
@@ -45,12 +48,20 @@ interface InputDataType {
   password: string | null;
 }
 
+export type BasicAuthLoginStep = 'form' | 'mfa-setup' | 'otp-verify' | 'locked';
+
 export const AuthorizerBasicAuthLogin: FC<{
   setView?: (v: Views) => void;
   onLogin?: (data: AuthToken | void) => void;
   urlProps?: Record<string, any>;
   roles?: string[];
-}> = ({ setView, onLogin, urlProps, roles }) => {
+  // Fired whenever this component switches between its own screens. See
+  // AuthorizerSignup's identical prop for why hosts need this: a successful
+  // login that still needs MFA setup/verification takes over the whole
+  // login surface - other login options (social buttons, passkey button)
+  // don't belong stacked on top of those screens.
+  onStepChange?: (step: BasicAuthLoginStep) => void;
+}> = ({ setView, onLogin, urlProps, roles, onStepChange }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [otpData, setOtpData] = useState<OtpDataType>({ ...initOtpData });
@@ -67,6 +78,19 @@ export const AuthorizerBasicAuthLogin: FC<{
     password: null,
   });
   const { setAuthData, config, authorizerRef } = useAuthorizer();
+
+  useEffect(() => {
+    if (!onStepChange) return;
+    if (locked) {
+      onStepChange('locked');
+    } else if (mfaOfferData.is_screen_visible) {
+      onStepChange('mfa-setup');
+    } else if (otpData.is_screen_visible) {
+      onStepChange('otp-verify');
+    } else {
+      onStepChange('form');
+    }
+  }, [locked, mfaOfferData.is_screen_visible, otpData.is_screen_visible]);
 
   const onInputChange = async (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -124,6 +148,7 @@ export const AuthorizerBasicAuthLogin: FC<{
           email: data.email || ``,
           phone_number: data.phone_number || ``,
           totpEnrollment: step.totpEnrollment,
+          passkey: step.passkey,
           emailOtp: step.emailOtp,
           smsOtp: step.smsOtp,
           state: urlProps?.state,
@@ -204,12 +229,13 @@ export const AuthorizerBasicAuthLogin: FC<{
       <AuthorizerMFASetup
         availableMfaMethods={{
           totp: !!mfaOfferData.totpEnrollment || config.is_totp_mfa_enabled,
-          passkey: false,
+          passkey: mfaOfferData.passkey,
           emailOtp: mfaOfferData.emailOtp,
           smsOtp: mfaOfferData.smsOtp,
         }}
         totpEnrollment={mfaOfferData.totpEnrollment || undefined}
         heading="Set up multi-factor authentication"
+        onBack={() => setMfaOfferData({ ...initMfaOfferData })}
         loginContext={{
           email: mfaOfferData.email,
           phone_number: mfaOfferData.phone_number,
@@ -241,6 +267,7 @@ export const AuthorizerBasicAuthLogin: FC<{
           is_totp: otpData.is_totp || false,
           offerWebauthnVerify: otpData.offer_webauthn_verify || false,
           hasCodeFactor: otpData.has_code_factor || false,
+          onBack: () => setOtpData({ ...initOtpData }),
         }}
         urlProps={urlProps}
       />
@@ -282,28 +309,15 @@ export const AuthorizerBasicAuthLogin: FC<{
               </div>
             )}
           </div>
-          <div className="styled-form-group">
-            <label
-              className="form-input-label"
-              htmlFor="authorizer-login-password"
-            >
-              <span>* </span>Password
-            </label>
-            <input
-              name="password"
-              id="authorizer-login-password"
-              className={`form-input-field ${
-                errorData.password ? 'input-error-content' : ''
-              }`}
-              placeholder="********"
-              type="password"
-              value={formData.password || ''}
-              onChange={e => onInputChange('password', e.target.value)}
-            />
-            {errorData.password && (
-              <div className="form-input-error">{errorData.password}</div>
-            )}
-          </div>
+          <PasswordInput
+            id="authorizer-login-password"
+            name="password"
+            label="Password"
+            autoComplete="current-password"
+            value={formData.password || ''}
+            onChange={(value) => onInputChange('password', value)}
+            error={errorData.password}
+          />
           <br />
           <StyledButton
             type="submit"

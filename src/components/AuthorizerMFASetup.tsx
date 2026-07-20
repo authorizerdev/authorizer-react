@@ -11,22 +11,12 @@ import {
 } from '../icons/mfa';
 import { StyledButton } from '../styledComponents';
 import { Message } from './Message';
+import { BackLink } from './BackLink';
 import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
 import { AuthorizerPasskeyRegister } from './AuthorizerPasskeyRegister';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { TotpEnrollment } from '../utils/mfaTriage';
-
-const BackLink: FC<{ onClick: () => void }> = ({ onClick }) => (
-  <button
-    type="button"
-    className="mfa-icon-button"
-    onClick={onClick}
-    style={{ border: 'none', background: 'none', padding: '4px 0' }}
-  >
-    &larr; All methods
-  </button>
-);
 
 export type MfaMethod = 'totp' | 'passkey' | 'email_otp' | 'sms_otp';
 
@@ -76,12 +66,24 @@ export const AuthorizerMFASetup: FC<{
     state?: string;
     onComplete: (response: AuthTokenLike) => void;
   };
+  // When present, a "Back" link is shown on the top-level method list so the
+  // host can let the user leave MFA setup entirely (distinct from BackLink's
+  // existing "All methods" links, which only return from a method's
+  // sub-flow to this same list).
+  onBack?: () => void;
+  // Whether the signed-in user already has at least one passkey registered
+  // (the host knows this via webauthnCredentials - there's no per-user
+  // enrolment signal for TOTP/email-OTP/SMS-OTP available to the client, so
+  // only passkey can be accurately highlighted as already set up).
+  passkeyRegistered?: boolean;
 }> = ({
   availableMfaMethods,
   totpEnrollment,
   onSetupMethod,
   heading = 'Add a second step to sign in',
   loginContext,
+  onBack,
+  passkeyRegistered,
 }) => {
   const [selected, setSelected] = useState<MfaMethod | null>(null);
   const [notice, setNotice] = useState('');
@@ -110,6 +112,7 @@ export const AuthorizerMFASetup: FC<{
     description: string;
     disabled?: boolean;
     disabledReason?: string;
+    enabled?: boolean;
   }[] = [
     {
       key: 'totp',
@@ -120,12 +123,13 @@ export const AuthorizerMFASetup: FC<{
     },
     {
       key: 'passkey',
-      available: !!availableMfaMethods.passkey && !loginContext,
+      available: !!availableMfaMethods.passkey,
       icon: <IconPasskey />,
       title: 'Passkey',
       description: 'Sign in with your fingerprint, face, or device PIN.',
       disabled: !passkeySupported,
       disabledReason: 'Not supported on this browser or device.',
+      enabled: !!passkeyRegistered,
     },
     {
       key: 'email_otp',
@@ -264,12 +268,11 @@ export const AuthorizerMFASetup: FC<{
   if (selected === 'totp' && effectiveTotpEnrollment) {
     return (
       <>
-        <BackLink onClick={backToList} />
+        <BackLink onClick={backToList} label="All methods" />
         <AuthorizerTOTPScanner
           {...effectiveTotpEnrollment}
           email={loginContext?.email}
           phone_number={loginContext?.phone_number}
-          setView={backToList}
           onLogin={(data) => {
             if (loginContext && data && (data as AuthTokenLike).access_token) {
               loginContext.onComplete(data as AuthTokenLike);
@@ -285,7 +288,7 @@ export const AuthorizerMFASetup: FC<{
   if (otpMethodPending) {
     return (
       <>
-        <BackLink onClick={() => setOtpMethodPending(null)} />
+        <BackLink onClick={() => setOtpMethodPending(null)} label="All methods" />
         <AuthorizerVerifyOtp
           email={loginContext?.email}
           phone_number={loginContext?.phone_number}
@@ -306,15 +309,36 @@ export const AuthorizerMFASetup: FC<{
   if (selected === 'passkey') {
     return (
       <>
-        <BackLink onClick={backToList} />
+        <BackLink onClick={backToList} label="All methods" />
         <p style={{ margin: '10px 0px', fontWeight: 'bold' }}>Add a passkey</p>
-        <AuthorizerPasskeyRegister onSuccess={backToList} showCredentials />
+        <AuthorizerPasskeyRegister
+          // showCredentials calls webauthn_credentials, which requires a
+          // bearer token - never available yet during a login-time offer.
+          showCredentials={!loginContext}
+          mfaSetup={
+            loginContext
+              ? {
+                  email: loginContext.email,
+                  phoneNumber: loginContext.phone_number,
+                  state: loginContext.state,
+                }
+              : undefined
+          }
+          onSuccess={(data) => {
+            if (loginContext && data && (data as AuthTokenLike).access_token) {
+              loginContext.onComplete(data as AuthTokenLike);
+              return;
+            }
+            backToList();
+          }}
+        />
       </>
     );
   }
 
   return (
     <>
+      {onBack && <BackLink onClick={onBack} />}
       <p style={{ margin: '10px 0px', fontWeight: 'bold' }}>{heading}</p>
       {notice && (
         <Message
@@ -339,10 +363,18 @@ export const AuthorizerMFASetup: FC<{
       ) : (
         <ul className="mfa-list" aria-label="Available multi-factor methods">
           {visibleMethods.map((m) => (
-            <li key={m.key} className="mfa-method">
+            <li
+              key={m.key}
+              className={`mfa-method${m.enabled ? ' mfa-method-enabled' : ''}`}
+            >
               <span className="mfa-method-icon">{m.icon}</span>
               <div className="mfa-method-body">
-                <p className="mfa-method-title">{m.title}</p>
+                <p className="mfa-method-title">
+                  {m.title}
+                  {m.enabled && (
+                    <span className="mfa-method-badge">Enabled</span>
+                  )}
+                </p>
                 <p className="mfa-method-desc">
                   {m.disabled && m.disabledReason
                     ? m.disabledReason
@@ -357,7 +389,7 @@ export const AuthorizerMFASetup: FC<{
                   onClick={() => handleSetup(m.key)}
                   style={{ width: 'auto' }}
                 >
-                  Set up
+                  {m.enabled ? 'Manage' : 'Set up'}
                 </StyledButton>
               </div>
             </li>

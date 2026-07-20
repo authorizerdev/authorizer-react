@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { isWebauthnSupported } from '@authorizerdev/authorizer-js';
 import { Github } from '../icons/github';
 import { Google } from '../icons/google';
 import { Facebook } from '../icons/facebook';
@@ -28,6 +29,10 @@ export const AuthorizerSocialLogin: FC<{
     config.is_microsoft_login_enabled ||
     config.is_twitch_login_enabled ||
     config.is_roblox_login_enabled;
+  // AuthorizerPasskeyLogin always renders immediately after this component
+  // (AuthorizerRoot, web/app's login.tsx) and owns its own "OR" separator
+  // for whatever follows it - suppress this one so the two don't stack.
+  const willShowPasskey = isWebauthnSupported() && !config.is_mfa_enforced;
 
   const data: {
     scope?: string;
@@ -178,6 +183,7 @@ export const AuthorizerSocialLogin: FC<{
         </>
       )}
       {hasSocialLogin &&
+        !willShowPasskey &&
         (config.is_basic_authentication_enabled ||
           config.is_mobile_basic_authentication_enabled ||
           config.is_magic_link_login_enabled) && (

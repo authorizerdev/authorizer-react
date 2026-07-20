@@ -12,6 +12,7 @@ import { AuthorizerSocialLogin } from './AuthorizerSocialLogin';
 import { AuthorizerPasskeyLogin } from './AuthorizerPasskeyLogin';
 import { AuthorizerMagicLinkLogin } from './AuthorizerMagicLinkLogin';
 import { AuthorizerMFASetup } from './AuthorizerMFASetup';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { Message } from './Message';
 import { createRandomString } from '../utils/common';
 import { hasWindow } from '../utils/window';
@@ -24,6 +25,10 @@ export const AuthorizerRoot: FC<{
   onPasswordReset?: () => void;
   roles?: string[];
 	signupFieldsOverrides?: FormFieldsOverrides
+  // When present, a "Back" link is shown on the MFA setup/verify screens
+  // (URL-param-driven, see mfaRedirect below) so the host can send the user
+  // somewhere sane - e.g. back to the login URL with the mfa params cleared.
+  onCancelMfa?: () => void;
 }> = ({
   onLogin,
   onSignup,
@@ -31,9 +36,24 @@ export const AuthorizerRoot: FC<{
   onForgotPassword,
   onPasswordReset,
   roles,
-	signupFieldsOverrides
+	signupFieldsOverrides,
+  onCancelMfa,
 }) => {
   const [view, setView] = useState(Views.Login);
+  // AuthorizerPasskeyLogin and AuthorizerBasicAuthLogin each take over the
+  // whole login surface once their own sign-in needs a second factor (their
+  // own MFA setup/verify/locked screens) - every other login option, and the
+  // login attempt not currently in flight, don't belong stacked on top of
+  // those screens.
+  const [passkeyStep, setPasskeyStep] = useState<
+    'button' | 'mfa-setup' | 'mfa-verify' | 'locked'
+  >('button');
+  const [basicAuthStep, setBasicAuthStep] = useState<
+    'form' | 'mfa-setup' | 'otp-verify' | 'locked'
+  >('form');
+  const passkeyIdle = passkeyStep === 'button';
+  const basicAuthIdle = basicAuthStep === 'form';
+  const showChrome = passkeyIdle && basicAuthIdle;
   const { config, configLoadError } = useAuthorizer();
   const searchParams = new URLSearchParams(
     hasWindow() ? window.location.search : ``
@@ -71,15 +91,37 @@ export const AuthorizerRoot: FC<{
           text={`Unable to reach the Authorizer server (${configLoadError}). Login methods that depend on it - such as basic auth, signup, and social login - won't appear until it's reachable.`}
         />
       )}
-      {mfaRedirect && (
+      {mfaRedirect && mfaRedirect.mfaGate === 'verify' && (
+        // An already-configured factor must be challenged, not offered setup
+        // again - no email/phone_number in hand (OAuth/magic-link return),
+        // but verify_otp resolves the pending user from the MFA session
+        // cookie alone, same as the passkey-primary-login continuation.
+        <AuthorizerVerifyOtp
+          is_totp={mfaRedirect.mfaMethods.includes('totp')}
+          offerWebauthnVerify={mfaRedirect.mfaMethods.includes('webauthn')}
+          hasCodeFactor={
+            mfaRedirect.mfaMethods.includes('totp') ||
+            mfaRedirect.mfaMethods.includes('email_otp') ||
+            mfaRedirect.mfaMethods.includes('sms_otp')
+          }
+          onBack={onCancelMfa}
+          onLogin={(data: any) => {
+            if (onLogin) {
+              onLogin(data);
+            }
+          }}
+        />
+      )}
+      {mfaRedirect && mfaRedirect.mfaGate === 'offer' && (
         <AuthorizerMFASetup
           availableMfaMethods={{
             totp: mfaRedirect.mfaMethods.includes('totp'),
-            passkey: false,
+            passkey: mfaRedirect.mfaMethods.includes('webauthn'),
             emailOtp: mfaRedirect.mfaMethods.includes('email_otp'),
             smsOtp: mfaRedirect.mfaMethods.includes('sms_otp'),
           }}
           heading="Set up multi-factor authentication"
+          onBack={onCancelMfa}
           loginContext={{
             onComplete: (data: any) => {
               if (onLogin) {
@@ -89,14 +131,15 @@ export const AuthorizerRoot: FC<{
           }}
         />
       )}
-      {!mfaRedirect && view === Views.Login && (
+      {!mfaRedirect && view === Views.Login && showChrome && (
         <AuthorizerSocialLogin urlProps={urlProps} roles={roles} />
       )}
-      {!mfaRedirect && view === Views.Login && (
-        <AuthorizerPasskeyLogin onLogin={onLogin} />
+      {!mfaRedirect && view === Views.Login && basicAuthIdle && (
+        <AuthorizerPasskeyLogin onLogin={onLogin} onStepChange={setPasskeyStep} />
       )}
       {!mfaRedirect &&
         view === Views.Login &&
+        passkeyIdle &&
         (config.is_basic_authentication_enabled ||
           config.is_mobile_basic_authentication_enabled) &&
         !config.is_magic_link_login_enabled && (
@@ -105,6 +148,7 @@ export const AuthorizerRoot: FC<{
             onLogin={onLogin}
             urlProps={urlProps}
             roles={roles}
+            onStepChange={setBasicAuthStep}
           />
         )}
 
@@ -122,13 +166,16 @@ export const AuthorizerRoot: FC<{
           />
         )}
 
-      {!mfaRedirect && view === Views.Login && config.is_magic_link_login_enabled && (
-        <AuthorizerMagicLinkLogin
-          onMagicLinkLogin={onMagicLinkLogin}
-          urlProps={urlProps}
-          roles={roles}
-        />
-      )}
+      {!mfaRedirect &&
+        view === Views.Login &&
+        showChrome &&
+        config.is_magic_link_login_enabled && (
+          <AuthorizerMagicLinkLogin
+            onMagicLinkLogin={onMagicLinkLogin}
+            urlProps={urlProps}
+            roles={roles}
+          />
+        )}
 
       {view === Views.ForgotPassword && (
         <AuthorizerForgotPassword

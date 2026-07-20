@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { AuthToken, isWebauthnSupported } from '@authorizerdev/authorizer-js';
 
 import '../styles/default.css';
@@ -8,6 +8,7 @@ import { StyledButton, StyledSeparator } from '../styledComponents';
 import { Message } from './Message';
 import { AuthorizerMFASetup } from './AuthorizerMFASetup';
 import { AuthorizerMfaLocked } from './AuthorizerMfaLocked';
+import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { resolveAuthStep, AuthStep } from '../utils/mfaTriage';
 
 // AuthorizerPasskeyLogin offers a full passwordless, usernameless "Sign in
@@ -45,11 +46,30 @@ const PasskeyIcon: FC = () => (
 
 export const AuthorizerPasskeyLogin: FC<{
   onLogin?: (data: AuthToken | void) => void;
-}> = ({ onLogin }) => {
+  // Fired whenever this component switches between its own button and its
+  // internal MFA offer/verify/locked screens. A passkey-primary login that
+  // needs a second factor takes over the whole login surface - hosts
+  // rendering other login options (social buttons, password form) alongside
+  // this component need this to hide them while an MFA screen is showing.
+  onStepChange?: (step: 'button' | 'mfa-setup' | 'mfa-verify' | 'locked') => void;
+}> = ({ onLogin, onStepChange }) => {
   const [error, setError] = useState(``);
   const [loading, setLoading] = useState(false);
   const [mfaStep, setMfaStep] = useState<AuthStep | null>(null);
   const { setAuthData, config, authorizerRef } = useAuthorizer();
+
+  useEffect(() => {
+    if (!onStepChange) return;
+    if (mfaStep?.kind === 'locked') {
+      onStepChange('locked');
+    } else if (mfaStep?.kind === 'offer') {
+      onStepChange('mfa-setup');
+    } else if (mfaStep?.kind === 'verify') {
+      onStepChange('mfa-verify');
+    } else {
+      onStepChange('button');
+    }
+  }, [mfaStep?.kind]);
 
   // When the org enforces MFA, passkey must never be offered as a
   // standalone primary-login path - it would let a user skip the org's
@@ -68,22 +88,17 @@ export const AuthorizerPasskeyLogin: FC<{
   // exact set of conditions AuthorizerRoot uses to decide whether
   // AuthorizerSocialLogin, AuthorizerBasicAuthLogin, or
   // AuthorizerMagicLinkLogin render anything on the login view.
-  const hasSocialLogin =
-    config.is_google_login_enabled ||
-    config.is_github_login_enabled ||
-    config.is_facebook_login_enabled ||
-    config.is_linkedin_login_enabled ||
-    config.is_apple_login_enabled ||
-    config.is_twitter_login_enabled ||
-    config.is_microsoft_login_enabled ||
-    config.is_twitch_login_enabled ||
-    config.is_roblox_login_enabled;
+  // Deliberately excludes hasSocialLogin: social login always renders above
+  // this button in every known composition (AuthorizerRoot, web/app's
+  // login.tsx), so it's never "below" the passkey button - counting it here
+  // produced a second, redundant "OR" stacked under the first one AND a
+  // dangling "OR" with nothing beneath when social was the only other method.
   const hasBasicAuthLogin =
     (config.is_basic_authentication_enabled ||
       config.is_mobile_basic_authentication_enabled) &&
     !config.is_magic_link_login_enabled;
   const hasAnotherLoginMethod =
-    hasSocialLogin || hasBasicAuthLogin || config.is_magic_link_login_enabled;
+    hasBasicAuthLogin || config.is_magic_link_login_enabled;
 
   // A cancelled ceremony or an account with no passkey surfaces as
   // NotAllowedError/AbortError (the browser deliberately does not distinguish
@@ -142,12 +157,13 @@ export const AuthorizerPasskeyLogin: FC<{
       <AuthorizerMFASetup
         availableMfaMethods={{
           totp: !!mfaStep.totpEnrollment || config.is_totp_mfa_enabled,
-          passkey: false,
+          passkey: mfaStep.passkey,
           emailOtp: mfaStep.emailOtp,
           smsOtp: mfaStep.smsOtp,
         }}
         totpEnrollment={mfaStep.totpEnrollment || undefined}
         heading="Set up multi-factor authentication"
+        onBack={() => setMfaStep(null)}
         loginContext={{
           onComplete: (data) => {
             setAuthData({
@@ -166,16 +182,27 @@ export const AuthorizerPasskeyLogin: FC<{
   }
   if (mfaStep?.kind === 'verify') {
     // A passkey-primary login that still needs a second factor has no
-    // email/phone_number in hand (usernameless login) - the existing
-    // AuthorizerVerifyOtp component requires one of those to identify the
-    // pending user via the MFA session cookie, so TOTP/email/SMS verify
-    // can't be completed from here. This is a real, narrower gap than the
-    // password-login path (which always has an email/phone from the form) -
-    // report it plainly rather than rendering a broken form.
+    // email/phone_number in hand (usernameless login). AuthorizerVerifyOtp
+    // still works here: verify_otp/resend_otp resolve the pending user from
+    // the MFA session cookie alone when no identifier is supplied (the same
+    // session-only path the OAuth-return continuation uses).
     return (
-      <Message
-        type={MessageType.Error}
-        text="Additional verification is required. Please sign in with your password instead to continue."
+      <AuthorizerVerifyOtp
+        is_totp={mfaStep.totp}
+        offerWebauthnVerify={mfaStep.webauthn}
+        hasCodeFactor={mfaStep.totp || mfaStep.email || mfaStep.mobile}
+        onBack={() => setMfaStep(null)}
+        onLogin={(data) => {
+          setAuthData({
+            user: data?.user || null,
+            token: data,
+            config,
+            loading: false,
+          });
+          if (onLogin) {
+            onLogin(data);
+          }
+        }}
       />
     );
   }
