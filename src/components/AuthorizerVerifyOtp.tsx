@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import {
   VerifyOTPRequest,
   isWebauthnSupported,
@@ -15,6 +15,7 @@ import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
 import { AuthorizerMfaLocked } from './AuthorizerMfaLocked';
 import { IconPasskey } from '../icons/mfa';
 import { resolveAuthStep } from '../utils/mfaTriage';
+import { hasWindow } from '../utils/window';
 
 interface InputDataType {
   otp: string | null;
@@ -38,6 +39,10 @@ export const AuthorizerVerifyOtp: FC<{
   is_totp?: boolean;
   offerWebauthnVerify?: boolean;
   hasCodeFactor?: boolean;
+  // True specifically when the pending code factor is SMS-delivered (as
+  // opposed to email OTP or TOTP) - gates the WebOTP auto-fill call, which
+  // only makes sense for an actual incoming SMS.
+  hasSmsOtp?: boolean;
   // When present, a "Back" link lets the user leave this challenge (e.g.
   // return to the login screen) instead of being stuck once a factor is
   // being verified.
@@ -51,6 +56,7 @@ export const AuthorizerVerifyOtp: FC<{
   is_totp,
   offerWebauthnVerify,
   hasCodeFactor,
+  hasSmsOtp,
   onBack,
 }) => {
   const [error, setError] = useState(``);
@@ -151,8 +157,64 @@ export const AuthorizerVerifyOtp: FC<{
     setFormData({ ...formData, [field]: value });
   };
 
+  // WebOTP: races navigator.credentials.get() against the user manually
+  // typing/pasting the SMS code, so the code auto-fills where the platform
+  // supports it. autoComplete="one-time-code" on the input below is only a
+  // declarative hint - browsers require this explicit call to actually
+  // fill the field. Scoped to SMS-OTP alone (not TOTP/email-OTP), since
+  // those codes never arrive by SMS. Feature-detected via
+  // window.OTPCredential, matching what the autocomplete hint already
+  // implies; unsupported platforms simply never resolve/reject here.
+  const otpAbortControllerRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    if (
+      !hasCodeFactor ||
+      is_totp ||
+      !hasSmsOtp ||
+      totpData.is_screen_visible ||
+      webauthnLocked ||
+      !hasWindow() ||
+      !('OTPCredential' in window)
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+    otpAbortControllerRef.current = controller;
+
+    (
+      navigator.credentials.get({
+        otp: { transport: ['sms'] },
+        signal: controller.signal,
+      } as any) as Promise<{ code?: string } | null>
+    )
+      .then((otpCredential) => {
+        if (otpCredential?.code) {
+          setFormData((prev) => ({ ...prev, otp: otpCredential.code as string }));
+        }
+      })
+      .catch(() => {
+        // Aborted on unmount/submit, or the platform declined - the user
+        // can still type/paste the code manually, so this isn't an error.
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [
+    hasCodeFactor,
+    is_totp,
+    hasSmsOtp,
+    totpData.is_screen_visible,
+    webauthnLocked,
+  ]);
+
   const onSubmit = async (e: any) => {
     e.preventDefault();
+    // Stop racing WebOTP once the user (or an auto-filled value) submits -
+    // otherwise a late resolution could overwrite formData.otp after the
+    // fact on a re-shown form (e.g. a failed attempt).
+    otpAbortControllerRef.current?.abort();
     setSuccessMessage(``);
     try {
       setLoading(true);

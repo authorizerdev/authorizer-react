@@ -95,6 +95,10 @@ export type OtpDataType = {
   // a verified email/SMS OTP factor (is_totp false) alongside webauthn, and
   // that code path must stay reachable even when a passkey is also offered.
   has_code_factor?: boolean;
+  // True specifically for a verified SMS-OTP factor (as opposed to email
+  // OTP) - drives AuthorizerVerifyOtp's WebOTP (navigator.credentials.get)
+  // auto-fill, which only makes sense for an SMS-delivered code.
+  has_sms_otp?: boolean;
 };
 
 export type TotpDataType = {

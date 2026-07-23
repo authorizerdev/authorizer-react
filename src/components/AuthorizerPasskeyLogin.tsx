@@ -191,6 +191,7 @@ export const AuthorizerPasskeyLogin: FC<{
         is_totp={mfaStep.totp}
         offerWebauthnVerify={mfaStep.webauthn}
         hasCodeFactor={mfaStep.totp || mfaStep.email || mfaStep.mobile}
+        hasSmsOtp={mfaStep.mobile}
         onBack={() => setMfaStep(null)}
         onLogin={(data) => {
           setAuthData({
