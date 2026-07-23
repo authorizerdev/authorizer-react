@@ -13,6 +13,7 @@ import { Twitter } from '../icons/twitter';
 import { Microsoft } from '../icons/microsoft';
 import { Twitch } from '../icons/twitch';
 import { Roblox } from '../icons/roblox';
+import { Discord } from '../icons/discord';
 
 export const AuthorizerSocialLogin: FC<{
   urlProps?: Record<string, any>;
@@ -28,7 +29,8 @@ export const AuthorizerSocialLogin: FC<{
     config.is_twitter_login_enabled ||
     config.is_microsoft_login_enabled ||
     config.is_twitch_login_enabled ||
-    config.is_roblox_login_enabled;
+    config.is_roblox_login_enabled ||
+    config.is_discord_login_enabled;
   // AuthorizerPasskeyLogin always renders immediately after this component
   // (AuthorizerRoot, web/app's login.tsx) and owns its own "OR" separator
   // for whatever follows it - suppress this one so the two don't stack.
@@ -178,6 +180,20 @@ export const AuthorizerSocialLogin: FC<{
           >
             <Roblox />
             Continue with Roblox
+          </StyledButton>
+          <br />
+        </>
+      )}
+      {config.is_discord_login_enabled && (
+        <>
+          <StyledButton
+            appearance={ButtonAppearance.Default}
+            onClick={() => {
+              window.location.href = `${config.authorizerURL}/oauth_login/discord?${queryParams}`;
+            }}
+          >
+            <Discord />
+            Continue with Discord
           </StyledButton>
           <br />
         </>
