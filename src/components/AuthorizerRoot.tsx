@@ -104,6 +104,7 @@ export const AuthorizerRoot: FC<{
             mfaRedirect.mfaMethods.includes('email_otp') ||
             mfaRedirect.mfaMethods.includes('sms_otp')
           }
+          hasSmsOtp={mfaRedirect.mfaMethods.includes('sms_otp')}
           onBack={onCancelMfa}
           onLogin={(data: any) => {
             if (onLogin) {

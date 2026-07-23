@@ -216,6 +216,7 @@ export const AuthorizerSignup: FC<{
           is_totp: step.totp,
           offer_webauthn_verify: step.webauthn,
           has_code_factor: step.totp || step.email || step.mobile,
+          has_sms_otp: step.mobile,
         });
         return;
       }
@@ -382,6 +383,7 @@ export const AuthorizerSignup: FC<{
             is_totp: otpData.is_totp || false,
             offerWebauthnVerify: otpData.offer_webauthn_verify || false,
             hasCodeFactor: otpData.has_code_factor || false,
+            hasSmsOtp: otpData.has_sms_otp || false,
             onBack: () => setOtpData({ ...initOtpData }),
           }}
           urlProps={urlProps}
