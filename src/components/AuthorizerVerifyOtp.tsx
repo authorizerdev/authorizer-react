@@ -99,16 +99,17 @@ export const AuthorizerVerifyOtp: FC<{
     try {
       setWebauthnLoading(true);
       const { data: res, errors } = await authorizerRef.loginWithPasskey(email);
-      if (errors && errors.length) {
-        if (!isUserDismissed(errors[0])) {
-          setWebauthnError(errors[0]?.message || ``);
-        }
+      if (errors && errors.length && isUserDismissed(errors[0])) {
         return;
       }
       // Route through resolveAuthStep rather than treating any truthy `res`
       // as success - webauthn_login_verify can return the same withheld
       // (null access_token) shape any other login endpoint can, the exact
-      // bug the MFA redesign fixed at every other call site.
+      // bug the MFA redesign fixed at every other call site. Also the only
+      // path that recognizes a locked-account error (isLockedError) instead
+      // of showing it as a generic dismissable message - a prior version of
+      // this function returned on any errors.length before ever reaching
+      // resolveAuthStep, making the 'locked' branch below unreachable.
       const step = resolveAuthStep(res, errors || []);
       if (step.kind === 'error') {
         setWebauthnError(step.message);
