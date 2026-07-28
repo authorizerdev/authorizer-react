@@ -347,7 +347,6 @@ export const AuthorizerSignup: FC<{
         }}
         totpEnrollment={mfaOfferData.totpEnrollment || undefined}
         heading="Set up multi-factor authentication"
-        onBack={() => setMfaOfferData({ ...initMfaOfferData })}
         loginContext={{
           email: mfaOfferData.email,
           phone_number: mfaOfferData.phone_number,
