@@ -9,7 +9,7 @@ import { AuthorizerMFASetup, useAuthorizer } from 'authorizer-react';
 // configured email/SMS provider) and this page reflects it automatically on
 // next load, with no code change here.
 const Settings: React.FC = () => {
-  const { config } = useAuthorizer();
+  const { config, user } = useAuthorizer();
 
   return (
     <div>
@@ -21,6 +21,9 @@ const Settings: React.FC = () => {
           emailOtp: config.is_email_otp_mfa_enabled,
           smsOtp: config.is_sms_otp_mfa_enabled,
         }}
+        // What this user already enrolled, so those tiles read
+        // "Enabled"/"Manage" instead of offering a fresh setup.
+        enrolledMethods={user?.enrolled_mfa_methods}
         heading="Add a second step to sign in"
       />
       <br />

@@ -36,6 +36,18 @@ export type AuthStep =
   | { kind: 'locked' }
   | { kind: 'error'; message: string };
 
+// normalizeEnrolledMethods maps the server's User.enrolled_mfa_methods
+// (["totp", "webauthn", "email_otp", "sms_otp"]) onto AuthorizerMFASetup's
+// tile keys. Only "webauthn" differs - the picker calls that tile "passkey".
+// Unknown values are kept as-is: they simply never match a tile.
+export function normalizeEnrolledMethods(
+  methods?: string[] | null,
+): Set<string> {
+  return new Set(
+    (methods || []).map((m) => (m === 'webauthn' ? 'passkey' : m)),
+  );
+}
+
 function isLockedError(errors: Types.AuthorizerSDKError[]): boolean {
   return errors.some(
     (e) =>
