@@ -16,7 +16,7 @@ import { AuthorizerTOTPScanner } from './AuthorizerTOTPScanner';
 import { AuthorizerPasskeyRegister } from './AuthorizerPasskeyRegister';
 import { AuthorizerVerifyOtp } from './AuthorizerVerifyOtp';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
-import { TotpEnrollment } from '../utils/mfaTriage';
+import { TotpEnrollment, normalizeEnrolledMethods } from '../utils/mfaTriage';
 
 export type MfaMethod = 'totp' | 'passkey' | 'email_otp' | 'sms_otp';
 
@@ -71,10 +71,14 @@ export const AuthorizerMFASetup: FC<{
   // existing "All methods" links, which only return from a method's
   // sub-flow to this same list).
   onBack?: () => void;
-  // Whether the signed-in user already has at least one passkey registered
-  // (the host knows this via webauthnCredentials - there's no per-user
-  // enrolment signal for TOTP/email-OTP/SMS-OTP available to the client, so
-  // only passkey can be accurately highlighted as already set up).
+  // The MFA factors this user has actually enrolled, straight from the
+  // server's User.enrolled_mfa_methods (["totp", "webauthn", "email_otp",
+  // "sms_otp"]) - authorizer-js fetches it as part of the user fragment, so
+  // hosts can pass `user.enrolled_mfa_methods` verbatim. Each matching tile
+  // renders as "Enabled" / "Manage" instead of "Set up".
+  enrolledMethods?: string[];
+  // Deprecated: pass enrolledMethods instead, which covers every method.
+  // Still honoured (OR'd in) so existing hosts keep working.
   passkeyRegistered?: boolean;
 }> = ({
   availableMfaMethods,
@@ -83,6 +87,7 @@ export const AuthorizerMFASetup: FC<{
   heading = 'Add a second step to sign in',
   loginContext,
   onBack,
+  enrolledMethods,
   passkeyRegistered,
 }) => {
   const [selected, setSelected] = useState<MfaMethod | null>(null);
@@ -104,6 +109,11 @@ export const AuthorizerMFASetup: FC<{
 
   const passkeySupported = isWebauthnSupported();
 
+  const enrolled = normalizeEnrolledMethods(enrolledMethods);
+  if (passkeyRegistered) {
+    enrolled.add('passkey');
+  }
+
   const methods: {
     key: MfaMethod;
     available: boolean;
@@ -120,6 +130,7 @@ export const AuthorizerMFASetup: FC<{
       icon: <IconAuthenticator />,
       title: 'Authenticator app',
       description: 'Use a TOTP app like Google Authenticator or Authy.',
+      enabled: enrolled.has('totp'),
     },
     {
       key: 'passkey',
@@ -129,7 +140,7 @@ export const AuthorizerMFASetup: FC<{
       description: 'Sign in with your fingerprint, face, or device PIN.',
       disabled: !passkeySupported,
       disabledReason: 'Not supported on this browser or device.',
-      enabled: !!passkeyRegistered,
+      enabled: enrolled.has('passkey'),
     },
     {
       key: 'email_otp',
@@ -137,6 +148,7 @@ export const AuthorizerMFASetup: FC<{
       icon: <IconEmail />,
       title: 'Email one-time code',
       description: 'Get a single-use code by email each time you sign in.',
+      enabled: enrolled.has('email_otp'),
     },
     {
       key: 'sms_otp',
@@ -145,6 +157,7 @@ export const AuthorizerMFASetup: FC<{
       title: 'SMS one-time code',
       description:
         'Get a single-use code by text message each time you sign in.',
+      enabled: enrolled.has('sms_otp'),
     },
   ];
 
