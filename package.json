@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0-rc.6",
+  "version": "2.2.0-rc.7",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -95,7 +95,7 @@
     "vitest": "^3.2.7"
   },
   "dependencies": {
-    "@authorizerdev/authorizer-js": "^3.3.0",
+    "@authorizerdev/authorizer-js": "^4.0.0-rc.0",
     "validator": "^13.11.0"
   }
 }
