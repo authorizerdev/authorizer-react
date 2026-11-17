@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Social login on Authorizer's login page now resumes the authorization request** ([authorizerdev/authorizer#855](https://github.com/authorizerdev/authorizer/issues/855)). When `/authorize` opens the login page (`/app` or `/app/signup`), `AuthorizerSocialLogin` sends that page's own URL as `redirect_uri`, with the `/authorize` parameters in the query string, instead of the client's callback. The login then comes back to `/app`, which replays the request to `/authorize`. A client whose callback is outside `--allowed-origins` can now use social login, and self-registered clients get the consent screen. Fragment parameters (`response_mode=fragment`) move into the query string.
+  - **Requires Authorizer 2.4.6 or later**, which accepts its own `/app` as a social-login `redirect_uri`. The hosted login page ships in the same image as the server, so it always meets this.
+  - **No change anywhere else:** it applies only when the page's origin equals `authorizerURL` and its URL carries both `client_id` and `response_type`. On your own site, `AuthorizerSocialLogin` sends the same `redirect_uri` as before.
+
 ## [2.0.0-rc.1] - 2025-12-30
 
 ### 🚀 Major Changes
