@@ -4,7 +4,7 @@ export const isValidOtp = (otp: string): boolean => {
 };
 
 export const hasSpecialChar = (char: string): boolean => {
-  const re = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+  const re = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~]/;
   return re.test(char);
 };
 

@@ -8,7 +8,7 @@ import { validatePassword } from '../utils/validations';
 
 interface PropTypes {
   value: string;
-  setDisableButton: Function;
+  setDisableButton: (disabled: boolean) => void;
 }
 
 const PasswordStrengthIndicator = ({ value, setDisableButton }: PropTypes) => {

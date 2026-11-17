@@ -7,6 +7,8 @@ import { StyledButton, StyledSeparator } from '../styledComponents';
 import { useAuthorizer } from '../contexts/AuthorizerContext';
 import { ButtonAppearance } from '../constants';
 import { createQueryParams } from '../utils/common';
+import { getAuthorizeResumeURL } from '../utils/authorizeResume';
+import { hasWindow } from '../utils/window';
 import { LinkedIn } from '../icons/linkedin';
 import { Apple } from '../icons/apple';
 import { Twitter } from '../icons/twitter';
@@ -52,6 +54,18 @@ export const AuthorizerSocialLogin: FC<{
 
   if (!data.redirect_uri && !data.redirectURL) {
     data.redirect_uri = config.redirectURL;
+  }
+
+  // On Authorizer's own login page during an /authorize request, return to
+  // this page instead of the client's callback, so the login resumes through
+  // /authorize (client redirect_uri check, consent, PKCE). redirectURL is
+  // dropped too: the server reads it before redirect_uri.
+  const resumeURL = hasWindow()
+    ? getAuthorizeResumeURL(config.authorizerURL, window.location)
+    : null;
+  if (resumeURL) {
+    data.redirect_uri = resumeURL;
+    delete data.redirectURL;
   }
 
   const queryParams = createQueryParams(data);

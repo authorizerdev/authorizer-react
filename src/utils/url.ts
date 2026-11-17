@@ -6,7 +6,6 @@ export const getSearchParams = (search = ''): Record<string, string> => {
     searchPrams = window.location.search;
   }
   const urlSearchParams = new URLSearchParams(`${searchPrams}`);
-  // @ts-ignore
   const params = Object.fromEntries(urlSearchParams.entries());
   return params;
 };
