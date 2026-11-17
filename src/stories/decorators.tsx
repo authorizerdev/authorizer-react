@@ -7,7 +7,7 @@ import StyledWrapper from '../styledComponents/StyledWrapper';
 // inside Storybook regardless of the host browser.
 export const withWebauthnSupport =
   (supported: boolean): Decorator =>
-  (Story) => {
+  function WithWebauthnSupport(Story) {
     if (supported) {
       (window as any).PublicKeyCredential = {
         parseCreationOptionsFromJSON: () => undefined,

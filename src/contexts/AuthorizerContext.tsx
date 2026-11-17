@@ -94,7 +94,7 @@ function reducer(
   }
 }
 
-let initialState: AuthorizerState = {
+const initialState: AuthorizerState = {
   user: null,
   token: null,
   loading: true,
@@ -233,7 +233,7 @@ export const AuthorizerProvider: FC<{
           },
         });
       }
-    } catch (err) {
+    } catch {
       dispatch({
         type: AuthorizerProviderActionType.SET_AUTH_DATA,
         payload: {

@@ -347,7 +347,7 @@ export const AuthorizerBasicAuthLogin: FC<{
 
             {config.is_sign_up_enabled && (
               <div>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <StyledLink onClick={() => setView(Views.Signup)}>
                   Sign Up
                 </StyledLink>

@@ -1,34 +1,57 @@
-module.exports = {
-  root: true,
-  env: {
-    browser: true,
-    es2021: true,
-    node: true,
+// ESLint flat config (ESLint 9). Same intent as the previous .eslintrc-style
+// config: eslint:recommended + @typescript-eslint recommended + react
+// recommended + react-hooks recommended.
+const js = require('@eslint/js');
+const globals = require('globals');
+const tsPlugin = require('@typescript-eslint/eslint-plugin');
+const reactPlugin = require('eslint-plugin-react');
+const reactHooksPlugin = require('eslint-plugin-react-hooks');
+
+module.exports = [
+  {
+    ignores: [
+      'dist/**',
+      'storybook-static/**',
+      'node_modules/**',
+      'example/**',
+      '*.config.js',
+      '*.config.ts',
+    ],
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-  ],
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
+  js.configs.recommended,
+  ...tsPlugin.configs['flat/recommended'],
+  reactPlugin.configs.flat.recommended,
+  reactHooksPlugin.configs['recommended-latest'],
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.es2021,
+        ...globals.node,
+      },
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      // warn, not error: ~40 pre-existing `any`s; typing them properly is a separate change.
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_' },
+      ],
     },
   },
-  plugins: ['react', 'react-hooks', '@typescript-eslint'],
-  settings: {
-    react: {
-      version: 'detect',
-    },
-  },
-  rules: {
-    'react/react-in-jsx-scope': 'off',
-    'react/prop-types': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-  },
-  ignorePatterns: ['dist/**', 'node_modules/**', '*.config.js', '*.config.ts'],
-};
+];
